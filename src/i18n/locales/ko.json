@@ -1,0 +1,57 @@
+{
+  "app": { "name": "unfetch", "tagline": "사람과 AI를 위한 다운로드 매니저" },
+  "titlebar": { "settings": "설정", "miniMode": "미니 창으로 전환", "minimize": "최소화", "maximize": "최대화", "close": "닫기" },
+  "sidebar": { "section": "필터", "all": "전체", "downloading": "진행 중", "done": "완료", "error": "실패", "trash": "휴지통" },
+  "toolbar": {
+    "title": { "all": "전체 작업", "downloading": "진행 중 (일시 중지 / 대기 포함)", "paused": "일시 중지됨", "done": "완료됨", "error": "실패한 작업", "queued": "대기 중", "trash": "휴지통" },
+    "search": "작업 검색...", "addTask": "작업 추가", "pauseAll": "모두 일시 중지", "resumeAll": "모두 시작", "restoreAll": "모두 복원", "emptyTrash": "휴지통 비우기", "confirmEmpty": "확인"
+  },
+  "status": { "queued": "대기 중", "downloading": "다운로드 중", "paused": "일시 중지", "done": "완료", "error": "실패" },
+  "task": {
+    "pause": "일시 중지", "resume": "재개", "retry": "재시도", "openFolder": "폴더 열기", "playInUnflick": "Unflick으로 재생", "copyUrl": "URL 복사",
+    "trash": "휴지통으로 이동", "restore": "복원", "hardDelete": "완전 삭제 (파일 포함)", "delete": "삭제", "confirmDelete": "삭제 확인",
+    "retryBadge": "재시도 {{count}}", "remaining": "{{time}} 남음", "waitingToStart": "시작 대기 중...", "errorPrefix": "오류: ", "speed": "{{value}}/초"
+  },
+  "addTask": {
+    "title": "다운로드 작업 추가", "subtitle": "HTTP, BT/마그넷, 1000개 이상의 동영상 사이트 지원", "batchToggle": "일괄", "url": "다운로드 URL", "urlBatch": "다운로드 URL (한 줄에 하나)",
+    "urlPlaceholder": "URL, 마그넷 링크 또는 동영상 페이지 주소 붙여넣기...",
+    "urlBatchPlaceholder": "https://example.com/file1.zip\nhttps://example.com/file2.zip\nmagnet:?xt=urn:btih:...",
+    "detectedType": "감지된 유형: ", "willCreate": "{{count}}개 작업 생성", "quality": "화질 선택", "threads": "다운로드 스레드: {{count}}",
+    "saveDir": "저장 폴더", "browse": "찾아보기", "saveDirPlaceholder": "기본 폴더 사용", "tags": "태그", "tagsPlaceholder": "입력 후 Enter (예: 영화 / 소프트웨어 / 업무)",
+    "advanced": "고급 옵션", "proxy": "프록시", "proxyPlaceholder": "http://127.0.0.1:7890",
+    "startAt": "⏰ 예약 시작 (비워두면 즉시 시작)", "clear": "지우기", "checksum": "체크섬 (완료 시 검증)",
+    "sha256Placeholder": "SHA-256 (64자 16진수)", "md5Placeholder": "MD5 (32자 16진수)",
+    "cookies": "쿠키 (Netscape 형식)", "cookiesPlaceholder": "쿠키 내용 붙여넣기...", "playAfter": "완료 후 Unflick에서 자동 재생",
+    "cancel": "취소", "submit": "다운로드 시작", "submitBatch": "다운로드 시작 ({{count}})", "submitting": "추가 중...",
+    "errorEmpty": "다운로드 URL을 입력하세요", "errorEmptyBatch": "최소 하나의 URL을 붙여넣으세요 (한 줄에 하나)", "errorFail": "추가 실패, URL을 확인하세요"
+  },
+  "urlType": { "http": "HTTP 다운로드", "bt": "BT / 마그넷 링크", "ytdlp": "동영상 사이트" },
+  "quality": { "best": "최고 화질", "1080p": "1080p", "720p": "720p", "480p": "480p", "audio": "오디오만" },
+  "settings": {
+    "title": "환경설정", "downloadDir": "다운로드 폴더", "concurrency": "동시 실행", "maxConcurrent": "최대 동시 작업 수", "httpThreads": "HTTP 다운로드 스레드 수",
+    "speedLimit": "속도 제한", "globalSpeedLimit": "전체 속도 제한", "noLimit": "무제한",
+    "speedSchedule": "시간대별 제한", "scheduleAdd": "+ 시간대 추가",
+    "scheduleEmpty": "시간대가 없습니다. 아래 \"추가\"를 클릭하여 시간대별 제한을 설정하세요.",
+    "scheduleHint": "전체 제한보다 우선합니다. 현재 시간이 일치하지 않으면 전체 제한을 사용합니다.",
+    "proxy": "네트워크 프록시", "systemProxy": "시스템 프록시 사용", "proxyOverride": "수동 지정 (시스템 프록시 재정의)",
+    "player": "플레이어 연동", "autoPlayUnflick": "완료 후 Unflick에서 자동 재생", "autoPlayHint": "동영상 / 오디오 작업만 해당",
+    "retryAndDone": "재시도 & 완료 시", "autoRetry": "실패 시 자동 재시도", "autoRetryHint": "1m / 3m / 10m 간격, 최대 3회",
+    "onAllDone": "모든 작업 완료 후 동작",
+    "onAllDoneOptions": { "none": "아무것도 안함", "notify": "알림 표시", "open_dir": "다운로드 폴더 열기", "sleep": "절전", "shutdown": "종료 (30초 후)" },
+    "onAllDoneHint": "실행 후 \"아무것도 안함\"으로 자동 재설정",
+    "system": "시작 & 시스템", "autostart": "로그인 시 자동 시작", "autostartHint": "로그인 후 백그라운드에서 조용히 시작",
+    "minimizeToTray": "닫을 때 트레이로 최소화", "minimizeToTrayHint": "메인 창을 닫아도 작업은 계속 진행",
+    "clipboardSniff": "클립보드 감지", "clipboardSniffHint": "URL / 마그넷 복사 시 다운로드 알림",
+    "language": "언어"
+  },
+  "statusBar": { "connected": "연결됨", "disconnected": "연결 안 됨", "totalSpeed": "합계" },
+  "tray": { "show": "메인 창 표시", "toggleMini": "미니 창 전환", "pauseAll": "모두 일시 중지", "resumeAll": "모두 재개", "quit": "종료" },
+  "clipboard": { "detected": "다운로드 링크 감지됨", "download": "다운로드", "dismiss": "무시" },
+  "drop": { "release": "놓으면 다운로드 시작", "supports": ".torrent / URL 링크 지원" },
+  "empty": {
+    "noTasks": "다운로드 작업이 없습니다", "noTasksHint": "오른쪽 상단의 \"작업 추가\"를 클릭하여 첫 다운로드를 시작하세요",
+    "noMatch": "일치하는 작업 없음", "noMatchHint": "다른 검색어를 시도해보세요",
+    "trashEmpty": "휴지통이 비어 있습니다", "trashEmptyHint": "삭제한 작업이 여기에 일시 보관됩니다"
+  },
+  "notify": { "downloadDone": "다운로드 완료", "downloadFailed": "다운로드 실패", "allDone": "모든 다운로드 완료", "allDoneMessage": "모든 작업이 완료되었습니다" }
+}

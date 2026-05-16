@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useTaskStore } from '../stores/taskStore'
 import type { FilterType } from '../types'
 
@@ -12,7 +13,7 @@ interface FilterItem {
 const filterItems: FilterItem[] = [
   {
     key: 'all',
-    label: '全部',
+    label: 'sidebar.all',
     icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -24,7 +25,7 @@ const filterItems: FilterItem[] = [
   },
   {
     key: 'downloading',
-    label: '下载中',
+    label: 'sidebar.downloading',
     pulse: true,
     icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -36,7 +37,7 @@ const filterItems: FilterItem[] = [
   },
   {
     key: 'done',
-    label: '已完成',
+    label: 'sidebar.done',
     icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
@@ -46,7 +47,7 @@ const filterItems: FilterItem[] = [
   },
   {
     key: 'error',
-    label: '失败',
+    label: 'sidebar.error',
     icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <circle cx="12" cy="12" r="10" />
@@ -57,7 +58,7 @@ const filterItems: FilterItem[] = [
   },
   {
     key: 'trash',
-    label: '垃圾箱',
+    label: 'sidebar.trash',
     icon: (
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <polyline points="3 6 5 6 21 6" />
@@ -79,9 +80,10 @@ const statusColors: Record<FilterType, string> = {
 
 export const Sidebar: React.FC = () => {
   const { filter, setFilter, counts, tasks } = useTaskStore()
+  const { t } = useTranslation()
   const taskCounts = counts()
   const activelyDownloading = tasks.some(
-    (t) => !t.trashed && t.status === 'downloading',
+    (tk) => !tk.trashed && tk.status === 'downloading',
   )
 
   const getCount = (key: FilterType): number => {
@@ -111,7 +113,7 @@ export const Sidebar: React.FC = () => {
           padding: '4px 8px 8px',
         }}
       >
-        任务过滤
+        {t('sidebar.section')}
       </div>
 
       {filterItems.map((item) => {
@@ -163,7 +165,7 @@ export const Sidebar: React.FC = () => {
 
             {/* 标签 */}
             <span style={{ flex: 1, fontSize: 13, fontWeight: active ? 600 : 400 }}>
-              {item.label}
+              {t(item.label)}
             </span>
 
             {/* 脉冲动画：只在有任务真在下载时才跳 */}

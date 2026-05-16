@@ -1,0 +1,58 @@
+{
+  "app": { "name": "unfetch", "tagline": "人とAIのためのダウンロードマネージャー" },
+  "titlebar": { "settings": "設定", "miniMode": "ミニウィンドウに切替", "minimize": "最小化", "maximize": "最大化", "close": "閉じる" },
+  "sidebar": { "section": "フィルター", "all": "すべて", "downloading": "進行中", "done": "完了", "error": "失敗", "trash": "ゴミ箱" },
+  "toolbar": {
+    "title": { "all": "すべてのタスク", "downloading": "進行中（一時停止 / 待機含む）", "paused": "一時停止", "done": "完了", "error": "失敗したタスク", "queued": "待機中", "trash": "ゴミ箱" },
+    "search": "タスクを検索...", "addTask": "タスクを追加", "pauseAll": "すべて一時停止", "resumeAll": "すべて再開", "restoreAll": "すべて復元", "emptyTrash": "ゴミ箱を空にする", "confirmEmpty": "確認"
+  },
+  "status": { "queued": "待機中", "downloading": "ダウンロード中", "paused": "一時停止", "done": "完了", "error": "失敗" },
+  "task": {
+    "pause": "一時停止", "resume": "再開", "retry": "再試行", "openFolder": "フォルダを開く", "playInUnflick": "Unflickで再生", "copyUrl": "URLをコピー",
+    "trash": "ゴミ箱へ移動", "restore": "復元", "hardDelete": "完全に削除（ファイル含む）", "delete": "削除", "confirmDelete": "削除確認",
+    "retryBadge": "再試行 {{count}}", "remaining": "残り {{time}}", "waitingToStart": "開始を待機中...", "errorPrefix": "エラー：", "speed": "{{value}}/秒"
+  },
+  "addTask": {
+    "title": "ダウンロードタスクを追加", "subtitle": "HTTP、BT/マグネット、1000以上の動画サイトに対応", "batchToggle": "一括", "url": "ダウンロード URL", "urlBatch": "ダウンロード URL（1行に1つ）",
+    "urlPlaceholder": "URL、マグネットリンク、動画ページのアドレスを貼り付け...",
+    "urlBatchPlaceholder": "https://example.com/file1.zip\nhttps://example.com/file2.zip\nmagnet:?xt=urn:btih:...",
+    "detectedType": "検出された種類：", "willCreate": "{{count}} 個のタスクを作成", "quality": "画質選択", "threads": "ダウンロードスレッド数：{{count}}",
+    "saveDir": "保存先", "browse": "参照", "saveDirPlaceholder": "デフォルトフォルダを使用", "tags": "タグ", "tagsPlaceholder": "入力後 Enter（例：映画 / ソフト / 仕事）",
+    "advanced": "詳細オプション", "proxy": "プロキシ", "proxyPlaceholder": "http://127.0.0.1:7890",
+    "startAt": "⏰ 予約ダウンロード（空欄＝即時開始）", "clear": "クリア", "checksum": "チェックサム（完了時に検証）",
+    "sha256Placeholder": "SHA-256（64文字16進数）", "md5Placeholder": "MD5（32文字16進数）",
+    "cookies": "Cookie（Netscape形式）", "cookiesPlaceholder": "Cookieを貼り付け...", "playAfter": "完了後 Unflick で自動再生",
+    "cancel": "キャンセル", "submit": "ダウンロード開始", "submitBatch": "ダウンロード開始 ({{count}})", "submitting": "追加中...",
+    "errorEmpty": "ダウンロード URL を入力してください", "errorEmptyBatch": "少なくとも1つの URL を貼り付け（1行に1つ）", "errorFail": "追加失敗、URL を確認してください"
+  },
+  "urlType": { "http": "HTTP ダウンロード", "bt": "BT / マグネットリンク", "ytdlp": "動画サイト" },
+  "quality": { "best": "最高画質", "1080p": "1080p", "720p": "720p", "480p": "480p", "audio": "音声のみ" },
+  "settings": {
+    "title": "設定", "downloadDir": "ダウンロードフォルダ", "concurrency": "同時実行数",
+    "maxConcurrent": "最大同時タスク数", "httpThreads": "HTTP ダウンロードスレッド数",
+    "speedLimit": "速度制限", "globalSpeedLimit": "全体速度制限", "noLimit": "無制限",
+    "speedSchedule": "時間帯別制限", "scheduleAdd": "+ 時間帯を追加",
+    "scheduleEmpty": "時間帯がありません。下の「追加」で異なる時間帯の制限を設定できます。",
+    "scheduleHint": "全体制限より優先されます。現在の時刻が一致しない場合は全体制限を使用します。",
+    "proxy": "ネットワークプロキシ", "systemProxy": "システムプロキシを使用", "proxyOverride": "手動指定（システムプロキシを上書き）",
+    "player": "プレイヤー連携", "autoPlayUnflick": "完了後 Unflick で自動再生", "autoPlayHint": "動画 / 音声タスクのみ",
+    "retryAndDone": "再試行 & 完了時動作", "autoRetry": "失敗時に自動再試行", "autoRetryHint": "1m / 3m / 10m 間隔で最大3回",
+    "onAllDone": "すべて完了時の動作",
+    "onAllDoneOptions": { "none": "何もしない", "notify": "通知を表示", "open_dir": "ダウンロードフォルダを開く", "sleep": "スリープ", "shutdown": "シャットダウン（30秒後）" },
+    "onAllDoneHint": "実行後「何もしない」に自動リセット",
+    "system": "起動 & システム", "autostart": "ログイン時に自動起動", "autostartHint": "ログイン後にバックグラウンドで静かに起動",
+    "minimizeToTray": "閉じる時にトレイへ最小化", "minimizeToTrayHint": "メインウィンドウを閉じてもタスクは継続",
+    "clipboardSniff": "クリップボード監視", "clipboardSniffHint": "URL / マグネットをコピーするとダウンロード提案",
+    "language": "言語"
+  },
+  "statusBar": { "connected": "接続済み", "disconnected": "未接続", "totalSpeed": "合計" },
+  "tray": { "show": "メインウィンドウを表示", "toggleMini": "ミニウィンドウ切替", "pauseAll": "すべて一時停止", "resumeAll": "すべて再開", "quit": "終了" },
+  "clipboard": { "detected": "ダウンロードリンクを検出", "download": "ダウンロード", "dismiss": "無視" },
+  "drop": { "release": "離してダウンロード", "supports": ".torrent / URL リンク対応" },
+  "empty": {
+    "noTasks": "ダウンロードタスクがありません", "noTasksHint": "右上の「タスクを追加」から最初のダウンロードを開始",
+    "noMatch": "一致するタスクがありません", "noMatchHint": "別のキーワードを試してください",
+    "trashEmpty": "ゴミ箱は空です", "trashEmptyHint": "削除したタスクはここに一時保存されます"
+  },
+  "notify": { "downloadDone": "ダウンロード完了", "downloadFailed": "ダウンロード失敗", "allDone": "すべてのダウンロード完了", "allDoneMessage": "すべてのタスクが完了しました" }
+}

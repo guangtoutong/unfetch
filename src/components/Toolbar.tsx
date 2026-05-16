@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useTaskStore } from '../stores/taskStore'
 import type { FilterType } from '../types'
 
@@ -6,18 +7,19 @@ interface ToolbarProps {
   onAdd: () => void
 }
 
-const filterLabels: Record<FilterType, string> = {
-  all: '全部任务',
-  downloading: '下载中（含已暂停 / 等待）',
-  paused: '已暂停',
-  done: '已完成',
-  error: '失败任务',
-  queued: '等待中',
-  trash: '垃圾箱',
+const filterLabelKeys: Record<FilterType, string> = {
+  all: 'toolbar.title.all',
+  downloading: 'toolbar.title.downloading',
+  paused: 'toolbar.title.paused',
+  done: 'toolbar.title.done',
+  error: 'toolbar.title.error',
+  queued: 'toolbar.title.queued',
+  trash: 'toolbar.title.trash',
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({ onAdd }) => {
   const { filter, searchQuery, setSearchQuery, counts, tasks, emptyTrash, restoreAllTrashed, pauseAll, resumeAll } = useTaskStore()
+  const { t } = useTranslation()
   const [searchFocused, setSearchFocused] = useState(false)
   const [confirmEmpty, setConfirmEmpty] = useState(false)
   const trashCount = counts().trash
@@ -61,7 +63,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAdd }) => {
           flexShrink: 0,
         }}
       >
-        {filterLabels[filter]}
+        {t(filterLabelKeys[filter])}
       </h2>
 
       {/* 搜索框 */}
@@ -84,7 +86,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAdd }) => {
         </span>
         <input
           type="text"
-          placeholder="搜索任务..."
+          placeholder={t('toolbar.search')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onFocus={() => setSearchFocused(true)}
@@ -136,26 +138,26 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAdd }) => {
           <BulkButton
             onClick={() => restoreAllTrashed().catch(console.error)}
             disabled={trashCount === 0}
-            title="将所有垃圾桶任务恢复"
+            title={t('toolbar.restoreAll')}
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
               <path d="M3 3v5h5" />
             </svg>
-            全部恢复{trashCount > 0 ? ` (${trashCount})` : ''}
+            {t('toolbar.restoreAll')}{trashCount > 0 ? ` (${trashCount})` : ''}
           </BulkButton>
           <BulkButton
             onClick={handleEmpty}
             disabled={trashCount === 0}
             danger
-            title={confirmEmpty ? '再次点击彻底删除所有任务及文件' : '清空垃圾箱（彻底删除所有任务及文件）'}
+            title={t('toolbar.emptyTrash')}
           >
             {confirmEmpty ? (
               <>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
-                确认清空
+                {t('toolbar.confirmEmpty')}
               </>
             ) : (
               <>
@@ -163,7 +165,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAdd }) => {
                   <polyline points="3 6 5 6 21 6" />
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
                 </svg>
-                清空垃圾箱
+                {t('toolbar.emptyTrash')}
               </>
             )}
           </BulkButton>
@@ -175,23 +177,23 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAdd }) => {
               <BulkButton
                 onClick={() => resumeAll().catch(console.error)}
                 disabled={resumableCount === 0}
-                title="继续所有暂停/失败的任务"
+                title={t('toolbar.resumeAll')}
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                   <polygon points="5 3 19 12 5 21 5 3" />
                 </svg>
-                全部开始{resumableCount > 0 ? ` (${resumableCount})` : ''}
+                {t('toolbar.resumeAll')}{resumableCount > 0 ? ` (${resumableCount})` : ''}
               </BulkButton>
               <BulkButton
                 onClick={() => pauseAll().catch(console.error)}
                 disabled={pausableCount === 0}
-                title="暂停所有正在下载/队列中的任务"
+                title={t('toolbar.pauseAll')}
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                   <rect x="6" y="4" width="4" height="16" rx="1" />
                   <rect x="14" y="4" width="4" height="16" rx="1" />
                 </svg>
-                全部暂停{pausableCount > 0 ? ` (${pausableCount})` : ''}
+                {t('toolbar.pauseAll')}{pausableCount > 0 ? ` (${pausableCount})` : ''}
               </BulkButton>
               <div style={{ width: 1, height: 24, background: 'var(--border)' }} />
             </>
@@ -263,6 +265,7 @@ const BulkButton: React.FC<{
 
 const AddButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
   const [hovered, setHovered] = useState(false)
+  const { t } = useTranslation()
 
   return (
     <button
@@ -294,7 +297,7 @@ const AddButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
         <line x1="12" y1="5" x2="12" y2="19" />
         <line x1="5" y1="12" x2="19" y2="12" />
       </svg>
-      添加任务
+      {t('toolbar.addTask')}
     </button>
   )
 }

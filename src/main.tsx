@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import { MiniApp } from './MiniApp'
+import './i18n'
 import './index.css'
 
 const params = new URLSearchParams(window.location.search)

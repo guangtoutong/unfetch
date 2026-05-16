@@ -1,0 +1,187 @@
+{
+  "app": {
+    "name": "unfetch",
+    "tagline": "为人和 AI 设计的下载管理器"
+  },
+  "titlebar": {
+    "settings": "设置",
+    "miniMode": "切换到迷你悬浮窗",
+    "minimize": "最小化",
+    "maximize": "最大化",
+    "close": "关闭"
+  },
+  "sidebar": {
+    "section": "任务过滤",
+    "all": "全部",
+    "downloading": "下载中",
+    "done": "已完成",
+    "error": "失败",
+    "trash": "垃圾箱"
+  },
+  "toolbar": {
+    "title": {
+      "all": "全部任务",
+      "downloading": "下载中（含已暂停 / 等待）",
+      "paused": "已暂停",
+      "done": "已完成",
+      "error": "失败任务",
+      "queued": "等待中",
+      "trash": "垃圾箱"
+    },
+    "search": "搜索任务...",
+    "addTask": "添加任务",
+    "pauseAll": "全部暂停",
+    "resumeAll": "全部开始",
+    "restoreAll": "全部恢复",
+    "emptyTrash": "清空垃圾箱",
+    "confirmEmpty": "确认清空"
+  },
+  "status": {
+    "queued": "排队中",
+    "downloading": "下载中",
+    "paused": "已暂停",
+    "done": "已完成",
+    "error": "失败"
+  },
+  "task": {
+    "pause": "暂停",
+    "resume": "继续",
+    "retry": "重试",
+    "openFolder": "打开文件夹",
+    "playInUnflick": "用 Unflick 播放",
+    "copyUrl": "复制 URL",
+    "trash": "移入垃圾箱",
+    "restore": "恢复",
+    "hardDelete": "彻底删除（含文件）",
+    "delete": "删除",
+    "confirmDelete": "确认删除",
+    "retryBadge": "重试 {{count}}",
+    "remaining": "剩余 {{time}}",
+    "waitingToStart": "等待开始...",
+    "errorPrefix": "错误：",
+    "speed": "{{value}}/s"
+  },
+  "addTask": {
+    "title": "添加下载任务",
+    "subtitle": "支持 HTTP、BT/磁力、1000+ 视频网站",
+    "batchToggle": "批量",
+    "url": "下载地址",
+    "urlBatch": "下载地址（每行一个）",
+    "urlPlaceholder": "粘贴 URL、磁力链接或视频网页地址...",
+    "urlBatchPlaceholder": "https://example.com/file1.zip\nhttps://example.com/file2.zip\nmagnet:?xt=urn:btih:...",
+    "detectedType": "检测到类型：",
+    "willCreate": "将创建 {{count}} 个任务",
+    "quality": "画质选择",
+    "threads": "下载线程数：{{count}}",
+    "saveDir": "保存目录",
+    "browse": "浏览",
+    "saveDirPlaceholder": "使用默认目录",
+    "tags": "标签",
+    "tagsPlaceholder": "输入标签后回车（如 影视 / 软件 / 工作）",
+    "advanced": "高级选项",
+    "proxy": "代理地址",
+    "proxyPlaceholder": "http://127.0.0.1:7890",
+    "startAt": "⏰ 定时下载（留空 = 立即开始）",
+    "clear": "清除",
+    "checksum": "校验码（下载完成后比对）",
+    "sha256Placeholder": "SHA-256（64 位十六进制）",
+    "md5Placeholder": "MD5（32 位十六进制）",
+    "cookies": "Cookie（Netscape 格式）",
+    "cookiesPlaceholder": "粘贴 Cookie 内容...",
+    "playAfter": "下载完成后自动用 Unflick 播放",
+    "cancel": "取消",
+    "submit": "开始下载",
+    "submitBatch": "开始下载 ({{count}})",
+    "submitting": "添加中...",
+    "errorEmpty": "请输入下载地址",
+    "errorEmptyBatch": "请粘贴至少一个 URL（每行一个）",
+    "errorFail": "添加失败，请检查地址"
+  },
+  "urlType": {
+    "http": "HTTP 下载",
+    "bt": "BT / 磁力链接",
+    "ytdlp": "视频网站"
+  },
+  "quality": {
+    "best": "最佳画质",
+    "1080p": "1080p",
+    "720p": "720p",
+    "480p": "480p",
+    "audio": "仅音频"
+  },
+  "settings": {
+    "title": "偏好设置",
+    "downloadDir": "下载目录",
+    "concurrency": "下载并发",
+    "maxConcurrent": "最大并发任务数",
+    "httpThreads": "HTTP 下载线程数",
+    "speedLimit": "速度限制",
+    "globalSpeedLimit": "全局速度限制",
+    "noLimit": "不限速",
+    "speedSchedule": "分时段限速",
+    "scheduleAdd": "+ 添加时段",
+    "scheduleEmpty": "暂无时段。点下方\"添加\"为不同时段设置限速。",
+    "scheduleHint": "优先级高于\"全局限速\"。当前小时不命中任何时段时，使用全局限速。",
+    "proxy": "网络代理",
+    "systemProxy": "使用系统代理",
+    "proxyOverride": "手动指定（覆盖系统代理）",
+    "player": "播放器集成",
+    "autoPlayUnflick": "下载完成后自动用 Unflick 播放",
+    "autoPlayHint": "仅对视频/音频类任务生效",
+    "retryAndDone": "自动重试 & 完成后",
+    "autoRetry": "任务失败自动重试",
+    "autoRetryHint": "按 1m / 3m / 10m 间隔重试，最多 3 次",
+    "onAllDone": "所有任务完成后动作",
+    "onAllDoneOptions": {
+      "none": "不做任何事",
+      "notify": "弹通知",
+      "open_dir": "打开下载目录",
+      "sleep": "休眠",
+      "shutdown": "关机（30 秒后执行）"
+    },
+    "onAllDoneHint": "执行一次后自动重置为\"不做任何事\"",
+    "system": "启动 & 系统集成",
+    "autostart": "开机自动启动",
+    "autostartHint": "登录系统后在后台静默启动",
+    "minimizeToTray": "关闭窗口时最小化到托盘",
+    "minimizeToTrayHint": "关闭主窗口后任务继续在后台下载",
+    "clipboardSniff": "剪贴板嗅探",
+    "clipboardSniffHint": "复制 URL/magnet 链接后弹出快速下载提示",
+    "language": "语言"
+  },
+  "statusBar": {
+    "connected": "已连接",
+    "disconnected": "未连接",
+    "totalSpeed": "总速度"
+  },
+  "tray": {
+    "show": "显示主窗口",
+    "toggleMini": "切换迷你悬浮窗",
+    "pauseAll": "暂停全部",
+    "resumeAll": "继续全部",
+    "quit": "退出"
+  },
+  "clipboard": {
+    "detected": "检测到下载链接",
+    "download": "立即下载",
+    "dismiss": "忽略"
+  },
+  "drop": {
+    "release": "释放即开始下载",
+    "supports": "支持 .torrent / URL 链接"
+  },
+  "empty": {
+    "noTasks": "暂无下载任务",
+    "noTasksHint": "点击右上角\"添加任务\"开始第一个下载",
+    "noMatch": "没有匹配的任务",
+    "noMatchHint": "尝试修改搜索关键词",
+    "trashEmpty": "垃圾箱是空的",
+    "trashEmptyHint": "删除的任务会暂存在这里"
+  },
+  "notify": {
+    "downloadDone": "下载完成",
+    "downloadFailed": "下载失败",
+    "allDone": "全部下载完成",
+    "allDoneMessage": "所有任务已完成"
+  }
+}

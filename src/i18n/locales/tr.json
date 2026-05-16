@@ -1,0 +1,57 @@
+{
+  "app": { "name": "unfetch", "tagline": "İnsanlar ve YZ için indirme yöneticisi" },
+  "titlebar": { "settings": "Ayarlar", "miniMode": "Mini pencereye geç", "minimize": "Simge durumuna küçült", "maximize": "Ekranı kapla", "close": "Kapat" },
+  "sidebar": { "section": "Filtre", "all": "Tümü", "downloading": "Aktif", "done": "Tamamlandı", "error": "Başarısız", "trash": "Çöp kutusu" },
+  "toolbar": {
+    "title": { "all": "Tüm görevler", "downloading": "Aktif (duraklatılmış / sıradakiler dahil)", "paused": "Duraklatıldı", "done": "Tamamlandı", "error": "Başarısız görevler", "queued": "Sırada", "trash": "Çöp kutusu" },
+    "search": "Görev ara...", "addTask": "Görev ekle", "pauseAll": "Tümünü duraklat", "resumeAll": "Tümünü başlat", "restoreAll": "Tümünü geri yükle", "emptyTrash": "Çöp kutusunu boşalt", "confirmEmpty": "Onayla"
+  },
+  "status": { "queued": "Sırada", "downloading": "İndiriliyor", "paused": "Duraklatıldı", "done": "Tamamlandı", "error": "Başarısız" },
+  "task": {
+    "pause": "Duraklat", "resume": "Devam ettir", "retry": "Yeniden dene", "openFolder": "Klasörü aç", "playInUnflick": "Unflick'te oynat", "copyUrl": "URL'yi kopyala",
+    "trash": "Çöp kutusuna taşı", "restore": "Geri yükle", "hardDelete": "Kalıcı olarak sil (dosya dahil)", "delete": "Sil", "confirmDelete": "Silmeyi onayla",
+    "retryBadge": "Deneme {{count}}", "remaining": "{{time}} kaldı", "waitingToStart": "Başlamayı bekliyor...", "errorPrefix": "Hata: ", "speed": "{{value}}/s"
+  },
+  "addTask": {
+    "title": "İndirme görevi ekle", "subtitle": "HTTP, BT / magnet ve 1000+ video sitesini destekler", "batchToggle": "Toplu", "url": "URL", "urlBatch": "URL'ler (her satıra bir tane)",
+    "urlPlaceholder": "URL, magnet bağlantısı veya video sayfa adresi yapıştırın...",
+    "urlBatchPlaceholder": "https://example.com/file1.zip\nhttps://example.com/file2.zip\nmagnet:?xt=urn:btih:...",
+    "detectedType": "Algılanan tür: ", "willCreate": "{{count}} görev oluşturulacak", "quality": "Kalite", "threads": "İş parçacığı: {{count}}",
+    "saveDir": "Hedef klasör", "browse": "Gözat", "saveDirPlaceholder": "Varsayılan klasörü kullan", "tags": "Etiketler", "tagsPlaceholder": "Yaz ve Enter'a bas",
+    "advanced": "Gelişmiş seçenekler", "proxy": "Proxy", "proxyPlaceholder": "http://127.0.0.1:7890",
+    "startAt": "⏰ Zamanlanmış başlangıç (boş = hemen)", "clear": "Temizle", "checksum": "Sağlama (tamamlandığında doğrulanır)",
+    "sha256Placeholder": "SHA-256 (64 hex)", "md5Placeholder": "MD5 (32 hex)",
+    "cookies": "Cookie'ler (Netscape formatı)", "cookiesPlaceholder": "Cookie içeriğini yapıştırın...", "playAfter": "Bitince Unflick'te oynat",
+    "cancel": "İptal", "submit": "İndirmeyi başlat", "submitBatch": "İndirmeleri başlat ({{count}})", "submitting": "Ekleniyor...",
+    "errorEmpty": "Lütfen bir URL girin", "errorEmptyBatch": "Lütfen en az bir URL yapıştırın (her satıra bir tane)", "errorFail": "Eklenemedi, URL'yi kontrol edin"
+  },
+  "urlType": { "http": "HTTP indirme", "bt": "BT / Magnet bağlantısı", "ytdlp": "Video sitesi" },
+  "quality": { "best": "En iyi kalite", "1080p": "1080p", "720p": "720p", "480p": "480p", "audio": "Yalnızca ses" },
+  "settings": {
+    "title": "Tercihler", "downloadDir": "İndirme klasörü", "concurrency": "Eşzamanlılık", "maxConcurrent": "Maks. eşzamanlı görev", "httpThreads": "HTTP iş parçacığı",
+    "speedLimit": "Hız sınırı", "globalSpeedLimit": "Genel sınır", "noLimit": "Sınırsız",
+    "speedSchedule": "Saatlik sınır", "scheduleAdd": "+ Aralık ekle",
+    "scheduleEmpty": "Henüz aralık yok. Saat aralıkları için limit ayarlamak için aşağıdan \"Ekle\"ye tıklayın.",
+    "scheduleHint": "Genel sınırdan daha öncelikli. Eşleşme yoksa genel sınır uygulanır.",
+    "proxy": "Ağ proxy'si", "systemProxy": "Sistem proxy'sini kullan", "proxyOverride": "Elle (sistem proxy'sini geçer)",
+    "player": "Oynatıcı entegrasyonu", "autoPlayUnflick": "Bitince Unflick'te oynat", "autoPlayHint": "Yalnızca video / ses",
+    "retryAndDone": "Yeniden dene & tamamlandığında", "autoRetry": "Otomatik yeniden dene", "autoRetryHint": "1m / 3m / 10m aralıkla, en fazla 3",
+    "onAllDone": "Hepsi bittiğinde eylem",
+    "onAllDoneOptions": { "none": "Hiçbir şey yapma", "notify": "Bildir", "open_dir": "Klasörü aç", "sleep": "Uyut", "shutdown": "Kapat (30s)" },
+    "onAllDoneHint": "Çalıştırıldıktan sonra \"Hiçbir şey yapma\"ya sıfırlanır",
+    "system": "Başlangıç & sistem", "autostart": "Oturum açınca başlat", "autostartHint": "Oturum açıldığında arka planda sessizce başlat",
+    "minimizeToTray": "Kapatınca tepsiye küçült", "minimizeToTrayHint": "İndirmeler arka planda devam eder",
+    "clipboardSniff": "Pano izleme", "clipboardSniffHint": "URL / magnet kopyalandığında indirme öner",
+    "language": "Dil"
+  },
+  "statusBar": { "connected": "Bağlı", "disconnected": "Bağlı değil", "totalSpeed": "Toplam" },
+  "tray": { "show": "Ana pencereyi göster", "toggleMini": "Mini'yi aç/kapat", "pauseAll": "Tümünü duraklat", "resumeAll": "Tümünü devam ettir", "quit": "Çık" },
+  "clipboard": { "detected": "İndirme bağlantısı algılandı", "download": "İndir", "dismiss": "Yoksay" },
+  "drop": { "release": "İndirmek için bırak", "supports": ".torrent / URL bağlantıları desteklenir" },
+  "empty": {
+    "noTasks": "Henüz indirme görevi yok", "noTasksHint": "İlk indirmeyi başlatmak için sağ üstteki \"Görev ekle\"ye tıklayın",
+    "noMatch": "Eşleşen görev yok", "noMatchHint": "Farklı bir anahtar kelime deneyin",
+    "trashEmpty": "Çöp kutusu boş", "trashEmptyHint": "Silinen görevler burada geçici olarak saklanır"
+  },
+  "notify": { "downloadDone": "İndirme tamamlandı", "downloadFailed": "İndirme başarısız", "allDone": "Tüm indirmeler tamamlandı", "allDoneMessage": "Tüm görevler tamamlandı" }
+}

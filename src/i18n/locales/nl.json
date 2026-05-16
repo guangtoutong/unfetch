@@ -1,0 +1,57 @@
+{
+  "app": { "name": "unfetch", "tagline": "Downloadbeheerder voor mensen en AI" },
+  "titlebar": { "settings": "Instellingen", "miniMode": "Naar mini-venster", "minimize": "Minimaliseren", "maximize": "Maximaliseren", "close": "Sluiten" },
+  "sidebar": { "section": "Filter", "all": "Alles", "downloading": "Actief", "done": "Voltooid", "error": "Mislukt", "trash": "Prullenbak" },
+  "toolbar": {
+    "title": { "all": "Alle taken", "downloading": "Actief (incl. gepauzeerd / wachtend)", "paused": "Gepauzeerd", "done": "Voltooid", "error": "Mislukt", "queued": "In wachtrij", "trash": "Prullenbak" },
+    "search": "Zoek taken...", "addTask": "Toevoegen", "pauseAll": "Alles pauzeren", "resumeAll": "Alles starten", "restoreAll": "Alles herstellen", "emptyTrash": "Prullenbak legen", "confirmEmpty": "Bevestigen"
+  },
+  "status": { "queued": "Wachtrij", "downloading": "Bezig", "paused": "Gepauzeerd", "done": "Voltooid", "error": "Mislukt" },
+  "task": {
+    "pause": "Pauze", "resume": "Hervatten", "retry": "Opnieuw proberen", "openFolder": "Map openen", "playInUnflick": "Afspelen in Unflick", "copyUrl": "URL kopiëren",
+    "trash": "Naar prullenbak", "restore": "Herstellen", "hardDelete": "Permanent verwijderen (incl. bestand)", "delete": "Verwijderen", "confirmDelete": "Bevestig verwijderen",
+    "retryBadge": "Poging {{count}}", "remaining": "{{time}} resterend", "waitingToStart": "Wachten om te starten...", "errorPrefix": "Fout: ", "speed": "{{value}}/s"
+  },
+  "addTask": {
+    "title": "Downloadtaak toevoegen", "subtitle": "Ondersteunt HTTP, BT / magnet en 1000+ videosites", "batchToggle": "Batch", "url": "URL", "urlBatch": "URLs (één per regel)",
+    "urlPlaceholder": "Plak een URL, magnet-link of video-pagina-adres...",
+    "urlBatchPlaceholder": "https://example.com/file1.zip\nhttps://example.com/file2.zip\nmagnet:?xt=urn:btih:...",
+    "detectedType": "Gedetecteerd type: ", "willCreate": "Er worden {{count}} taken aangemaakt", "quality": "Kwaliteit", "threads": "Threads: {{count}}",
+    "saveDir": "Doelmap", "browse": "Bladeren", "saveDirPlaceholder": "Standaardmap gebruiken", "tags": "Tags", "tagsPlaceholder": "Typ en druk op Enter",
+    "advanced": "Geavanceerde opties", "proxy": "Proxy", "proxyPlaceholder": "http://127.0.0.1:7890",
+    "startAt": "⏰ Geplande start (leeg = direct)", "clear": "Wissen", "checksum": "Controlesom (geverifieerd na voltooiing)",
+    "sha256Placeholder": "SHA-256 (64 hex)", "md5Placeholder": "MD5 (32 hex)",
+    "cookies": "Cookies (Netscape-formaat)", "cookiesPlaceholder": "Plak cookies...", "playAfter": "Na voltooiing in Unflick afspelen",
+    "cancel": "Annuleren", "submit": "Download starten", "submitBatch": "Downloads starten ({{count}})", "submitting": "Toevoegen...",
+    "errorEmpty": "Voer een URL in", "errorEmptyBatch": "Plak minstens één URL (één per regel)", "errorFail": "Toevoegen mislukt, controleer de URL"
+  },
+  "urlType": { "http": "HTTP-download", "bt": "BT / magnet-link", "ytdlp": "Videosite" },
+  "quality": { "best": "Beste kwaliteit", "1080p": "1080p", "720p": "720p", "480p": "480p", "audio": "Alleen audio" },
+  "settings": {
+    "title": "Voorkeuren", "downloadDir": "Downloadmap", "concurrency": "Gelijktijdigheid", "maxConcurrent": "Max gelijktijdige taken", "httpThreads": "HTTP-threads",
+    "speedLimit": "Snelheidslimiet", "globalSpeedLimit": "Globale limiet", "noLimit": "Onbeperkt",
+    "speedSchedule": "Tijdslot-limiet", "scheduleAdd": "+ Tijdslot toevoegen",
+    "scheduleEmpty": "Nog geen tijdslots. Klik op \"Toevoegen\" om limieten in te stellen.",
+    "scheduleHint": "Hogere prioriteit dan globale limiet. Anders geldt de globale limiet.",
+    "proxy": "Netwerkproxy", "systemProxy": "Systeemproxy gebruiken", "proxyOverride": "Handmatig (overschrijft systeemproxy)",
+    "player": "Spelerintegratie", "autoPlayUnflick": "Na voltooiing in Unflick afspelen", "autoPlayHint": "Alleen video / audio",
+    "retryAndDone": "Opnieuw proberen & na voltooiing", "autoRetry": "Automatisch opnieuw proberen", "autoRetryHint": "Intervallen 1m / 3m / 10m, max 3",
+    "onAllDone": "Actie wanneer alles klaar is",
+    "onAllDoneOptions": { "none": "Niets doen", "notify": "Melding", "open_dir": "Map openen", "sleep": "Slaapstand", "shutdown": "Afsluiten (30s)" },
+    "onAllDoneHint": "Wordt na uitvoering teruggezet naar \"Niets doen\"",
+    "system": "Opstart & systeem", "autostart": "Bij aanmelden starten", "autostartHint": "Stille start op de achtergrond",
+    "minimizeToTray": "Minimaliseren naar systeemvak", "minimizeToTrayHint": "Downloads gaan door op de achtergrond",
+    "clipboardSniff": "Klembord bewaken", "clipboardSniffHint": "Downloadvoorstel bij kopiëren URL / magnet",
+    "language": "Taal"
+  },
+  "statusBar": { "connected": "Verbonden", "disconnected": "Niet verbonden", "totalSpeed": "Totaal" },
+  "tray": { "show": "Hoofdvenster tonen", "toggleMini": "Mini schakelen", "pauseAll": "Alles pauzeren", "resumeAll": "Alles hervatten", "quit": "Afsluiten" },
+  "clipboard": { "detected": "Downloadlink gedetecteerd", "download": "Downloaden", "dismiss": "Negeren" },
+  "drop": { "release": "Loslaten om te downloaden", "supports": "Ondersteunt .torrent / URL-links" },
+  "empty": {
+    "noTasks": "Geen downloadtaken", "noTasksHint": "Klik op \"Toevoegen\" rechtsboven",
+    "noMatch": "Geen overeenkomsten", "noMatchHint": "Probeer een ander zoekwoord",
+    "trashEmpty": "Prullenbak is leeg", "trashEmptyHint": "Verwijderde taken worden hier tijdelijk bewaard"
+  },
+  "notify": { "downloadDone": "Download voltooid", "downloadFailed": "Download mislukt", "allDone": "Alle downloads voltooid", "allDoneMessage": "Alle taken voltooid" }
+}

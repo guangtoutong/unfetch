@@ -1,0 +1,57 @@
+{
+  "app": { "name": "unfetch", "tagline": "Un download manager per umani e IA" },
+  "titlebar": { "settings": "Impostazioni", "miniMode": "Passa alla mini finestra", "minimize": "Riduci", "maximize": "Ingrandisci", "close": "Chiudi" },
+  "sidebar": { "section": "Filtro", "all": "Tutto", "downloading": "Attivi", "done": "Completati", "error": "Falliti", "trash": "Cestino" },
+  "toolbar": {
+    "title": { "all": "Tutte le attività", "downloading": "Attivi (incl. in pausa / coda)", "paused": "In pausa", "done": "Completati", "error": "Attività fallite", "queued": "In coda", "trash": "Cestino" },
+    "search": "Cerca attività...", "addTask": "Aggiungi", "pauseAll": "Metti tutto in pausa", "resumeAll": "Avvia tutto", "restoreAll": "Ripristina tutto", "emptyTrash": "Svuota cestino", "confirmEmpty": "Conferma"
+  },
+  "status": { "queued": "In coda", "downloading": "In corso", "paused": "In pausa", "done": "Completato", "error": "Fallito" },
+  "task": {
+    "pause": "Pausa", "resume": "Riprendi", "retry": "Riprova", "openFolder": "Apri cartella", "playInUnflick": "Riproduci in Unflick", "copyUrl": "Copia URL",
+    "trash": "Sposta nel cestino", "restore": "Ripristina", "hardDelete": "Elimina definitivamente (con file)", "delete": "Elimina", "confirmDelete": "Conferma eliminazione",
+    "retryBadge": "Tentativo {{count}}", "remaining": "{{time}} rimanenti", "waitingToStart": "In attesa di iniziare...", "errorPrefix": "Errore: ", "speed": "{{value}}/s"
+  },
+  "addTask": {
+    "title": "Aggiungi attività di download", "subtitle": "Supporta HTTP, BT / magnet e oltre 1000 siti video", "batchToggle": "Lotto", "url": "URL", "urlBatch": "URL (uno per riga)",
+    "urlPlaceholder": "Incolla URL, link magnet o indirizzo di pagina video...",
+    "urlBatchPlaceholder": "https://example.com/file1.zip\nhttps://example.com/file2.zip\nmagnet:?xt=urn:btih:...",
+    "detectedType": "Tipo rilevato: ", "willCreate": "Verranno create {{count}} attività", "quality": "Qualità", "threads": "Thread: {{count}}",
+    "saveDir": "Cartella di salvataggio", "browse": "Sfoglia", "saveDirPlaceholder": "Usa cartella predefinita", "tags": "Tag", "tagsPlaceholder": "Digita e premi Invio",
+    "advanced": "Opzioni avanzate", "proxy": "Proxy", "proxyPlaceholder": "http://127.0.0.1:7890",
+    "startAt": "⏰ Avvio programmato (vuoto = subito)", "clear": "Cancella", "checksum": "Checksum (verificato al termine)",
+    "sha256Placeholder": "SHA-256 (64 hex)", "md5Placeholder": "MD5 (32 hex)",
+    "cookies": "Cookie (formato Netscape)", "cookiesPlaceholder": "Incolla i cookie...", "playAfter": "Riproduci in Unflick al termine",
+    "cancel": "Annulla", "submit": "Inizia download", "submitBatch": "Inizia download ({{count}})", "submitting": "Aggiunta...",
+    "errorEmpty": "Inserisci un URL", "errorEmptyBatch": "Incolla almeno un URL (uno per riga)", "errorFail": "Aggiunta fallita, controlla l'URL"
+  },
+  "urlType": { "http": "Download HTTP", "bt": "BT / Link magnet", "ytdlp": "Sito video" },
+  "quality": { "best": "Migliore qualità", "1080p": "1080p", "720p": "720p", "480p": "480p", "audio": "Solo audio" },
+  "settings": {
+    "title": "Preferenze", "downloadDir": "Cartella download", "concurrency": "Concorrenza", "maxConcurrent": "Attività simultanee max", "httpThreads": "Thread HTTP",
+    "speedLimit": "Limite velocità", "globalSpeedLimit": "Limite globale", "noLimit": "Illimitato",
+    "speedSchedule": "Limite orario", "scheduleAdd": "+ Aggiungi fascia",
+    "scheduleEmpty": "Nessuna fascia. Premi \"Aggiungi\" qui sotto per impostare limiti per fascia oraria.",
+    "scheduleHint": "Priorità sul limite globale. Se nessuna corrisponde, vale il globale.",
+    "proxy": "Proxy di rete", "systemProxy": "Usa proxy di sistema", "proxyOverride": "Manuale (sovrascrive proxy di sistema)",
+    "player": "Integrazione player", "autoPlayUnflick": "Riproduci in Unflick al termine", "autoPlayHint": "Solo video / audio",
+    "retryAndDone": "Riprova & al termine", "autoRetry": "Riprova automatica", "autoRetryHint": "Intervalli 1m / 3m / 10m, max 3 tentativi",
+    "onAllDone": "Azione al termine di tutti",
+    "onAllDoneOptions": { "none": "Non fare nulla", "notify": "Notifica", "open_dir": "Apri cartella", "sleep": "Sospendi", "shutdown": "Spegni (30s)" },
+    "onAllDoneHint": "Reimposta a \"Non fare nulla\" dopo l'esecuzione",
+    "system": "Avvio & sistema", "autostart": "Avvia al login", "autostartHint": "Avvio silenzioso in background",
+    "minimizeToTray": "Riduci a icona al chiudere", "minimizeToTrayHint": "I download continuano in background",
+    "clipboardSniff": "Monitora appunti", "clipboardSniffHint": "Suggerisci download alla copia di URL / magnet",
+    "language": "Lingua"
+  },
+  "statusBar": { "connected": "Connesso", "disconnected": "Disconnesso", "totalSpeed": "Totale" },
+  "tray": { "show": "Mostra finestra principale", "toggleMini": "Alterna mini", "pauseAll": "Pausa tutto", "resumeAll": "Riprendi tutto", "quit": "Esci" },
+  "clipboard": { "detected": "Link di download rilevato", "download": "Scarica", "dismiss": "Ignora" },
+  "drop": { "release": "Rilascia per scaricare", "supports": "Supporta .torrent / URL" },
+  "empty": {
+    "noTasks": "Nessuna attività di download", "noTasksHint": "Premi \"Aggiungi\" in alto a destra",
+    "noMatch": "Nessuna corrispondenza", "noMatchHint": "Prova un'altra parola chiave",
+    "trashEmpty": "Cestino vuoto", "trashEmptyHint": "Le attività eliminate vengono salvate qui temporaneamente"
+  },
+  "notify": { "downloadDone": "Download completato", "downloadFailed": "Download fallito", "allDone": "Tutti i download completati", "allDoneMessage": "Tutte le attività completate" }
+}

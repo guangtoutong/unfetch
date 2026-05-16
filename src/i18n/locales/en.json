@@ -1,0 +1,187 @@
+{
+  "app": {
+    "name": "unfetch",
+    "tagline": "A download manager for humans and AI"
+  },
+  "titlebar": {
+    "settings": "Settings",
+    "miniMode": "Switch to mini overlay",
+    "minimize": "Minimize",
+    "maximize": "Maximize",
+    "close": "Close"
+  },
+  "sidebar": {
+    "section": "Filter",
+    "all": "All",
+    "downloading": "Active",
+    "done": "Done",
+    "error": "Failed",
+    "trash": "Trash"
+  },
+  "toolbar": {
+    "title": {
+      "all": "All tasks",
+      "downloading": "Active (incl. paused / queued)",
+      "paused": "Paused",
+      "done": "Completed",
+      "error": "Failed tasks",
+      "queued": "Queued",
+      "trash": "Trash"
+    },
+    "search": "Search tasks...",
+    "addTask": "Add task",
+    "pauseAll": "Pause all",
+    "resumeAll": "Start all",
+    "restoreAll": "Restore all",
+    "emptyTrash": "Empty trash",
+    "confirmEmpty": "Confirm empty"
+  },
+  "status": {
+    "queued": "Queued",
+    "downloading": "Downloading",
+    "paused": "Paused",
+    "done": "Done",
+    "error": "Failed"
+  },
+  "task": {
+    "pause": "Pause",
+    "resume": "Resume",
+    "retry": "Retry",
+    "openFolder": "Open folder",
+    "playInUnflick": "Play in Unflick",
+    "copyUrl": "Copy URL",
+    "trash": "Move to trash",
+    "restore": "Restore",
+    "hardDelete": "Delete permanently (incl. file)",
+    "delete": "Delete",
+    "confirmDelete": "Confirm delete",
+    "retryBadge": "Retry {{count}}",
+    "remaining": "{{time}} left",
+    "waitingToStart": "Waiting to start...",
+    "errorPrefix": "Error: ",
+    "speed": "{{value}}/s"
+  },
+  "addTask": {
+    "title": "Add download task",
+    "subtitle": "Supports HTTP, BT / magnet, 1000+ video sites",
+    "batchToggle": "Batch",
+    "url": "Download URL",
+    "urlBatch": "Download URLs (one per line)",
+    "urlPlaceholder": "Paste a URL, magnet link, or video page address...",
+    "urlBatchPlaceholder": "https://example.com/file1.zip\nhttps://example.com/file2.zip\nmagnet:?xt=urn:btih:...",
+    "detectedType": "Detected type: ",
+    "willCreate": "Will create {{count}} tasks",
+    "quality": "Video quality",
+    "threads": "Download threads: {{count}}",
+    "saveDir": "Save directory",
+    "browse": "Browse",
+    "saveDirPlaceholder": "Use default directory",
+    "tags": "Tags",
+    "tagsPlaceholder": "Type and press Enter (e.g. Movies / Software / Work)",
+    "advanced": "Advanced options",
+    "proxy": "Proxy",
+    "proxyPlaceholder": "http://127.0.0.1:7890",
+    "startAt": "⏰ Scheduled start (empty = start now)",
+    "clear": "Clear",
+    "checksum": "Checksum (verified on completion)",
+    "sha256Placeholder": "SHA-256 (64 hex chars)",
+    "md5Placeholder": "MD5 (32 hex chars)",
+    "cookies": "Cookies (Netscape format)",
+    "cookiesPlaceholder": "Paste cookie content...",
+    "playAfter": "Play in Unflick when finished",
+    "cancel": "Cancel",
+    "submit": "Start download",
+    "submitBatch": "Start downloads ({{count}})",
+    "submitting": "Adding...",
+    "errorEmpty": "Please enter a download URL",
+    "errorEmptyBatch": "Please paste at least one URL (one per line)",
+    "errorFail": "Failed to add, please check the URL"
+  },
+  "urlType": {
+    "http": "HTTP download",
+    "bt": "BT / Magnet link",
+    "ytdlp": "Video site"
+  },
+  "quality": {
+    "best": "Best quality",
+    "1080p": "1080p",
+    "720p": "720p",
+    "480p": "480p",
+    "audio": "Audio only"
+  },
+  "settings": {
+    "title": "Preferences",
+    "downloadDir": "Download folder",
+    "concurrency": "Concurrency",
+    "maxConcurrent": "Max concurrent tasks",
+    "httpThreads": "HTTP download threads",
+    "speedLimit": "Speed limit",
+    "globalSpeedLimit": "Global speed limit",
+    "noLimit": "Unlimited",
+    "speedSchedule": "Hourly schedule",
+    "scheduleAdd": "+ Add slot",
+    "scheduleEmpty": "No slots yet. Click \"Add\" below to set a limit for a time range.",
+    "scheduleHint": "Higher priority than the global limit. If the current hour doesn't match any slot, the global limit is used.",
+    "proxy": "Network proxy",
+    "systemProxy": "Use system proxy",
+    "proxyOverride": "Manual override (overrides system proxy)",
+    "player": "Player integration",
+    "autoPlayUnflick": "Auto-play in Unflick when finished",
+    "autoPlayHint": "Only for video / audio tasks",
+    "retryAndDone": "Retry & when done",
+    "autoRetry": "Auto retry on failure",
+    "autoRetryHint": "Backoff 1m / 3m / 10m, max 3 retries",
+    "onAllDone": "Action when all tasks are done",
+    "onAllDoneOptions": {
+      "none": "Do nothing",
+      "notify": "Show notification",
+      "open_dir": "Open download folder",
+      "sleep": "Sleep",
+      "shutdown": "Shut down (30s delay)"
+    },
+    "onAllDoneHint": "Resets to \"Do nothing\" after running once",
+    "system": "Startup & system",
+    "autostart": "Launch at login",
+    "autostartHint": "Start silently in the background after login",
+    "minimizeToTray": "Minimize to tray on close",
+    "minimizeToTrayHint": "Tasks keep downloading after the window is closed",
+    "clipboardSniff": "Clipboard sniffer",
+    "clipboardSniffHint": "Prompt to download when you copy a URL / magnet link",
+    "language": "Language"
+  },
+  "statusBar": {
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "totalSpeed": "Total"
+  },
+  "tray": {
+    "show": "Show main window",
+    "toggleMini": "Toggle mini overlay",
+    "pauseAll": "Pause all",
+    "resumeAll": "Resume all",
+    "quit": "Quit"
+  },
+  "clipboard": {
+    "detected": "Download link detected",
+    "download": "Download",
+    "dismiss": "Dismiss"
+  },
+  "drop": {
+    "release": "Release to download",
+    "supports": "Supports .torrent / URL links"
+  },
+  "empty": {
+    "noTasks": "No download tasks yet",
+    "noTasksHint": "Click \"Add task\" in the top-right to start your first download",
+    "noMatch": "No matching tasks",
+    "noMatchHint": "Try a different search keyword",
+    "trashEmpty": "Trash is empty",
+    "trashEmptyHint": "Deleted tasks land here temporarily"
+  },
+  "notify": {
+    "downloadDone": "Download complete",
+    "downloadFailed": "Download failed",
+    "allDone": "All downloads complete",
+    "allDoneMessage": "All tasks finished"
+  }
+}

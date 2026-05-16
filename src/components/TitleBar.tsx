@@ -1,5 +1,7 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../stores/settingsStore'
+import { LanguageSwitcher } from './LanguageSwitcher'
 
 // Tauri 2 窗口控制（如果不在 Tauri 环境中，则忽略）
 async function tauriClose() {
@@ -43,6 +45,7 @@ async function showMiniMode() {
 
 export const TitleBar: React.FC = () => {
   const { setOpen } = useSettingsStore()
+  const { t } = useTranslation()
 
   return (
     <div
@@ -113,10 +116,13 @@ export const TitleBar: React.FC = () => {
           WebkitAppRegion: 'no-drag' as React.CSSProperties['WebkitAppRegion'],
         }}
       >
+        {/* 语言切换 */}
+        <LanguageSwitcher />
+
         {/* 设置 */}
         <TitleBarBtn
           onClick={() => setOpen(true)}
-          title="设置"
+          title={t('titlebar.settings')}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="3" />
@@ -127,7 +133,7 @@ export const TitleBar: React.FC = () => {
         <div style={{ width: 1, height: 16, background: 'var(--border)', margin: '0 4px' }} />
 
         {/* 迷你模式 */}
-        <TitleBarBtn onClick={showMiniMode} title="切换到迷你悬浮窗">
+        <TitleBarBtn onClick={showMiniMode} title={t('titlebar.miniMode')}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <rect x="3" y="3" width="18" height="18" rx="2" />
             <rect x="14" y="14" width="6" height="6" rx="1" fill="currentColor" />
@@ -135,21 +141,21 @@ export const TitleBar: React.FC = () => {
         </TitleBarBtn>
 
         {/* 最小化 */}
-        <TitleBarBtn onClick={tauriMinimize} title="最小化" hoverColor="rgba(255,255,255,0.08)">
+        <TitleBarBtn onClick={tauriMinimize} title={t('titlebar.minimize')} hoverColor="rgba(255,255,255,0.08)">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
             <rect x="1" y="5.5" width="10" height="1" fill="currentColor" rx="0.5" />
           </svg>
         </TitleBarBtn>
 
         {/* 最大化 */}
-        <TitleBarBtn onClick={tauriToggleMaximize} title="最大化" hoverColor="rgba(255,255,255,0.08)">
+        <TitleBarBtn onClick={tauriToggleMaximize} title={t('titlebar.maximize')} hoverColor="rgba(255,255,255,0.08)">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
             <rect x="1.5" y="1.5" width="9" height="9" stroke="currentColor" strokeWidth="1.2" rx="1" />
           </svg>
         </TitleBarBtn>
 
         {/* 关闭 */}
-        <TitleBarBtn onClick={tauriClose} title="关闭" hoverColor="rgba(239,68,68,0.85)" hoverTextColor="white">
+        <TitleBarBtn onClick={tauriClose} title={t('titlebar.close')} hoverColor="rgba(239,68,68,0.85)" hoverTextColor="white">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
             <path d="M1.5 1.5L10.5 10.5M10.5 1.5L1.5 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
