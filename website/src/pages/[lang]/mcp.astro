@@ -1,0 +1,14 @@
+---
+import Base from '../../layouts/Base.astro'
+import MCP from '../../components/MCP.astro'
+import { LANGS } from '../../i18n/strings'
+
+export function getStaticPaths() {
+  return LANGS.filter((l) => l.code !== 'en').map((l) => ({ params: { lang: l.code } }))
+}
+
+const { lang } = Astro.params
+---
+<Base lang={lang as string} pageTitle="MCP integration">
+  <MCP />
+</Base>

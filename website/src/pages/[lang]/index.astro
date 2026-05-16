@@ -1,0 +1,14 @@
+---
+import Base from '../../layouts/Base.astro'
+import Home from '../../components/Home.astro'
+import { LANGS } from '../../i18n/strings'
+
+export function getStaticPaths() {
+  return LANGS.filter((l) => l.code !== 'en').map((l) => ({ params: { lang: l.code } }))
+}
+
+const { lang } = Astro.params
+---
+<Base lang={lang as string}>
+  <Home lang={lang as string} />
+</Base>

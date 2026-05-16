@@ -1,0 +1,67 @@
+---
+import { getStrings } from '../i18n/strings'
+interface Props { lang: string }
+const { lang } = Astro.props
+const s = getStrings(lang)
+const mcpHref = lang === 'en' ? '/mcp' : `/${lang}/mcp`
+---
+<section style="padding: 80px 0 60px;">
+  <div class="container" style="text-align: center;">
+    <span style="display: inline-block; padding: 6px 14px; border-radius: 20px; background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: #22c55e; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 24px;">
+      {s.hero.tag}
+    </span>
+    <h1 style="font-size: 56px; font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; margin-bottom: 20px; background: linear-gradient(135deg, #fff 0%, #a78bfa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+      {s.hero.title}
+    </h1>
+    <p style="font-size: 19px; color: var(--muted); max-width: 720px; margin: 0 auto 40px;">
+      {s.hero.subtitle}
+    </p>
+    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+      <a href="https://github.com/guangtoutong/unfetch/releases/latest"
+         style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 8px 24px rgba(99,102,241,0.4);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+          <polyline points="8 17 12 21 16 17" />
+          <line x1="12" y1="12" x2="12" y2="21" />
+          <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" />
+        </svg>
+        {s.hero.download}
+      </a>
+      <a href={mcpHref}
+         style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.15); color: white; border-radius: 10px; font-weight: 600; font-size: 15px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z" />
+          <path d="M12 8v8M8 12h8" />
+        </svg>
+        {s.hero.mcp}
+      </a>
+    </div>
+    <p style="margin-top: 16px; font-size: 12px; color: var(--muted);">{s.hero.requirements}</p>
+  </div>
+</section>
+
+<section style="padding: 40px 0;">
+  <div class="container">
+    <h2 style="text-align: center; font-size: 32px; font-weight: 700; margin-bottom: 48px;">
+      {s.features.title}
+    </h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+      {s.features.items.map((f) => (
+        <div style="padding: 24px; background: var(--bg-2); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px;">
+          <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">{f.title}</h3>
+          <p style="font-size: 13px; color: var(--muted); line-height: 1.6;">{f.desc}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<section style="padding: 60px 0 80px;">
+  <div class="container" style="text-align: center; padding: 56px 32px; background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1)); border: 1px solid rgba(139,92,246,0.2); border-radius: 20px;">
+    <h2 style="font-size: 32px; font-weight: 700; margin-bottom: 12px;">{s.cta.title}</h2>
+    <p style="font-size: 16px; color: var(--muted); margin-bottom: 28px;">{s.cta.desc}</p>
+    <a href="https://github.com/guangtoutong/unfetch/releases/latest"
+       style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border-radius: 10px; font-weight: 600;">
+      {s.cta.button}
+    </a>
+  </div>
+</section>

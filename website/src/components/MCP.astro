@@ -1,0 +1,62 @@
+---
+const config = `{
+  "mcpServers": {
+    "unfetch": {
+      "command": "C:\\\\Program Files\\\\unfetch\\\\unfetch.exe",
+      "args": ["--mcp"]
+    }
+  }
+}`
+
+const tools = [
+  { name: 'add_task', desc: 'Add a download task — HTTP, magnet, or video page' },
+  { name: 'list_tasks', desc: 'List all tasks (filter by status)' },
+  { name: 'get_task', desc: 'Get details of a single task' },
+  { name: 'pause_task', desc: 'Pause a downloading task' },
+  { name: 'resume_task', desc: 'Resume a paused task' },
+  { name: 'remove_task', desc: 'Permanently delete a task' },
+  { name: 'trash_task', desc: 'Move a task to trash (reversible)' },
+  { name: 'restore_task', desc: 'Restore a task from trash' },
+  { name: 'empty_trash', desc: 'Empty the trash bin' },
+  { name: 'restore_all_trashed', desc: 'Restore everything in the trash' },
+  { name: 'get_config', desc: 'Read current configuration' },
+  { name: 'set_config', desc: 'Update configuration (download dir, threads, ...)' },
+  { name: 'play_in_unflick', desc: 'Open a downloaded file in Unflick player' },
+]
+---
+<section style="padding: 60px 0;">
+  <div class="container" style="max-width: 760px;">
+    <h1 style="font-size: 40px; font-weight: 800; margin-bottom: 16px; letter-spacing: -1px;">
+      Drive unfetch from your AI assistant
+    </h1>
+    <p style="font-size: 17px; color: var(--muted); margin-bottom: 40px;">
+      unfetch ships with a built-in <strong style="color: white;">MCP server</strong> — exposing 13 tools so Claude Desktop, Cursor, or any MCP host can search, queue, and manage downloads on your behalf.
+    </p>
+
+    <h2 style="font-size: 22px; margin-bottom: 16px;">Claude Desktop configuration</h2>
+    <p style="color: var(--muted); margin-bottom: 12px; font-size: 14px;">
+      Add this to <code style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;">claude_desktop_config.json</code>:
+    </p>
+    <pre style="background: var(--bg-2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 18px; overflow-x: auto; font-family: monospace; font-size: 13px; line-height: 1.55;"><code>{config}</code></pre>
+    <p style="color: var(--muted); margin-top: 12px; font-size: 13px;">
+      Restart Claude Desktop. You should see a 🔌 icon — unfetch is now available as a tool source.
+    </p>
+
+    <h2 style="font-size: 22px; margin: 56px 0 16px;">Available tools</h2>
+    <div style="display: grid; gap: 10px;">
+      {tools.map((tool) => (
+        <div style="display: flex; gap: 16px; padding: 12px 14px; background: var(--bg-2); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px;">
+          <code style="flex-shrink: 0; min-width: 180px; color: var(--accent); font-size: 13px;">{tool.name}</code>
+          <span style="font-size: 13px; color: var(--muted);">{tool.desc}</span>
+        </div>
+      ))}
+    </div>
+
+    <h2 style="font-size: 22px; margin: 56px 0 16px;">Example prompts</h2>
+    <ul style="color: var(--muted); font-size: 14px; line-height: 1.8; padding-left: 20px;">
+      <li>「Download this 4K video to my Downloads folder and pause it once it hits 500 MB」</li>
+      <li>「How many active downloads do I have? Pause anything bigger than 1 GB」</li>
+      <li>「Search YouTube for the latest Linus Torvalds keynote and grab the 1080p mp4」</li>
+    </ul>
+  </div>
+</section>

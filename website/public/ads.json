@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Unflick",
+    "url": "https://unflick.app",
+    "description": "极简播放器 · 配合 unfetch 即开即播",
+    "logoUrl": "https://www.google.com/s2/favicons?domain=unflick.app&sz=128",
+    "logoLetter": "U",
+    "logoColor": "#3b82f6",
+    "badge": "免费 · 无广告"
+  },
+  {
+    "name": "Solomd",
+    "url": "https://solomd.app",
+    "description": "本地 Markdown 笔记 · 隐私安全的 Solo 写作工具",
+    "logoUrl": "https://www.google.com/s2/favicons?domain=solomd.app&sz=128",
+    "logoLetter": "S",
+    "logoColor": "#10b981",
+    "badge": "免费 · 无广告"
+  }
+]
