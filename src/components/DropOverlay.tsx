@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useTaskStore } from '../stores/taskStore'
 
 type DragState = 'idle' | 'over'
@@ -8,6 +9,7 @@ export const DropOverlay: React.FC = () => {
   const [state, setState] = useState<DragState>('idle')
   const [count, setCount] = useState(0)
   const { addTask } = useTaskStore()
+  const { t } = useTranslation()
 
   useEffect(() => {
     let unlistenPromise: any
@@ -95,10 +97,10 @@ export const DropOverlay: React.FC = () => {
               <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" />
             </svg>
             <div style={{ fontSize: 16, fontWeight: 700, color: 'white', marginBottom: 4 }}>
-              释放即开始下载
+              {t('drop.release')}
             </div>
             <div style={{ fontSize: 12, color: '#a3a3b8' }}>
-              {count > 0 ? `${count} 个文件` : '支持 .torrent / URL 链接'}
+              {count > 0 ? `${count}` : t('drop.supports')}
             </div>
           </motion.div>
         </motion.div>

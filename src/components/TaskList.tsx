@@ -1,5 +1,6 @@
 import React from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useTaskStore } from '../stores/taskStore'
 import { TaskItem } from './TaskItem'
 
@@ -27,6 +28,7 @@ const EmptyIllustration: React.FC = () => (
 export const TaskList: React.FC = () => {
   const filteredTasks = useTaskStore((s) => s.filteredTasks())
   const { isLoading, searchQuery, filter } = useTaskStore()
+  const { t } = useTranslation()
 
   if (isLoading && filteredTasks.length === 0) {
     return (
@@ -42,7 +44,7 @@ export const TaskList: React.FC = () => {
         }}
       >
         <LoadingSpinner />
-        <span style={{ fontSize: 13 }}>正在加载任务...</span>
+        <span style={{ fontSize: 13 }}>...</span>
       </div>
     )
   }
@@ -63,14 +65,14 @@ export const TaskList: React.FC = () => {
         <EmptyIllustration />
         <div style={{ textAlign: 'center' }}>
           <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
-            {searchQuery ? '没有匹配的任务' : filter === 'trash' ? '垃圾箱是空的' : '暂无下载任务'}
+            {searchQuery ? t('empty.noMatch') : filter === 'trash' ? t('empty.trashEmpty') : t('empty.noTasks')}
           </p>
           <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
             {searchQuery
-              ? '尝试修改搜索关键词'
+              ? t('empty.noMatchHint')
               : filter === 'trash'
-              ? '删除的任务会暂存在这里'
-              : '点击右上角"添加任务"开始第一个下载'}
+              ? t('empty.trashEmptyHint')
+              : t('empty.noTasksHint')}
           </p>
         </div>
       </div>

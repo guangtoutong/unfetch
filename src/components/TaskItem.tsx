@@ -1,5 +1,6 @@
 import React, { forwardRef, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useTaskStore } from '../stores/taskStore'
 import { ContextMenu, type MenuItem } from './ContextMenu'
 import {
@@ -96,12 +97,13 @@ const SourceBadge: React.FC<{ url: string; type: string }> = ({ url, type }) => 
 
 // 状态徽章
 const StatusBadge: React.FC<{ status: TaskStatus }> = ({ status }) => {
+  const { t } = useTranslation()
   const map: Record<TaskStatus, { label: string; bg: string; color: string; pulse: boolean }> = {
-    queued: { label: '排队中', bg: 'rgba(100,116,139,0.15)', color: '#64748b', pulse: false },
-    downloading: { label: '下载中', bg: 'rgba(34,197,94,0.12)', color: '#22c55e', pulse: true },
-    paused: { label: '已暂停', bg: 'rgba(245,158,11,0.12)', color: '#f59e0b', pulse: false },
-    done: { label: '已完成', bg: 'rgba(99,102,241,0.12)', color: '#6366f1', pulse: false },
-    error: { label: '失败', bg: 'rgba(239,68,68,0.12)', color: '#ef4444', pulse: false },
+    queued: { label: t('status.queued'), bg: 'rgba(100,116,139,0.15)', color: '#64748b', pulse: false },
+    downloading: { label: t('status.downloading'), bg: 'rgba(34,197,94,0.12)', color: '#22c55e', pulse: true },
+    paused: { label: t('status.paused'), bg: 'rgba(245,158,11,0.12)', color: '#f59e0b', pulse: false },
+    done: { label: t('status.done'), bg: 'rgba(99,102,241,0.12)', color: '#6366f1', pulse: false },
+    error: { label: t('status.error'), bg: 'rgba(239,68,68,0.12)', color: '#ef4444', pulse: false },
   }
   const s = map[status]
 
@@ -250,6 +252,7 @@ async function playInUnflick(path: string) {
 
 export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskItem({ task, filter }, ref) {
   const { pauseTask, resumeTask, trashTask, restoreTask, removeTask } = useTaskStore()
+  const { t } = useTranslation()
   const [hovered, setHovered] = useState(false)
   const [confirmHardDelete, setConfirmHardDelete] = useState(false)
   const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(null)
@@ -276,7 +279,7 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
     if (inTrash) {
       return [
         {
-          label: '恢复任务',
+          label: t('task.restore'),
           icon: (
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
@@ -287,7 +290,7 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
         },
         { divider: true, label: '' },
         {
-          label: '复制 URL',
+          label: t('task.copyUrl'),
           icon: (
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="9" y="9" width="13" height="13" rx="2" />
@@ -298,7 +301,7 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
         },
         { divider: true, label: '' },
         {
-          label: '彻底删除（含文件）',
+          label: t('task.hardDelete'),
           danger: true,
           icon: (
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -314,7 +317,7 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
     const items: MenuItem[] = []
     if (task.status === 'downloading' || task.status === 'queued') {
       items.push({
-        label: '暂停',
+        label: t('task.pause'),
         icon: (
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
             <rect x="6" y="4" width="4" height="16" rx="1" />
@@ -325,7 +328,7 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
       })
     } else if (task.status === 'paused') {
       items.push({
-        label: '开始',
+        label: t('task.resume'),
         icon: (
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
             <polygon points="5 3 19 12 5 21 5 3" />
@@ -335,7 +338,7 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
       })
     } else if (task.status === 'error') {
       items.push({
-        label: '重试',
+        label: t('task.retry'),
         icon: (
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M21 12a9 9 0 1 1-3-6.7L21 8" />
@@ -348,7 +351,7 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
 
     if (task.status === 'done') {
       items.push({
-        label: '打开文件夹',
+        label: t('task.openFolder'),
         icon: (
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
@@ -358,7 +361,7 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
       })
       if (filePath) {
         items.push({
-          label: '用 Unflick 播放',
+          label: t('task.playInUnflick'),
           icon: (
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polygon points="5 3 19 12 5 21 5 3" />
@@ -372,7 +375,7 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
     if (items.length > 0) items.push({ divider: true, label: '' })
 
     items.push({
-      label: '复制 URL',
+      label: t('task.copyUrl'),
       icon: (
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <rect x="9" y="9" width="13" height="13" rx="2" />
@@ -385,7 +388,7 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
     items.push({ divider: true, label: '' })
 
     items.push({
-      label: '移入垃圾箱',
+      label: t('task.trash'),
       icon: (
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <polyline points="3 6 5 6 21 6" />
@@ -396,7 +399,7 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
     })
 
     items.push({
-      label: '彻底删除（含文件）',
+      label: t('task.hardDelete'),
       danger: true,
       icon: (
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -481,7 +484,7 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
                 background: 'rgba(245,158,11,0.12)',
                 borderRadius: 4, padding: '2px 6px',
               }}>
-                重试 {task.retry_count}
+                {t('task.retryBadge', { count: task.retry_count })}
               </span>
             )}
             {task.start_at && new Date(task.start_at).getTime() > Date.now() && (
@@ -561,19 +564,19 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
                 {formatSpeed(task.speed)}
               </span>
               <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                剩余 {formatETA(task.eta)}
+                {t('task.remaining', { time: formatETA(task.eta) })}
               </span>
             </>
           )}
 
           {task.status === 'error' && task.error && (
             <span style={{ fontSize: 12, color: 'var(--error)' }} title={task.error}>
-              错误：{task.error.substring(0, 60)}{task.error.length > 60 ? '...' : ''}
+              {t('task.errorPrefix')}{task.error.substring(0, 60)}{task.error.length > 60 ? '...' : ''}
             </span>
           )}
 
           {task.status === 'queued' && (
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>等待开始...</span>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('task.waitingToStart')}</span>
           )}
         </div>
 
@@ -585,21 +588,21 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
           style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}
         >
           {task.status === 'downloading' && (
-            <ActionButton onClick={() => pauseTask(task.id)} title="暂停">
+            <ActionButton onClick={() => pauseTask(task.id)} title={t('task.pause')}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <rect x="6" y="4" width="4" height="16" rx="1" />
                 <rect x="14" y="4" width="4" height="16" rx="1" />
               </svg>
-              暂停
+              {t('task.pause')}
             </ActionButton>
           )}
 
           {task.status === 'paused' && (
-            <ActionButton onClick={() => resumeTask(task.id)} title="继续">
+            <ActionButton onClick={() => resumeTask(task.id)} title={t('task.resume')}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <polygon points="5 3 19 12 5 21 5 3" />
               </svg>
-              继续
+              {t('task.resume')}
             </ActionButton>
           )}
 
@@ -607,21 +610,21 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
             <>
               <ActionButton
                 onClick={() => openInExplorer(task.save_path)}
-                title="打开目录"
+                title={t('task.openFolder')}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
                 </svg>
-                打开目录
+                {t('task.openFolder')}
               </ActionButton>
               <ActionButton
                 onClick={() => playInUnflick(`${task.save_path}/${task.filename}`)}
-                title="用 Unflick 播放"
+                title={t('task.playInUnflick')}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polygon points="5 3 19 12 5 21 5 3" />
                 </svg>
-                播放
+                {t('task.playInUnflick')}
               </ActionButton>
             </>
           )}
@@ -630,17 +633,17 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
             <>
               <ActionButton
                 onClick={() => restoreTask(task.id).catch(console.error)}
-                title="恢复任务"
+                title={t('task.restore')}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
                   <path d="M3 3v5h5" />
                 </svg>
-                恢复
+                {t('task.restore')}
               </ActionButton>
               <ActionButton
                 onClick={handleHardDelete}
-                title={confirmHardDelete ? '再次点击彻底删除（含文件）' : '彻底删除（含文件）'}
+                title={confirmHardDelete ? t('task.confirmDelete') : t('task.hardDelete')}
                 danger
               >
                 {confirmHardDelete ? (
@@ -648,7 +651,7 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
-                    确认删除
+                    {t('task.confirmDelete')}
                   </>
                 ) : (
                   <>
@@ -656,7 +659,7 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
                       <polyline points="3 6 5 6 21 6" />
                       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
                     </svg>
-                    彻底删除
+                    {t('task.hardDelete')}
                   </>
                 )}
               </ActionButton>
@@ -664,14 +667,14 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
           ) : (
             <ActionButton
               onClick={() => trashTask(task.id).catch(console.error)}
-              title="移入垃圾箱"
+              title={t('task.trash')}
               danger
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="3 6 5 6 21 6" />
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
               </svg>
-              删除
+              {t('task.delete')}
             </ActionButton>
           )}
         </motion.div>

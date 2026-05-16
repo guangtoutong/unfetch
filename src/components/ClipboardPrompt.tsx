@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { listenClipboardUrls } from '../lib/systemIntegration'
 import { useTaskStore } from '../stores/taskStore'
 
@@ -11,6 +12,7 @@ interface Pending {
 export const ClipboardPrompt: React.FC = () => {
   const [pending, setPending] = useState<Pending | null>(null)
   const { addTask } = useTaskStore()
+  const { t } = useTranslation()
 
   useEffect(() => {
     let unlisten: (() => void) | null = null
@@ -70,7 +72,7 @@ export const ClipboardPrompt: React.FC = () => {
               <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
             </svg>
             <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
-              检测到下载链接
+              {t('clipboard.detected')}
             </span>
           </div>
 
@@ -107,7 +109,7 @@ export const ClipboardPrompt: React.FC = () => {
                 cursor: 'pointer',
               }}
             >
-              立即下载
+              {t('clipboard.download')}
             </button>
             <button
               onClick={onDismiss}
@@ -122,7 +124,7 @@ export const ClipboardPrompt: React.FC = () => {
                 cursor: 'pointer',
               }}
             >
-              忽略
+              {t('clipboard.dismiss')}
             </button>
           </div>
         </motion.div>
