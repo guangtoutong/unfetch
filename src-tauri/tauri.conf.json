@@ -1,0 +1,86 @@
+{
+  "productName": "unfetch",
+  "version": "0.1.0",
+  "identifier": "app.unfetch.client",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1421",
+    "beforeDevCommand": "pnpm dev",
+    "beforeBuildCommand": "pnpm build"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "unfetch",
+        "width": 1100,
+        "height": 700,
+        "minWidth": 800,
+        "minHeight": 500,
+        "center": true,
+        "resizable": true,
+        "decorations": false,
+        "transparent": false,
+        "dragDropEnabled": false,
+        "backgroundColor": "#070710",
+        "visible": true,
+        "dragDropEnabled": true
+      },
+      {
+        "label": "mini",
+        "title": "unfetch mini",
+        "url": "index.html?window=mini",
+        "width": 320,
+        "height": 64,
+        "minWidth": 320,
+        "minHeight": 64,
+        "maxWidth": 320,
+        "maxHeight": 64,
+        "resizable": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "visible": false,
+        "shadow": false
+      }
+    ],
+    "security": {
+      "csp": null,
+      "assetProtocol": { "enable": true, "scope": { "allow": ["**"] } }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "externalBin": ["binaries/unfetch-daemon"],
+    "resources": {
+      "binaries/": "binaries/"
+    },
+    "fileAssociations": [
+      {
+        "ext": ["torrent"],
+        "name": "BitTorrent File",
+        "description": "BitTorrent metadata file",
+        "role": "Editor"
+      }
+    ],
+    "windows": {
+      "nsis": {
+        "installerHooks": "installer/hooks.nsh",
+        "installerIcon": "installer/installer.ico"
+      }
+    },
+    "macOS": { "minimumSystemVersion": "11.0" }
+  },
+  "plugins": {
+    "shell": {
+      "open": true
+    },
+    "deep-link": {
+      "desktop": {
+        "schemes": ["magnet"]
+      }
+    }
+  }
+}

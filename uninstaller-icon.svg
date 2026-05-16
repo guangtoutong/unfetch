@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0a18"/>
+      <stop offset="100%" stop-color="#1a1a32"/>
+    </linearGradient>
+    <linearGradient id="uFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="arrowFill" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <radialGradient id="badgeBg" cx="0.4" cy="0.4" r="0.7">
+      <stop offset="0%" stop-color="#f87171"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="100" fill="url(#bg)"/>
+
+  <path d="M 80 72 L 80 312 Q 80 444 256 444 Q 432 444 432 312 L 432 72 L 336 72 L 336 308 Q 336 364 256 364 Q 176 364 176 308 L 176 72 Z" fill="url(#uFill)"/>
+
+  <path d="M 220 96 L 292 96 L 292 220 L 360 220 L 256 340 L 152 220 L 220 220 Z" fill="url(#arrowFill)" stroke="#7c2d12" stroke-width="6" stroke-linejoin="round"/>
+
+  <!-- 右下角卸载徽章：红色圆 + 白色 × -->
+  <circle cx="416" cy="416" r="78" fill="url(#badgeBg)" stroke="#0a0a18" stroke-width="10"/>
+  <g stroke="#ffffff" stroke-width="22" stroke-linecap="round">
+    <line x1="386" y1="386" x2="446" y2="446"/>
+    <line x1="446" y1="386" x2="386" y2="446"/>
+  </g>
+</svg>

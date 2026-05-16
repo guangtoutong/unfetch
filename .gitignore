@@ -1,0 +1,45 @@
+# Node
+node_modules/
+dist/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Rust / Tauri
+src-tauri/target/
+src-tauri/gen/
+
+# Go daemon 二进制（CI 构建产物）
+core/unfetch-daemon
+core/unfetch-daemon.exe
+core/unfetch-daemon.exe~
+core/vendor/
+
+# 第三方二进制（用 scripts/fetch-binaries 拉，不入库）
+core/ffmpeg.exe
+core/ffprobe.exe
+core/yt-dlp.exe
+
+# Tauri sidecar 二进制（CI 时从 core 重新生成）
+src-tauri/binaries/unfetch-daemon
+src-tauri/binaries/unfetch-daemon.exe
+src-tauri/binaries/unfetch-daemon-*
+
+# Build 中间产物
+app-icon-1024.png
+logo-options/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 本地环境配置
+.env
+.env.local
+
+# 用户数据
+*.tasks.db
+daemon.log
+unfetch.log
