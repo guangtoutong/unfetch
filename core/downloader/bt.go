@@ -56,8 +56,14 @@ var publicTrackers = []string{
 	"http://tracker.openbittorrent.com:80/announce",
 	"http://tracker.opentrackr.org:1337/announce",
 	"http://tracker.skyts.net:6969/announce",
-	// WSS (websocket) 用于 WebTorrent 互通
+	// WSS (websocket) 用于 WebTorrent 互通（浏览器端 peer）
 	"wss://tracker.openwebtorrent.com",
+	"wss://tracker.webtorrent.dev",
+	"wss://tracker.btorrent.xyz",
+	// IPv6（部分 tracker 仅 IPv6 节点，扩大 peer 池）
+	"udp://ipv6.tracker.harry.lu:80/announce",
+	"udp://ipv6.tracker.cl-pl.org:1337/announce",
+	"udp://[2001:67c:6ec:203:218:71ff:fe04:8466]:6969/announce",
 }
 
 // BTDownloader BT 下载器，基于 anacrolix/torrent
@@ -98,19 +104,28 @@ func (d *BTDownloader) Download(ctx context.Context, task *types.Task, onProgres
 	clientCfg.NoUpload = false // 允许上传，遵循 BT 协议，提升 swarm 收 peer
 	clientCfg.Seed = false     // 下载完成后不做种
 	clientCfg.ListenPort = 0   // 随机端口
-	// 加大 peer 并发池 — 默认 50/500 太保守，提升后 peer 发现速度提升明显
+	// 加大 peer 并发池
 	clientCfg.TorrentPeersLowWater = 200
 	clientCfg.TorrentPeersHighWater = 2000
 	clientCfg.HalfOpenConnsPerTorrent = 100
 	clientCfg.TotalHalfOpenConns = 500
 	clientCfg.EstablishedConnsPerTorrent = 200
-	// 允许双协议（uTP + TCP），尽可能找到 peer
+	// 协议
 	clientCfg.DisableUTP = false
-	clientCfg.DisableTCP = false
-	clientCfg.DisablePEX = false  // peer exchange 提升 peer 发现
-	clientCfg.NoDHT = false       // DHT 是无 tracker 时的关键
+	clientCfg.DisablePEX = false           // peer exchange
+	clientCfg.NoDHT = false                // DHT 是无 tracker 时关键
+	clientCfg.DisableIPv6 = false          // IPv6 peer 池
+	clientCfg.DisableIPv4 = false
+	clientCfg.DisableWebtorrent = false    // WebTorrent peer (浏览器端)
 	clientCfg.AcceptPeerConnections = true
 	clientCfg.DropMutuallyCompletePeers = true
+	// uTP-only 模式：绕开 ISP 对 BT TCP 端口的屏蔽
+	if cfg != nil && cfg.BTForceUTP {
+		clientCfg.DisableTCP = true
+		slog.Info("bt: uTP-only mode enabled")
+	} else {
+		clientCfg.DisableTCP = false
+	}
 
 	// 代理：按协议分别处理 HTTP proxy 和 SOCKS5
 	effectiveProxy := resolveProxy(task.Proxy, cfg)
@@ -166,6 +181,21 @@ func (d *BTDownloader) Download(ctx context.Context, task *types.Task, onProgres
 		t, err = client.AddTorrentFromFile(torrentPath)
 		if err != nil {
 			return fmt.Errorf("add torrent from file: %w", err)
+		}
+	}
+
+	// 合并自定义 tracker
+	if len(task.CustomTrackers) > 0 {
+		groups := make([][]string, 0, len(task.CustomTrackers))
+		for _, tr := range task.CustomTrackers {
+			tr = strings.TrimSpace(tr)
+			if tr != "" {
+				groups = append(groups, []string{tr})
+			}
+		}
+		if len(groups) > 0 {
+			t.AddTrackers(groups)
+			slog.Info("bt: added custom trackers", "count", len(groups))
 		}
 	}
 
@@ -239,9 +269,12 @@ func (d *BTDownloader) Download(ctx context.Context, task *types.Task, onProgres
 		case <-ticker.C:
 			stats := t.Stats()
 			done := t.BytesCompleted()
-
 			task.DoneBytes = done
-			_ = stats
+
+			// 上报 peer 统计：active = 正在交换数据的连接，total = 已知 + 半开
+			task.PeersConnected = stats.ActivePeers
+			task.PeersTotal = stats.TotalPeers
+			task.Seeders = stats.ConnectedSeeders
 
 			if t.Complete.Bool() {
 				task.DoneBytes = task.TotalBytes

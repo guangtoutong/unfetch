@@ -569,6 +569,35 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
             </>
           )}
 
+          {/* BT 类型：peer / seeder 统计 */}
+          {task.type === 'bt' && task.status === 'downloading' && (task.peers_connected || task.peers_total || task.seeders) !== undefined && (
+            <span
+              style={{
+                fontSize: 11,
+                color: 'var(--text-muted)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                fontVariantNumeric: 'tabular-nums',
+              }}
+              title={`已连接 peer / 总发现 peer，其中 ${task.seeders ?? 0} 个种子`}
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>{task.peers_connected ?? 0}</span>
+              <span>/ {task.peers_total ?? 0}</span>
+              {(task.seeders ?? 0) > 0 && (
+                <span style={{ color: '#22c55e', marginLeft: 4, fontWeight: 600 }} title="种子数（拥有完整文件的 peer）">
+                  ★ {task.seeders}
+                </span>
+              )}
+            </span>
+          )}
+
           {task.status === 'error' && task.error && (
             <span style={{ fontSize: 12, color: 'var(--error)' }} title={task.error}>
               {t('task.errorPrefix')}{task.error.substring(0, 60)}{task.error.length > 60 ? '...' : ''}

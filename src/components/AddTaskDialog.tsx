@@ -83,6 +83,8 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
   // BT 文件选择
   const [torrentPreview, setTorrentPreview] = useState<TorrentPreview | null>(null)
   const [previewing, setPreviewing] = useState(false)
+  // BT 自定义 tracker
+  const [customTrackers, setCustomTrackers] = useState('')
 
   const urlInputRef = useRef<HTMLInputElement>(null)
   const batchRef = useRef<HTMLTextAreaElement>(null)
@@ -118,6 +120,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
       setMd5('')
       setTorrentPreview(null)
       setPreviewing(false)
+      setCustomTrackers('')
     }
   }, [open, batchMode])
 
@@ -148,6 +151,10 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
 
   const buildReq = (u: string, selectedFiles?: number[]): AddTaskRequest => {
     const detectedType = detectUrlType(u)
+    const trackerList = customTrackers
+      .split(/[\r\n]+/)
+      .map((s) => s.trim())
+      .filter(Boolean)
     return {
       url: u,
       save_dir: saveDir || undefined,
@@ -161,6 +168,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
       expected_sha256: sha256 || undefined,
       expected_md5: md5 || undefined,
       selected_files: selectedFiles,
+      custom_trackers: detectedType === 'bt' && trackerList.length > 0 ? trackerList : undefined,
     }
   }
 
@@ -524,6 +532,25 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                           <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>代理地址</label>
                           <input type="text" placeholder="http://127.0.0.1:7890" value={proxy} onChange={(e) => setProxy(e.target.value)} className="input-base" />
                         </div>
+
+                        {/* BT 自定义 tracker */}
+                        {urlType === 'bt' && (
+                          <div>
+                            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>
+                              自定义 Tracker（每行一个，可选）
+                            </label>
+                            <textarea
+                              placeholder={'udp://my-private.tracker:6969/announce\nhttp://example.com:8080/announce'}
+                              value={customTrackers}
+                              onChange={(e) => setCustomTrackers(e.target.value)}
+                              className="input-base"
+                              style={{ minHeight: 60, fontFamily: 'monospace', fontSize: 11, resize: 'vertical' }}
+                            />
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3 }}>
+                              会和内置 32 个公共 tracker 合并使用，扩大 peer 池
+                            </div>
+                          </div>
+                        )}
 
                         {/* 定时下载 */}
                         <div>

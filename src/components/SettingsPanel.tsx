@@ -413,6 +413,23 @@ export const SettingsPanel: React.FC = () => {
                   onChange={onToggleClipSniff}
                 />
               </Section>
+
+              <Divider />
+
+              <Section title="BT 优化" icon={
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                  <path d="M2 17l10 5 10-5" />
+                  <path d="M2 12l10 5 10-5" />
+                </svg>
+              }>
+                <ToggleRow
+                  label="强制 uTP 模式（关闭 TCP）"
+                  description="部分 ISP 屏蔽 BT 的 TCP 端口；切换到 uTP (UDP) 后可能恢复连接，但同时会限制部分 peer 来源"
+                  checked={!!config.bt_force_utp}
+                  onChange={(v) => updateConfig({ bt_force_utp: v })}
+                />
+              </Section>
             </div>
           </motion.div>
         </>

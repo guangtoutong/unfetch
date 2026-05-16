@@ -36,6 +36,11 @@ export interface Task {
   expected_sha256?: string
   expected_md5?: string
   actual_sha256?: string
+  selected_files?: number[]
+  custom_trackers?: string[]
+  peers_connected?: number
+  peers_total?: number
+  seeders?: number
 }
 
 export interface SpeedScheduleEntry {
@@ -56,6 +61,7 @@ export interface Config {
   auto_retry?: boolean
   max_retries?: number
   on_all_done?: OnAllDoneAction
+  bt_force_utp?: boolean
 }
 
 export interface AddTaskRequest {
@@ -72,6 +78,7 @@ export interface AddTaskRequest {
   expected_sha256?: string
   expected_md5?: string
   selected_files?: number[]
+  custom_trackers?: string[]
 }
 
 export interface TorrentFile {

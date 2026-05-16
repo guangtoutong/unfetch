@@ -78,6 +78,11 @@ type Task struct {
 	ExpectedMD5    string `json:"expected_md5,omitempty"`
 	ActualSHA256   string `json:"actual_sha256,omitempty"`
 	SelectedFiles  []int  `json:"selected_files,omitempty"` // BT 任务：仅下载这些下标的文件
+	CustomTrackers []string `json:"custom_trackers,omitempty"` // 额外的 tracker URL（BT 任务）
+	// BT 运行时统计（不持久化）
+	PeersConnected int `json:"peers_connected,omitempty"`
+	PeersTotal     int `json:"peers_total,omitempty"`
+	Seeders        int `json:"seeders,omitempty"`
 	CreatedAt  time.Time  `json:"created_at"`
 	FinishedAt *time.Time `json:"finished_at,omitempty"`
 	Error      string     `json:"error,omitempty"`
@@ -99,6 +104,8 @@ type AddTaskRequest struct {
 	ExpectedMD5    string    `json:"expected_md5,omitempty"`
 	// BT 任务专用：仅下载这些文件下标（空数组 = 全部）
 	SelectedFiles []int      `json:"selected_files,omitempty"`
+	// BT 任务专用：额外 tracker URL
+	CustomTrackers []string  `json:"custom_trackers,omitempty"`
 }
 
 // SpeedScheduleEntry 分时段限速：在 [StartHour, EndHour) 时段内使用 Limit
@@ -120,4 +127,5 @@ type Config struct {
 	AutoRetry       bool   `json:"auto_retry"`
 	MaxRetries      int    `json:"max_retries"`  // 默认 3
 	OnAllDone       OnAllDoneAction `json:"on_all_done"`
+	BTForceUTP      bool   `json:"bt_force_utp"` // 强制 uTP（关闭 TCP），绕开 ISP BT 端口屏蔽
 }
