@@ -106,6 +106,8 @@ type AddTaskRequest struct {
 	SelectedFiles []int      `json:"selected_files,omitempty"`
 	// BT 任务专用：额外 tracker URL
 	CustomTrackers []string  `json:"custom_trackers,omitempty"`
+	// 任务模板名（从 Config.TaskTemplates 中查找，覆盖未显式提供的字段）
+	Template       string    `json:"template,omitempty"`
 }
 
 // SpeedScheduleEntry 分时段限速：在 [StartHour, EndHour) 时段内使用 Limit
@@ -128,4 +130,37 @@ type Config struct {
 	MaxRetries      int    `json:"max_retries"`  // 默认 3
 	OnAllDone       OnAllDoneAction `json:"on_all_done"`
 	BTForceUTP      bool   `json:"bt_force_utp"` // 强制 uTP（关闭 TCP），绕开 ISP BT 端口屏蔽
+
+	// 远程 Web UI
+	RemoteEnabled bool   `json:"remote_enabled"` // true 时绑定 0.0.0.0 + 强制 token
+	RemoteToken   string `json:"remote_token,omitempty"`
+
+	// RSS 订阅
+	RSSFeeds []RSSFeed `json:"rss_feeds,omitempty"`
+
+	// 任务完成钩子
+	OnCompleteWebhook string `json:"on_complete_webhook,omitempty"` // POST {id, filename, save_path, url}
+	OnCompleteExec    string `json:"on_complete_exec,omitempty"`    // 支持 {id} {filename} {save_path} 占位
+
+	// 任务模板（Cookie / UA / Header 预设）
+	TaskTemplates []TaskTemplate `json:"task_templates,omitempty"`
+}
+
+// RSSFeed 一个 RSS 订阅源
+type RSSFeed struct {
+	Name        string `json:"name"`
+	URL         string `json:"url"`
+	FilterRegex string `json:"filter_regex,omitempty"` // 匹配 item title；空 = 全部接受
+	IntervalMin int    `json:"interval_min"`           // 轮询间隔，默认 15
+	Enabled     bool   `json:"enabled"`
+	SaveDir     string `json:"save_dir,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
+}
+
+// TaskTemplate 网站访问模板
+type TaskTemplate struct {
+	Name      string            `json:"name"`
+	Cookies   string            `json:"cookies,omitempty"`
+	UserAgent string            `json:"user_agent,omitempty"`
+	Headers   map[string]string `json:"headers,omitempty"`
 }

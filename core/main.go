@@ -14,13 +14,21 @@ import (
 
 	"unfetch/core/api"
 	"unfetch/core/queue"
+	"unfetch/core/rss"
 	"unfetch/core/types"
 )
 
 const (
-	listenAddr = ":19543"
-	configFile = "config.json"
+	defaultPort = 19543
+	configFile  = "config.json"
 )
+
+func listenAddr(cfg *types.Config) string {
+	if cfg.RemoteEnabled {
+		return fmt.Sprintf("0.0.0.0:%d", defaultPort)
+	}
+	return fmt.Sprintf("127.0.0.1:%d", defaultPort)
+}
 
 func configDir() string {
 	home, err := os.UserHomeDir()
@@ -91,14 +99,24 @@ func main() {
 		Level: slog.LevelDebug,
 	})))
 
-	slog.Info("unfetch daemon starting", "addr", listenAddr)
+	slog.Info("unfetch daemon starting")
 
 	cfg, err := loadConfig()
 	if err != nil {
 		slog.Error("failed to load config", "err", err)
 		os.Exit(1)
 	}
-	slog.Info("config loaded", "download_dir", cfg.DownloadDir, "max_concurrent", cfg.MaxConcurrent)
+	addr := listenAddr(cfg)
+	slog.Info("config loaded",
+		"download_dir", cfg.DownloadDir,
+		"max_concurrent", cfg.MaxConcurrent,
+		"remote_enabled", cfg.RemoteEnabled,
+		"addr", addr,
+	)
+	if cfg.RemoteEnabled && cfg.RemoteToken == "" {
+		slog.Error("remote_enabled=true 但 remote_token 为空，拒绝启动（远程模式必须设 token）")
+		os.Exit(1)
+	}
 
 	// 确保下载目录存在
 	if err := os.MkdirAll(cfg.DownloadDir, 0755); err != nil {
@@ -115,16 +133,22 @@ func main() {
 	router := api.NewRouter(mgr, cfg, saveConfig)
 
 	srv := &http.Server{
-		Addr:         listenAddr,
+		Addr:         addr,
 		Handler:      router,
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 0, // SSE 需要长连接，不设超时
 		IdleTimeout:  120 * time.Second,
 	}
 
+	// 启动 RSS poller
+	rssCtx, rssCancel := context.WithCancel(context.Background())
+	defer rssCancel()
+	rssPoller := rss.NewPoller(mgr, func() *types.Config { return cfg })
+	rssPoller.Start(rssCtx)
+
 	// 启动 HTTP 服务
 	go func() {
-		slog.Info("HTTP server listening", "addr", listenAddr)
+		slog.Info("HTTP server listening", "addr", addr)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			slog.Error("HTTP server error", "err", err)
 			os.Exit(1)

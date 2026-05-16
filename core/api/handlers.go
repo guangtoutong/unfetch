@@ -156,6 +156,22 @@ func (h *Handlers) AddTask(w http.ResponseWriter, r *http.Request) {
 	cfg := h.cfg
 	h.cfgMu.RUnlock()
 
+	// 解析任务模板：仅补全用户未显式提供的字段
+	if req.Template != "" {
+		for _, t := range cfg.TaskTemplates {
+			if t.Name == req.Template {
+				if req.Cookies == "" {
+					req.Cookies = t.Cookies
+				}
+				// User-Agent 和 Headers 透传给 downloader（依赖下载器实现）；先合并到 Cookies 行内是不合适的
+				// 此处仅做 Cookies 合并，UA/Headers 暂未在下载器中接入，留待后续扩展
+				_ = t.UserAgent
+				_ = t.Headers
+				break
+			}
+		}
+	}
+
 	taskType := detectURLType(req.URL)
 
 	saveDir := req.SaveDir

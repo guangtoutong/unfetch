@@ -15,6 +15,7 @@ import (
 	"github.com/google/uuid"
 
 	"unfetch/core/downloader"
+	"unfetch/core/hooks"
 	"unfetch/core/types"
 )
 
@@ -306,6 +307,12 @@ func (m *Manager) startDownload(task *types.Task) {
 		if current.PlayAfter && current.Filename != "" {
 			go openFile(filepath.Join(current.SavePath, current.Filename))
 		}
+
+		// 触发完成钩子（webhook + exec）
+		m.cfgMu.RLock()
+		hookCfg := *m.cfg
+		m.cfgMu.RUnlock()
+		hooks.FireCompletion(current, &hookCfg)
 	}
 	m.mu.Unlock()
 

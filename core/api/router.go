@@ -1,13 +1,16 @@
 package api
 
 import (
+	"crypto/subtle"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
 	"unfetch/core/queue"
 	"unfetch/core/types"
+	"unfetch/core/web"
 )
 
 func corsMiddleware(next http.Handler) http.Handler {
@@ -23,6 +26,38 @@ func corsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+// tokenAuth 如果配置了 RemoteToken，强制要求 Authorization: Bearer <token>
+// /health 不做鉴权（健康检查）；同源访问通过 ?token= query 也可（兼容 SSE）
+func tokenAuthMiddleware(cfg *types.Config) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			token := cfg.RemoteToken
+			if token == "" {
+				next.ServeHTTP(w, r)
+				return
+			}
+			// 健康检查和 OPTIONS 不鉴权
+			if r.URL.Path == "/health" || r.Method == http.MethodOptions {
+				next.ServeHTTP(w, r)
+				return
+			}
+			// 优先从 Authorization header 取
+			provided := ""
+			if auth := r.Header.Get("Authorization"); strings.HasPrefix(auth, "Bearer ") {
+				provided = strings.TrimPrefix(auth, "Bearer ")
+			} else if q := r.URL.Query().Get("token"); q != "" {
+				provided = q
+			}
+			if subtle.ConstantTimeCompare([]byte(provided), []byte(token)) != 1 {
+				w.WriteHeader(http.StatusUnauthorized)
+				_, _ = w.Write([]byte(`{"error":"unauthorized"}`))
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 func NewRouter(mgr *queue.Manager, cfg *types.Config, saveCfg func(*types.Config) error) http.Handler {
 	h := NewHandlers(mgr, cfg, saveCfg)
 
@@ -30,6 +65,7 @@ func NewRouter(mgr *queue.Manager, cfg *types.Config, saveCfg func(*types.Config
 	r.Use(corsMiddleware)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RequestID)
+	r.Use(tokenAuthMiddleware(cfg))
 
 	r.Get("/health", h.Health)
 	r.Post("/shutdown", h.Shutdown)
@@ -56,6 +92,11 @@ func NewRouter(mgr *queue.Manager, cfg *types.Config, saveCfg func(*types.Config
 
 	r.Get("/system-proxy", h.GetSystemProxy)
 	r.Post("/torrent/preview", h.PreviewTorrent)
+
+	// 内嵌的 Web UI，挂载到 / 之外的所有未匹配路径
+	// 注意：当远程模式启用时，Web UI 需要在 URL 中带 token （?token=）或同源请求自动注入
+	r.Handle("/ui", http.RedirectHandler("/ui/", http.StatusFound))
+	r.Handle("/ui/*", http.StripPrefix("/ui", web.Handler()))
 
 	return r
 }
