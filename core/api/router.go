@@ -55,6 +55,7 @@ func NewRouter(mgr *queue.Manager, cfg *types.Config, saveCfg func(*types.Config
 	r.Patch("/config", h.UpdateConfig)
 
 	r.Get("/system-proxy", h.GetSystemProxy)
+	r.Post("/torrent/preview", h.PreviewTorrent)
 
 	return r
 }

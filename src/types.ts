@@ -71,6 +71,21 @@ export interface AddTaskRequest {
   tags?: string[]
   expected_sha256?: string
   expected_md5?: string
+  selected_files?: number[]
+}
+
+export interface TorrentFile {
+  index: number
+  path: string
+  length: number
+  selected: boolean
+}
+
+export interface TorrentPreview {
+  name: string
+  info_hash: string
+  total_bytes: number
+  files: TorrentFile[]
 }
 
 export interface TaskCounts {

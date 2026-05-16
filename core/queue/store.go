@@ -79,6 +79,7 @@ func NewStore() (*Store, error) {
 		`ALTER TABLE tasks ADD COLUMN expected_sha256 TEXT NOT NULL DEFAULT ''`,
 		`ALTER TABLE tasks ADD COLUMN expected_md5 TEXT NOT NULL DEFAULT ''`,
 		`ALTER TABLE tasks ADD COLUMN actual_sha256 TEXT NOT NULL DEFAULT ''`,
+		`ALTER TABLE tasks ADD COLUMN selected_files TEXT NOT NULL DEFAULT ''`,
 	}
 	for _, m := range migrations {
 		if _, err := db.Exec(m); err != nil {
@@ -124,14 +125,15 @@ func (s *Store) SaveTask(task *types.Task) error {
 		startAt = &s
 	}
 	tagsJSON, _ := json.Marshal(task.Tags)
+	selectedJSON, _ := json.Marshal(task.SelectedFiles)
 
 	_, err = s.db.Exec(`
 		INSERT INTO tasks
 			(id, url, filename, save_path, type, status, total_bytes, done_bytes, threads,
 			 proxy, quality, cookies, play_after, trashed, retry_count, start_at, tags,
-			 expected_sha256, expected_md5, actual_sha256,
+			 expected_sha256, expected_md5, actual_sha256, selected_files,
 			 created_at, finished_at, error, metadata)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(id) DO UPDATE SET
 			filename    = excluded.filename,
 			save_path   = excluded.save_path,
@@ -150,6 +152,7 @@ func (s *Store) SaveTask(task *types.Task) error {
 			expected_sha256 = excluded.expected_sha256,
 			expected_md5 = excluded.expected_md5,
 			actual_sha256 = excluded.actual_sha256,
+			selected_files = excluded.selected_files,
 			finished_at = excluded.finished_at,
 			error       = excluded.error,
 			metadata    = excluded.metadata
@@ -159,7 +162,7 @@ func (s *Store) SaveTask(task *types.Task) error {
 		task.TotalBytes, task.DoneBytes,
 		task.Threads, task.Proxy, task.Quality, task.Cookies,
 		playAfter, trashed, task.RetryCount, startAt, string(tagsJSON),
-		task.ExpectedSHA256, task.ExpectedMD5, task.ActualSHA256,
+		task.ExpectedSHA256, task.ExpectedMD5, task.ActualSHA256, string(selectedJSON),
 		task.CreatedAt.Format(time.RFC3339),
 		finishedAt,
 		task.Error,
@@ -186,7 +189,7 @@ func (s *Store) LoadActiveTasks() ([]*types.Task, error) {
 		SELECT id, url, filename, save_path, type, status,
 		       total_bytes, done_bytes, threads, proxy, quality, cookies,
 		       play_after, trashed, retry_count, start_at, tags,
-		       expected_sha256, expected_md5, actual_sha256,
+		       expected_sha256, expected_md5, actual_sha256, selected_files,
 		       created_at, finished_at, error, metadata
 		FROM tasks
 		WHERE status NOT IN ('done') OR trashed = 1
@@ -225,6 +228,7 @@ func scanTask(rows *sql.Rows) (*types.Task, error) {
 		trashed    int
 		startAt    sql.NullString
 		tagsJSON   sql.NullString
+		selectedJSON sql.NullString
 		createdAt  string
 		finishedAt sql.NullString
 		metaJSON   sql.NullString
@@ -236,7 +240,7 @@ func scanTask(rows *sql.Rows) (*types.Task, error) {
 		&t.TotalBytes, &t.DoneBytes,
 		&t.Threads, &t.Proxy, &t.Quality, &t.Cookies,
 		&playAfter, &trashed, &t.RetryCount, &startAt, &tagsJSON,
-		&t.ExpectedSHA256, &t.ExpectedMD5, &t.ActualSHA256,
+		&t.ExpectedSHA256, &t.ExpectedMD5, &t.ActualSHA256, &selectedJSON,
 		&createdAt, &finishedAt, &t.Error, &metaJSON,
 	)
 	if err != nil {
@@ -255,6 +259,9 @@ func scanTask(rows *sql.Rows) (*types.Task, error) {
 	}
 	if tagsJSON.Valid && tagsJSON.String != "" {
 		_ = json.Unmarshal([]byte(tagsJSON.String), &t.Tags)
+	}
+	if selectedJSON.Valid && selectedJSON.String != "" {
+		_ = json.Unmarshal([]byte(selectedJSON.String), &t.SelectedFiles)
 	}
 
 	if ca, err := time.Parse(time.RFC3339, createdAt); err == nil {

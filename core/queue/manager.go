@@ -169,6 +169,7 @@ func (m *Manager) AddTask(req types.AddTaskRequest, taskType types.TaskType) (*t
 		Tags:      req.Tags,
 		ExpectedSHA256: req.ExpectedSHA256,
 		ExpectedMD5:    req.ExpectedMD5,
+		SelectedFiles:  req.SelectedFiles,
 		CreatedAt: time.Now(),
 	}
 

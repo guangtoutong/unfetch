@@ -20,16 +20,44 @@ import (
 	"unfetch/core/types"
 )
 
-// publicTrackers 是常用的公共 tracker 列表，用于补全无 tracker 的磁力链接
+// publicTrackers 公共 tracker 列表（基于 ngosang/trackerslist 的高速节点）
+// 用于补全无 tracker 的磁力链接以提高 peer 发现成功率
 var publicTrackers = []string{
+	// 主力 UDP
 	"udp://tracker.opentrackr.org:1337/announce",
-	"udp://open.tracker.cl:1337/announce",
 	"udp://tracker.openbittorrent.com:6969/announce",
-	"https://tracker.opentrackr.org:443/announce",
-	"https://tracker1.bt.moack.co.kr:443/announce",
-	"http://tracker.openbittorrent.com:80/announce",
+	"udp://open.tracker.cl:1337/announce",
+	"udp://9.rarbg.com:2810/announce",
 	"udp://exodus.desync.com:6969/announce",
 	"udp://tracker.torrent.eu.org:451/announce",
+	"udp://open.demonii.com:1337/announce",
+	"udp://open.stealth.si:80/announce",
+	"udp://tracker.tiny-vps.com:6969/announce",
+	"udp://tracker.dler.org:6969/announce",
+	"udp://tracker.bittor.pw:1337/announce",
+	"udp://tracker.theoks.net:6969/announce",
+	"udp://tracker.skyts.net:6969/announce",
+	"udp://retracker01-msk-virt.corbina.net:80/announce",
+	"udp://opentracker.io:6969/announce",
+	"udp://moonburrow.club:6969/announce",
+	"udp://leet-tracker.moe:1337/announce",
+	"udp://isk.richardsw.club:6969/announce",
+	"udp://fe.dealclub.de:6969/announce",
+	"udp://explodie.org:6969/announce",
+	"udp://discord.heihachi.pw:6969/announce",
+	"udp://bt2.archive.org:6969/announce",
+	"udp://bt1.archive.org:6969/announce",
+	// HTTPS 备份
+	"https://tracker.tamersunion.org:443/announce",
+	"https://tracker.gcrenwp.top:443/announce",
+	"https://tracker1.520.jp:443/announce",
+	"https://tracker.lilithraws.org:443/announce",
+	// HTTP 备份
+	"http://tracker.openbittorrent.com:80/announce",
+	"http://tracker.opentrackr.org:1337/announce",
+	"http://tracker.skyts.net:6969/announce",
+	// WSS (websocket) 用于 WebTorrent 互通
+	"wss://tracker.openwebtorrent.com",
 }
 
 // BTDownloader BT 下载器，基于 anacrolix/torrent
@@ -67,9 +95,22 @@ func (d *BTDownloader) Download(ctx context.Context, task *types.Task, onProgres
 	clientCfg := torrent.NewDefaultClientConfig()
 	clientCfg.DefaultStorage = storage.NewFileByInfoHash(task.SavePath)
 	clientCfg.DataDir = task.SavePath
-	clientCfg.NoUpload = false // 允许上传，遵循 BT 协议
+	clientCfg.NoUpload = false // 允许上传，遵循 BT 协议，提升 swarm 收 peer
 	clientCfg.Seed = false     // 下载完成后不做种
-	clientCfg.ListenPort = 0   // 随机端口（默认 42069 容易撞库 / 端口占用）
+	clientCfg.ListenPort = 0   // 随机端口
+	// 加大 peer 并发池 — 默认 50/500 太保守，提升后 peer 发现速度提升明显
+	clientCfg.TorrentPeersLowWater = 200
+	clientCfg.TorrentPeersHighWater = 2000
+	clientCfg.HalfOpenConnsPerTorrent = 100
+	clientCfg.TotalHalfOpenConns = 500
+	clientCfg.EstablishedConnsPerTorrent = 200
+	// 允许双协议（uTP + TCP），尽可能找到 peer
+	clientCfg.DisableUTP = false
+	clientCfg.DisableTCP = false
+	clientCfg.DisablePEX = false  // peer exchange 提升 peer 发现
+	clientCfg.NoDHT = false       // DHT 是无 tracker 时的关键
+	clientCfg.AcceptPeerConnections = true
+	clientCfg.DropMutuallyCompletePeers = true
 
 	// 代理：按协议分别处理 HTTP proxy 和 SOCKS5
 	effectiveProxy := resolveProxy(task.Proxy, cfg)
@@ -161,8 +202,30 @@ func (d *BTDownloader) Download(ctx context.Context, task *types.Task, onProgres
 
 	onProgress()
 
-	// 开始下载所有文件
-	t.DownloadAll()
+	// 按 SelectedFiles 选择性下载；空切片或 nil 代表下载全部
+	if len(task.SelectedFiles) == 0 {
+		t.DownloadAll()
+	} else {
+		selected := make(map[int]bool, len(task.SelectedFiles))
+		for _, idx := range task.SelectedFiles {
+			selected[idx] = true
+		}
+		files := t.Files()
+		// 重新累加真实下载字节数（被排除的文件不算）
+		var realTotal int64
+		for i, f := range files {
+			if selected[i] {
+				f.SetPriority(torrent.PiecePriorityNormal)
+				realTotal += f.Length()
+			} else {
+				f.SetPriority(torrent.PiecePriorityNone)
+			}
+		}
+		if realTotal > 0 {
+			task.TotalBytes = realTotal
+		}
+		slog.Info("bt: selective download", "id", task.ID, "selected", len(task.SelectedFiles), "of", len(files), "size", realTotal)
+	}
 
 	// 监控进度
 	ticker := time.NewTicker(500 * time.Millisecond)
@@ -202,6 +265,100 @@ func (d *BTDownloader) Download(ctx context.Context, task *types.Task, onProgres
 
 func isMagnet(u string) bool {
 	return len(u) >= 7 && u[:7] == "magnet:"
+}
+
+// PreviewTorrent 只取元数据，不真正开始下载。用于"选哪些文件"前置交互。
+// 完成或超时后会自动关闭 client。
+func PreviewTorrent(ctx context.Context, rawURL string, cfg *types.Config) (*types.TorrentPreview, error) {
+	clientCfg := torrent.NewDefaultClientConfig()
+	tmpDir, err := os.MkdirTemp("", "unfetch-preview-*")
+	if err != nil {
+		return nil, fmt.Errorf("temp dir: %w", err)
+	}
+	defer os.RemoveAll(tmpDir)
+	clientCfg.DataDir = tmpDir
+	clientCfg.NoUpload = true
+	clientCfg.Seed = false
+	clientCfg.ListenPort = 0
+
+	// 复用代理逻辑
+	if cfg != nil {
+		effectiveProxy := resolveProxy("", cfg)
+		if effectiveProxy != "" {
+			if proxyURL, err := url.Parse(effectiveProxy); err == nil {
+				switch proxyURL.Scheme {
+				case "socks5", "socks5h":
+					if dialer, err := buildSOCKS5Dialer(proxyURL); err == nil {
+						dialCtx := func(_ context.Context, network, addr string) (net.Conn, error) {
+							return dialer.Dial(network, addr)
+						}
+						clientCfg.TrackerDialContext = dialCtx
+						clientCfg.HTTPDialContext = dialCtx
+					}
+				default:
+					clientCfg.HTTPProxy = http.ProxyURL(proxyURL)
+				}
+			}
+		}
+	}
+
+	client, err := newTorrentClientWithRetry(clientCfg)
+	if err != nil {
+		return nil, fmt.Errorf("torrent client: %w", err)
+	}
+	defer client.Close()
+
+	var t *torrent.Torrent
+	if isMagnet(rawURL) {
+		enriched := enrichMagnet(rawURL)
+		t, err = client.AddMagnet(enriched)
+		if err != nil {
+			return nil, fmt.Errorf("add magnet: %w", err)
+		}
+	} else if localPath, ok := parseLocalTorrentURL(rawURL); ok {
+		t, err = client.AddTorrentFromFile(localPath)
+		if err != nil {
+			return nil, fmt.Errorf("add torrent: %w", err)
+		}
+	} else {
+		// 远程 .torrent
+		torrentPath, err := downloadTorrentFile(ctx, rawURL, tmpDir)
+		if err != nil {
+			return nil, fmt.Errorf("download torrent file: %w", err)
+		}
+		defer os.Remove(torrentPath)
+		t, err = client.AddTorrentFromFile(torrentPath)
+		if err != nil {
+			return nil, fmt.Errorf("add torrent file: %w", err)
+		}
+	}
+
+	// 等元数据，最多 90 秒
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case <-t.GotInfo():
+	case <-time.After(90 * time.Second):
+		return nil, fmt.Errorf("timeout waiting for torrent metadata")
+	}
+
+	info := t.Info()
+	files := t.Files()
+	preview := &types.TorrentPreview{
+		Name:       info.BestName(),
+		InfoHash:   t.InfoHash().String(),
+		TotalBytes: t.Length(),
+		Files:      make([]types.TorrentFile, len(files)),
+	}
+	for i, f := range files {
+		preview.Files[i] = types.TorrentFile{
+			Index:    i,
+			Path:     f.DisplayPath(),
+			Length:   f.Length(),
+			Selected: true,
+		}
+	}
+	return preview, nil
 }
 
 // newTorrentClientWithRetry 创建 torrent client，端口被占时换随机端口重试

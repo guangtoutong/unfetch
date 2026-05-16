@@ -1,4 +1,4 @@
-import type { Task, Config, AddTaskRequest } from '../types'
+import type { Task, Config, AddTaskRequest, TorrentPreview } from '../types'
 
 const API_BASE = 'http://127.0.0.1:19543'
 
@@ -41,6 +41,9 @@ export const api = {
 
   restoreTask: (id: string): Promise<Task> =>
     request(`/tasks/${id}/restore`, { method: 'PATCH' }),
+
+  previewTorrent: (url: string): Promise<TorrentPreview> =>
+    request('/torrent/preview', { method: 'POST', body: JSON.stringify({ url }) }),
 
   emptyTrash: (): Promise<{ deleted: number }> =>
     request(`/tasks/trash`, { method: 'DELETE' }),

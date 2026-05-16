@@ -38,6 +38,22 @@ type TaskMeta struct {
 	Duration  int    `json:"duration,omitempty"` // seconds
 }
 
+// TorrentFile 一个 torrent 内单个文件的元数据
+type TorrentFile struct {
+	Index    int    `json:"index"`
+	Path     string `json:"path"`
+	Length   int64  `json:"length"`
+	Selected bool   `json:"selected"`
+}
+
+// TorrentPreview 种子元信息（用于 /torrent/preview）
+type TorrentPreview struct {
+	Name       string        `json:"name"`
+	InfoHash   string        `json:"info_hash"`
+	TotalBytes int64         `json:"total_bytes"`
+	Files      []TorrentFile `json:"files"`
+}
+
 type Task struct {
 	ID         string     `json:"id"`
 	URL        string     `json:"url"`
@@ -61,6 +77,7 @@ type Task struct {
 	ExpectedSHA256 string `json:"expected_sha256,omitempty"`
 	ExpectedMD5    string `json:"expected_md5,omitempty"`
 	ActualSHA256   string `json:"actual_sha256,omitempty"`
+	SelectedFiles  []int  `json:"selected_files,omitempty"` // BT 任务：仅下载这些下标的文件
 	CreatedAt  time.Time  `json:"created_at"`
 	FinishedAt *time.Time `json:"finished_at,omitempty"`
 	Error      string     `json:"error,omitempty"`
@@ -80,6 +97,8 @@ type AddTaskRequest struct {
 	Tags          []string   `json:"tags,omitempty"`
 	ExpectedSHA256 string    `json:"expected_sha256,omitempty"`
 	ExpectedMD5    string    `json:"expected_md5,omitempty"`
+	// BT 任务专用：仅下载这些文件下标（空数组 = 全部）
+	SelectedFiles []int      `json:"selected_files,omitempty"`
 }
 
 // SpeedScheduleEntry 分时段限速：在 [StartHour, EndHour) 时段内使用 Limit

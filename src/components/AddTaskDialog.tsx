@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next'
 import { useTaskStore } from '../stores/taskStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { detectUrlType } from '../lib/format'
-import type { AddTaskRequest } from '../types'
+import { api } from '../lib/api'
+import { TorrentFilePicker } from './TorrentFilePicker'
+import type { AddTaskRequest, TorrentPreview } from '../types'
 
 const qualityKeys = [
   { value: 'best', labelKey: 'quality.best' },
@@ -78,6 +80,10 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
   const [sha256, setSha256] = useState('')
   const [md5, setMd5] = useState('')
 
+  // BT 文件选择
+  const [torrentPreview, setTorrentPreview] = useState<TorrentPreview | null>(null)
+  const [previewing, setPreviewing] = useState(false)
+
   const urlInputRef = useRef<HTMLInputElement>(null)
   const batchRef = useRef<HTMLTextAreaElement>(null)
 
@@ -110,6 +116,8 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
       setStartAt('')
       setSha256('')
       setMd5('')
+      setTorrentPreview(null)
+      setPreviewing(false)
     }
   }, [open, batchMode])
 
@@ -131,6 +139,31 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
   }
   const removeTag = (t: string) => setTags(tags.filter((x) => x !== t))
 
+  // start_at: datetime-local → ISO string；空就是立即开始
+  const getStartAtISO = (): string | undefined => {
+    if (!startAt) return undefined
+    const d = new Date(startAt)
+    return isNaN(d.getTime()) ? undefined : d.toISOString()
+  }
+
+  const buildReq = (u: string, selectedFiles?: number[]): AddTaskRequest => {
+    const detectedType = detectUrlType(u)
+    return {
+      url: u,
+      save_dir: saveDir || undefined,
+      threads: detectedType === 'http' ? threads : undefined,
+      proxy: proxy || undefined,
+      cookies: cookies || undefined,
+      quality: detectedType === 'ytdlp' ? quality : undefined,
+      play_after: playAfter,
+      tags: tags.length > 0 ? tags : undefined,
+      start_at: getStartAtISO(),
+      expected_sha256: sha256 || undefined,
+      expected_md5: md5 || undefined,
+      selected_files: selectedFiles,
+    }
+  }
+
   const handleSubmit = async () => {
     const urls = batchMode ? parseUrls(url) : (url.trim() ? [url.trim()] : [])
     if (urls.length === 0) {
@@ -139,34 +172,28 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
     }
 
     setError('')
-    setSubmitting(true)
 
-    // start_at: datetime-local → ISO string；空就是立即开始
-    let startAtISO: string | undefined
-    if (startAt) {
-      const d = new Date(startAt)
-      if (!isNaN(d.getTime())) startAtISO = d.toISOString()
+    // 单 URL + BT 类型：先调 preview API，进入文件选择界面
+    if (!batchMode && urls.length === 1 && urlType === 'bt') {
+      const u = urls[0]
+      setPreviewing(true)
+      try {
+        const preview = await api.previewTorrent(u)
+        setTorrentPreview(preview)
+      } catch (e) {
+        setError((e as Error).message || '获取种子元信息失败')
+      } finally {
+        setPreviewing(false)
+      }
+      return
     }
 
+    setSubmitting(true)
     try {
       let succeeded = 0
       for (const u of urls) {
-        const detectedType = detectUrlType(u)
-        const req: AddTaskRequest = {
-          url: u,
-          save_dir: saveDir || undefined,
-          threads: detectedType === 'http' ? threads : undefined,
-          proxy: proxy || undefined,
-          cookies: cookies || undefined,
-          quality: detectedType === 'ytdlp' ? quality : undefined,
-          play_after: playAfter,
-          tags: tags.length > 0 ? tags : undefined,
-          start_at: startAtISO,
-          expected_sha256: sha256 || undefined,
-          expected_md5: md5 || undefined,
-        }
         try {
-          await addTask(req)
+          await addTask(buildReq(u))
           succeeded++
         } catch (e) {
           console.error('add task failed', u, e)
@@ -177,6 +204,21 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
       } else {
         onClose()
       }
+    } catch (err) {
+      setError((err as Error).message || t('addTask.errorFail'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  // 从 TorrentFilePicker 拿到选定文件后真正下单
+  const handleTorrentConfirm = async (selectedIndices: number[]) => {
+    if (!torrentPreview) return
+    setSubmitting(true)
+    setError('')
+    try {
+      await addTask(buildReq(url.trim(), selectedIndices))
+      onClose()
     } catch (err) {
       setError((err as Error).message || t('addTask.errorFail'))
     } finally {
@@ -247,6 +289,31 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
             <div style={{ height: 2, background: 'linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899)', flexShrink: 0 }} />
 
             <div style={{ padding: '20px 24px 24px', overflow: 'auto', flex: 1 }}>
+              {/* BT 文件选择步骤（preview 拿到后切换到此视图） */}
+              {torrentPreview ? (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>选择要下载的文件</div>
+                    <button
+                      onClick={() => setTorrentPreview(null)}
+                      style={{ fontSize: 12, padding: '5px 10px', background: 'transparent', border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-secondary)', cursor: 'pointer' }}
+                    >
+                      ← 返回修改
+                    </button>
+                  </div>
+                  <TorrentFilePicker
+                    preview={torrentPreview}
+                    submitting={submitting}
+                    onCancel={() => setTorrentPreview(null)}
+                    onConfirm={handleTorrentConfirm}
+                  />
+                  {error && (
+                    <div style={{ marginTop: 12, padding: '9px 12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 8, color: '#ef4444', fontSize: 12 }}>
+                      {error}
+                    </div>
+                  )}
+                </>
+              ) : (<>
               {/* 标题 + 模式切换 */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -513,17 +580,22 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
               )}
 
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                <button className="btn btn-ghost" onClick={onClose}>取消</button>
+                <button className="btn btn-ghost" onClick={onClose}>{t('addTask.cancel')}</button>
                 <button
                   className="btn btn-primary"
                   onClick={handleSubmit}
-                  disabled={submitting || !url.trim()}
+                  disabled={submitting || previewing || !url.trim()}
                   style={{ minWidth: 100, position: 'relative', boxShadow: '0 0 16px rgba(99,102,241,0.35)' }}
                 >
-                  {submitting ? (
+                  {previewing ? (
                     <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                       <span style={{ width: 12, height: 12, borderRadius: '50%', border: '1.5px solid rgba(255,255,255,0.3)', borderTopColor: 'white', animation: 'spin 0.7s linear infinite' }} />
-                      添加中...
+                      正在解析种子...
+                    </span>
+                  ) : submitting ? (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <span style={{ width: 12, height: 12, borderRadius: '50%', border: '1.5px solid rgba(255,255,255,0.3)', borderTopColor: 'white', animation: 'spin 0.7s linear infinite' }} />
+                      {t('addTask.submitting')}
                     </span>
                   ) : (
                     <>
@@ -537,6 +609,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                   )}
                 </button>
               </div>
+              </>)}
             </div>
           </motion.div>
         </>

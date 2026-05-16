@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -197,6 +198,7 @@ func (h *Handlers) AddTask(w http.ResponseWriter, r *http.Request) {
 		Tags:           req.Tags,
 		ExpectedSHA256: req.ExpectedSHA256,
 		ExpectedMD5:    req.ExpectedMD5,
+		SelectedFiles:  req.SelectedFiles,
 	}, taskType)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, fmt.Sprintf("add task failed: %v", err))
@@ -461,6 +463,36 @@ func (h *Handlers) TasksEvents(w http.ResponseWriter, r *http.Request) {
 			flusher.Flush()
 		}
 	}
+}
+
+// PreviewTorrent POST /torrent/preview
+// body: { url: "magnet:..." 或 .torrent URL/路径 }
+// 返回 TorrentPreview，让前端选完文件后再走 POST /tasks
+func (h *Handlers) PreviewTorrent(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		URL string `json:"url"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, fmt.Sprintf("invalid body: %v", err))
+		return
+	}
+	if req.URL == "" {
+		writeError(w, http.StatusBadRequest, "url is required")
+		return
+	}
+
+	h.cfgMu.RLock()
+	cfg := h.cfg
+	h.cfgMu.RUnlock()
+
+	ctx, cancel := context.WithTimeout(r.Context(), 100*time.Second)
+	defer cancel()
+	preview, err := downloader.PreviewTorrent(ctx, req.URL, cfg)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, fmt.Sprintf("preview failed: %v", err))
+		return
+	}
+	writeJSON(w, http.StatusOK, preview)
 }
 
 // GetSystemProxy GET /system-proxy
