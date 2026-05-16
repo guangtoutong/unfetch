@@ -11,10 +11,10 @@ const title = pageTitle ? `${pageTitle} · unfetch` : s.meta.title
 
 const currentPath = Astro.url.pathname
 function langHref(code: string): string {
-  // 把 /xx/... 或 /... 路径替换前缀
   const stripped = currentPath.replace(/^\/(zh|ja|ko|de|fr|es|pt|it|pl|nl|tr|sv|uk)(\/|$)/, '/')
   return code === 'en' ? stripped : `/${code}${stripped === '/' ? '' : stripped}`
 }
+const currentLang = LANGS.find((l) => l.code === lang) || LANGS[0]
 ---
 <!doctype html>
 <html lang={lang}>
@@ -32,16 +32,30 @@ function langHref(code: string): string {
       --muted: #94a3b8;
       --primary: #8b5cf6;
       --accent: #fbbf24;
+      --border: rgba(255,255,255,0.1);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.5; }
     a { color: var(--primary); text-decoration: none; }
     a:hover { color: #a78bfa; }
     .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    .lang-btn { display: flex; align-items: center; gap: 4px; padding: 6px 10px; background: transparent; border: 1px solid transparent; border-radius: 6px; cursor: pointer; color: var(--muted); font: inherit; font-size: 13px; }
+    .lang-btn:hover { background: rgba(255,255,255,0.05); color: var(--fg); }
+    .lang-menu { position: absolute; right: 0; top: 36px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px; padding: 4px; min-width: 170px; z-index: 100; max-height: 360px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; }
+    .lang-menu.open { display: block; }
+    .lang-menu a { display: block; padding: 7px 10px; border-radius: 5px; color: var(--fg); font-size: 13px; transition: background 0.15s; }
+    .lang-menu a:hover { background: rgba(99,102,241,0.15); }
+    .lang-menu a.active { color: var(--primary); background: rgba(99,102,241,0.12); font-weight: 600; }
+
+    .stats-row { display: inline-flex; gap: 12px; margin-top: 16px; font-size: 13px; color: var(--muted); align-items: center; }
+    .stats-row a { color: var(--muted); display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 14px; transition: all 0.15s; }
+    .stats-row a:hover { color: var(--fg); border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.03); }
+    .stats-row .num { font-weight: 600; color: var(--fg); font-variant-numeric: tabular-nums; }
   </style>
 </head>
 <body>
-  <header style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+  <header style="border-bottom: 1px solid var(--border);">
     <div class="container" style="display: flex; align-items: center; justify-content: space-between; padding-top: 16px; padding-bottom: 16px;">
       <a href={lang === 'en' ? '/' : `/${lang}`} style="display: flex; align-items: center; gap: 10px; color: white;">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
@@ -60,22 +74,29 @@ function langHref(code: string): string {
         </svg>
         <span style="font-weight: 700; font-size: 18px; letter-spacing: -0.5px;">unfetch</span>
       </a>
-      <nav style="display: flex; align-items: center; gap: 20px; font-size: 14px;">
+      <nav style="display: flex; align-items: center; gap: 16px; font-size: 14px;">
         <a href={lang === 'en' ? '/' : `/${lang}`} style="color: var(--muted);">{s.nav.home}</a>
         <a href={lang === 'en' ? '/mcp' : `/${lang}/mcp`} style="color: var(--muted);">{s.nav.mcp}</a>
         <a href="https://github.com/guangtoutong/unfetch" style="color: var(--muted);" target="_blank" rel="noreferrer">{s.nav.github}</a>
-        <details style="position: relative;">
-          <summary style="cursor: pointer; color: var(--muted); list-style: none; padding: 4px 8px; border-radius: 6px;">
-            🌐 {LANGS.find((l) => l.code === lang)?.native || 'English'} ▾
-          </summary>
-          <div style="position: absolute; right: 0; top: 28px; background: var(--bg-2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 4px; min-width: 160px; z-index: 100; max-height: 360px; overflow-y: auto;">
+
+        <div id="lang-wrap" style="position: relative;">
+          <button class="lang-btn" id="lang-btn" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+            <span>{currentLang.native}</span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="lang-menu" id="lang-menu">
             {LANGS.map((l) => (
-              <a href={langHref(l.code)} style={`display: block; padding: 6px 10px; border-radius: 5px; color: ${l.code === lang ? 'var(--primary)' : 'var(--fg)'}; font-size: 12px;`}>
+              <a href={langHref(l.code)} class={l.code === lang ? 'active' : ''}>
                 {l.native}
               </a>
             ))}
           </div>
-        </details>
+        </div>
       </nav>
     </div>
   </header>
@@ -84,11 +105,73 @@ function langHref(code: string): string {
     <slot />
   </main>
 
-  <footer style="border-top: 1px solid rgba(255,255,255,0.06); padding: 32px 0; margin-top: 80px;">
+  <footer style="border-top: 1px solid var(--border); padding: 32px 0; margin-top: 80px;">
     <div class="container" style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted);">
       <span>{s.footer.copy}</span>
       <span><a href="https://github.com/guangtoutong/unfetch/blob/master/LICENSE">{s.footer.license}</a></span>
     </div>
   </footer>
+
+  <script is:inline>
+    // 语言切换器开关
+    (function () {
+      const btn = document.getElementById('lang-btn')
+      const menu = document.getElementById('lang-menu')
+      if (!btn || !menu) return
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation()
+        menu.classList.toggle('open')
+      })
+      document.addEventListener('click', (e) => {
+        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+          menu.classList.remove('open')
+        }
+      })
+    })()
+
+    // GitHub stars + 总下载量，每页加载拉一次，localStorage 缓存 30 分钟
+    (function () {
+      const KEY = 'unfetch.gh.stats'
+      const TTL = 30 * 60 * 1000
+      const starEl = document.getElementById('gh-stars')
+      const dlEl = document.getElementById('gh-downloads')
+      if (!starEl || !dlEl) return
+
+      function render(stars, downloads) {
+        starEl.textContent = formatCount(stars)
+        dlEl.textContent = formatCount(downloads)
+      }
+      function formatCount(n) {
+        if (typeof n !== 'number') return '—'
+        if (n >= 10000) return (n / 1000).toFixed(1) + 'k'
+        if (n >= 1000) return (n / 1000).toFixed(1) + 'k'
+        return String(n)
+      }
+      try {
+        const cached = JSON.parse(localStorage.getItem(KEY) || 'null')
+        if (cached && Date.now() - cached.t < TTL) {
+          render(cached.stars, cached.downloads)
+          return
+        }
+      } catch {}
+
+      Promise.all([
+        fetch('https://api.github.com/repos/guangtoutong/unfetch').then(r => r.json()),
+        fetch('https://api.github.com/repos/guangtoutong/unfetch/releases').then(r => r.json()),
+      ]).then(([repo, releases]) => {
+        const stars = repo.stargazers_count || 0
+        let downloads = 0
+        if (Array.isArray(releases)) {
+          for (const rel of releases) {
+            for (const asset of rel.assets || []) {
+              downloads += asset.download_count || 0
+            }
+          }
+        }
+        render(stars, downloads)
+        try { localStorage.setItem(KEY, JSON.stringify({ stars, downloads, t: Date.now() })) } catch {}
+      }).catch(() => {})
+    })()
+  </script>
 </body>
 </html>
