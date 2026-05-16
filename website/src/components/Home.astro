@@ -17,14 +17,14 @@ const mcpHref = lang === 'en' ? '/mcp' : `/${lang}/mcp`
       {s.hero.subtitle}
     </p>
     <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-      <a href="https://github.com/guangtoutong/unfetch/releases/latest"
+      <a id="download-cta" href="https://github.com/guangtoutong/unfetch/releases/latest" data-default-label={s.hero.download}
          style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 8px 24px rgba(99,102,241,0.4);">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
           <polyline points="8 17 12 21 16 17" />
           <line x1="12" y1="12" x2="12" y2="21" />
           <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" />
         </svg>
-        {s.hero.download}
+        <span id="download-cta-label">{s.hero.download}</span>
       </a>
       <a href={mcpHref}
          style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.15); color: white; border-radius: 10px; font-weight: 600; font-size: 15px;">

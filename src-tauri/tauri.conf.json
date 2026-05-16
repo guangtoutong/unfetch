@@ -21,10 +21,9 @@
         "resizable": true,
         "decorations": false,
         "transparent": false,
-        "dragDropEnabled": false,
+        "dragDropEnabled": true,
         "backgroundColor": "#070710",
-        "visible": true,
-        "dragDropEnabled": true
+        "visible": true
       },
       {
         "label": "mini",
@@ -52,7 +51,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis"],
+    "targets": ["nsis", "app", "dmg", "deb", "rpm", "appimage"],
     "externalBin": ["binaries/unfetch-daemon"],
     "resources": {
       "binaries/": "binaries/"
@@ -62,6 +61,7 @@
         "ext": ["torrent"],
         "name": "BitTorrent File",
         "description": "BitTorrent metadata file",
+        "mimeType": "application/x-bittorrent",
         "role": "Editor"
       }
     ],

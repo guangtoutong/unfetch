@@ -51,9 +51,9 @@ const en: Strings = {
     tag: 'Free · Open Source · No ads',
     title: 'Downloads built for humans and AI',
     subtitle: 'Fast HTTP downloads, BT, 1000+ video sites — all in one app. Drive it by hand, by CLI, or by AI through MCP.',
-    download: 'Download for Windows',
+    download: 'Download',
     mcp: 'Use with AI (MCP)',
-    requirements: 'Windows 10 / 11 · 64-bit · 8 MB installer',
+    requirements: 'Windows 10+ · macOS 11+ · Linux x64 · ~8 MB',
   },
   features: {
     title: 'Everything a download manager should be',
@@ -80,9 +80,9 @@ const zh: Strings = {
     tag: '免费 · 开源 · 无广告',
     title: '为人和 AI 设计的下载工具',
     subtitle: '多线程 HTTP、BT 磁力、1000+ 视频网站，一个 app 全搞定。GUI、CLI、AI 都能驱动它。',
-    download: '下载 Windows 版',
+    download: '立即下载',
     mcp: '在 AI 里使用 (MCP)',
-    requirements: 'Windows 10 / 11 · 64 位 · 8 MB 安装包',
+    requirements: 'Windows 10+ · macOS 11+ · Linux x64 · 约 8 MB',
   },
   features: {
     title: '下载管理器该有的样子',

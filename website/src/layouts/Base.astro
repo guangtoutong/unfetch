@@ -129,6 +129,44 @@ const currentLang = LANGS.find((l) => l.code === lang) || LANGS[0]
       })
     })()
 
+    // 下载按钮 OS 探测：根据 navigator 信息把链接换成对应平台的最新 asset
+    (function () {
+      const btn = document.getElementById('download-cta')
+      const label = document.getElementById('download-cta-label')
+      if (!btn) return
+      const ua = navigator.userAgent || ''
+      const platform = (navigator.platform || '').toLowerCase()
+      const REPO = 'guangtoutong/unfetch'
+      const LATEST = 'https://github.com/' + REPO + '/releases/latest/download/'
+      // 探测 OS / arch
+      let osLabel = 'Windows'
+      let assetPattern = /x64-setup\.exe$/i
+      if (/Mac|iPhone|iPad/i.test(ua) || platform.includes('mac')) {
+        const isAS = /arm|aarch64/i.test(ua) || /AppleWebKit.*Macintosh.*arm/i.test(ua)
+        osLabel = isAS ? 'macOS (Apple Silicon)' : 'macOS (Intel)'
+        assetPattern = isAS ? /aarch64\.dmg$/i : /x64\.dmg$/i
+      } else if (/Linux|X11/i.test(ua)) {
+        osLabel = 'Linux'
+        assetPattern = /\.AppImage$/i
+      }
+      // 把 OS 标签贴到按钮上
+      if (label) {
+        const base = (label.textContent || '').trim()
+        label.textContent = base + ' · ' + osLabel
+      }
+      // 查询最新 release 找具体 asset URL
+      fetch('https://api.github.com/repos/' + REPO + '/releases/latest')
+        .then((r) => r.json())
+        .then((data) => {
+          const assets = Array.isArray(data?.assets) ? data.assets : []
+          const match = assets.find((a) => assetPattern.test(a.name || ''))
+          if (match && match.browser_download_url) {
+            btn.href = match.browser_download_url
+          }
+        })
+        .catch(() => {})
+    })()
+
     // GitHub stars + 总下载量，每页加载拉一次，localStorage 缓存 30 分钟
     (function () {
       const KEY = 'unfetch.gh.stats'

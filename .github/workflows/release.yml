@@ -1,0 +1,158 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '版本号 (eg. v0.1.0)，留空则只构建不创建 release'
+        required: false
+        default: ''
+
+jobs:
+  build:
+    name: Build ${{ matrix.os_label }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            os_label: Windows x64
+            target: x86_64-pc-windows-msvc
+            sidecar_ext: .exe
+            goos: windows
+            goarch: amd64
+          - os: macos-14
+            os_label: macOS Apple Silicon
+            target: aarch64-apple-darwin
+            sidecar_ext: ''
+            goos: darwin
+            goarch: arm64
+          - os: macos-13
+            os_label: macOS Intel
+            target: x86_64-apple-darwin
+            sidecar_ext: ''
+            goos: darwin
+            goarch: amd64
+          - os: ubuntu-22.04
+            os_label: Linux x64
+            target: x86_64-unknown-linux-gnu
+            sidecar_ext: ''
+            goos: linux
+            goarch: amd64
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache-dependency-path: core/go.sum
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Linux build deps
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            libsoup-3.0-dev \
+            libjavascriptcoregtk-4.1-dev
+
+      - name: Install JS deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Go daemon (${{ matrix.goos }}/${{ matrix.goarch }})
+        working-directory: core
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: '0'
+        shell: bash
+        run: |
+          # Windows 需要 -H windowsgui 隐藏控制台；其他平台不需要
+          if [ "$GOOS" = "windows" ]; then
+            go build -ldflags="-H windowsgui -s -w" -o ../src-tauri/binaries/unfetch-daemon-${{ matrix.target }}${{ matrix.sidecar_ext }} .
+          else
+            go build -ldflags="-s -w" -o ../src-tauri/binaries/unfetch-daemon-${{ matrix.target }}${{ matrix.sidecar_ext }} .
+            chmod +x ../src-tauri/binaries/unfetch-daemon-${{ matrix.target }}${{ matrix.sidecar_ext }}
+          fi
+
+      - name: Build Tauri
+        # macOS 暂不签名也不公证（用户在另一台机器做）
+        env:
+          # 跳过 macOS 自动签名
+          APPLE_SIGNING_IDENTITY: ''
+        run: pnpm tauri build --target ${{ matrix.target }}
+
+      - name: List bundle output (debug)
+        shell: bash
+        run: |
+          ls -laR src-tauri/target/${{ matrix.target }}/release/bundle/ || true
+
+      - name: Upload bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: unfetch-${{ matrix.target }}
+          path: |
+            src-tauri/target/${{ matrix.target }}/release/bundle/**/*.exe
+            src-tauri/target/${{ matrix.target }}/release/bundle/**/*.msi
+            src-tauri/target/${{ matrix.target }}/release/bundle/**/*.dmg
+            src-tauri/target/${{ matrix.target }}/release/bundle/**/*.app.tar.gz
+            src-tauri/target/${{ matrix.target }}/release/bundle/**/*.deb
+            src-tauri/target/${{ matrix.target }}/release/bundle/**/*.rpm
+            src-tauri/target/${{ matrix.target }}/release/bundle/**/*.AppImage
+          if-no-files-found: warn
+          retention-days: 7
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Flatten artifacts
+        run: |
+          mkdir -p release
+          find artifacts -type f \( -name '*.exe' -o -name '*.msi' -o -name '*.dmg' -o -name '*.app.tar.gz' -o -name '*.deb' -o -name '*.rpm' -o -name '*.AppImage' \) -exec cp {} release/ \;
+          ls -la release/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          generate_release_notes: true
+          fail_on_unmatched_files: false
