@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useTaskStore } from '../stores/taskStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { detectUrlType } from '../lib/format'
 import type { AddTaskRequest } from '../types'
 
-const qualityOptions = [
-  { value: 'best', label: '最佳画质' },
-  { value: '1080p', label: '1080p' },
-  { value: '720p', label: '720p' },
-  { value: '480p', label: '480p' },
-  { value: 'audio', label: '仅音频' },
+const qualityKeys = [
+  { value: 'best', labelKey: 'quality.best' },
+  { value: '1080p', labelKey: 'quality.1080p' },
+  { value: '720p', labelKey: 'quality.720p' },
+  { value: '480p', labelKey: 'quality.480p' },
+  { value: 'audio', labelKey: 'quality.audio' },
 ]
 
 const UrlTypeIcon: React.FC<{ type: string }> = ({ type }) => {
@@ -55,6 +56,7 @@ function parseUrls(input: string): string[] {
 export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) => {
   const { addTask } = useTaskStore()
   const { config } = useSettingsStore()
+  const { t } = useTranslation()
 
   const [url, setUrl] = useState('')
   const [batchMode, setBatchMode] = useState(false)
@@ -132,7 +134,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
   const handleSubmit = async () => {
     const urls = batchMode ? parseUrls(url) : (url.trim() ? [url.trim()] : [])
     if (urls.length === 0) {
-      setError(batchMode ? '请粘贴至少一个 URL（每行一个）' : '请输入下载地址')
+      setError(batchMode ? t('addTask.errorEmptyBatch') : t('addTask.errorEmpty'))
       return
     }
 
@@ -171,12 +173,12 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
         }
       }
       if (succeeded === 0) {
-        setError('添加失败，请检查地址')
+        setError(t('addTask.errorFail'))
       } else {
         onClose()
       }
     } catch (err) {
-      setError((err as Error).message || '添加失败')
+      setError((err as Error).message || t('addTask.errorFail'))
     } finally {
       setSubmitting(false)
     }
@@ -191,9 +193,9 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
   }
 
   const urlTypeLabels: Record<string, string> = {
-    http: 'HTTP 下载',
-    bt: 'BT / 磁力链接',
-    ytdlp: '视频网站',
+    http: t('urlType.http'),
+    bt: t('urlType.bt'),
+    ytdlp: t('urlType.ytdlp'),
   }
 
   // 批量解析预览
@@ -264,7 +266,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                   {/* 批量开关 */}
                   <button
                     onClick={() => { setBatchMode(!batchMode); setUrl('') }}
-                    title={batchMode ? '切换到单 URL 模式' : '切换到批量模式（每行一个 URL）'}
+                    title={t('addTask.batchToggle')}
                     style={{
                       height: 28,
                       padding: '0 10px',
@@ -322,7 +324,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                     <input
                       ref={urlInputRef}
                       type="text"
-                      placeholder="粘贴 URL、磁力链接或视频网页地址..."
+                      placeholder={t('addTask.urlPlaceholder')}
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
@@ -350,7 +352,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                     画质选择
                   </label>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {qualityOptions.map((opt) => (
+                    {qualityKeys.map((opt) => (
                       <button
                         key={opt.value}
                         onClick={() => setQuality(opt.value)}
@@ -365,7 +367,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                           fontWeight: quality === opt.value ? 600 : 400,
                         }}
                       >
-                        {opt.label}
+                        {t(opt.labelKey)}
                       </button>
                     ))}
                   </div>
@@ -392,7 +394,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }}>
                       <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
                     </svg>
-                    <input type="text" placeholder={config.download_dir || '使用默认目录'} value={saveDir} onChange={(e) => setSaveDir(e.target.value)} className="input-base" style={{ paddingLeft: 30 }} />
+                    <input type="text" placeholder={config.download_dir || t('addTask.saveDirPlaceholder')} value={saveDir} onChange={(e) => setSaveDir(e.target.value)} className="input-base" style={{ paddingLeft: 30 }} />
                   </div>
                   <button onClick={handleSelectDir} className="btn btn-ghost" style={{ flexShrink: 0, height: 38 }}>浏览</button>
                 </div>
@@ -415,7 +417,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                 </div>
                 <input
                   type="text"
-                  placeholder="输入标签后回车（如 影视 / 软件 / 工作）"
+                  placeholder={t('addTask.tagsPlaceholder')}
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={(e) => {
@@ -474,15 +476,15 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                           <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>
                             校验码（下载完成后比对）
                           </label>
-                          <input type="text" placeholder="SHA-256（64 位十六进制）" value={sha256} onChange={(e) => setSha256(e.target.value)} className="input-base" style={{ marginBottom: 6, fontFamily: 'monospace', fontSize: 11 }} />
-                          <input type="text" placeholder="MD5（32 位十六进制）" value={md5} onChange={(e) => setMd5(e.target.value)} className="input-base" style={{ fontFamily: 'monospace', fontSize: 11 }} />
+                          <input type="text" placeholder={t('addTask.sha256Placeholder')} value={sha256} onChange={(e) => setSha256(e.target.value)} className="input-base" style={{ marginBottom: 6, fontFamily: 'monospace', fontSize: 11 }} />
+                          <input type="text" placeholder={t('addTask.md5Placeholder')} value={md5} onChange={(e) => setMd5(e.target.value)} className="input-base" style={{ fontFamily: 'monospace', fontSize: 11 }} />
                         </div>
 
                         {/* Cookie */}
                         {urlType === 'ytdlp' && (
                           <div>
                             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>Cookie（Netscape 格式）</label>
-                            <textarea placeholder="粘贴 Cookie 内容..." value={cookies} onChange={(e) => setCookies(e.target.value)} className="input-base" style={{ height: 72, resize: 'vertical', fontFamily: 'monospace', fontSize: 11 }} />
+                            <textarea placeholder={t('addTask.cookiesPlaceholder')} value={cookies} onChange={(e) => setCookies(e.target.value)} className="input-base" style={{ height: 72, resize: 'vertical', fontFamily: 'monospace', fontSize: 11 }} />
                           </div>
                         )}
 
@@ -530,7 +532,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                         <line x1="12" y1="12" x2="12" y2="21" />
                         <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" />
                       </svg>
-                      {batchMode && parsedBatch.length > 1 ? `开始下载 (${parsedBatch.length})` : '开始下载'}
+                      {batchMode && parsedBatch.length > 1 ? t('addTask.submitBatch', { count: parsedBatch.length }) : t('addTask.submit')}
                     </>
                   )}
                 </button>
