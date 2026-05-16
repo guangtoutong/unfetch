@@ -35,7 +35,7 @@ jobs:
             sidecar_ext: ''
             goos: darwin
             goarch: amd64
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             os_label: Linux x64
             target: x86_64-unknown-linux-gnu
             sidecar_ext: ''
@@ -74,17 +74,19 @@ jobs:
           cache: 'pnpm'
 
       - name: Linux build deps
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-24.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             libwebkit2gtk-4.1-dev \
-            libappindicator3-dev \
+            libayatana-appindicator3-dev \
             librsvg2-dev \
             patchelf \
             libssl-dev \
             libsoup-3.0-dev \
-            libjavascriptcoregtk-4.1-dev
+            libjavascriptcoregtk-4.1-dev \
+            libxdo-dev \
+            file
 
       - name: Install JS deps
         run: pnpm install --frozen-lockfile
