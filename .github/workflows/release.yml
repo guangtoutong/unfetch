@@ -108,10 +108,9 @@ jobs:
           fi
 
       - name: Build Tauri
-        # macOS 暂不签名也不公证（用户在另一台机器做）
+        # macOS 暂用 ad-hoc 签名（- 表示无真实证书，绕开 keychain 查找），公证在用户另一台机器做
         env:
-          # 跳过 macOS 自动签名
-          APPLE_SIGNING_IDENTITY: ''
+          APPLE_SIGNING_IDENTITY: '-'
         run: pnpm tauri build --target ${{ matrix.target }}
 
       - name: List bundle output (debug)
