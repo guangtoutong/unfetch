@@ -62,6 +62,21 @@ pub enum Commands {
     /// 恢复任务
     Resume { id: String },
 
+    /// 阻塞等待任务完成或失败，期间打印进度
+    Wait {
+        id: String,
+        /// 最长等待秒数（默认 1800）
+        #[arg(long, default_value = "1800")]
+        timeout: u64,
+    },
+
+    /// 等所有未完成任务全部跑完
+    WaitAll {
+        /// 最长等待秒数（默认 3600）
+        #[arg(long, default_value = "3600")]
+        timeout: u64,
+    },
+
     /// 删除任务
     Remove {
         id: String,
@@ -169,6 +184,85 @@ fn _run(cli: Cli) -> Result<i32> {
             ensure_daemon()?;
             let resp = patch(&format!("/tasks/{id}/resume"))?;
             print_json(&resp);
+        }
+
+        Commands::Wait { id, timeout } => {
+            ensure_daemon()?;
+            let started = std::time::Instant::now();
+            let deadline = started + std::time::Duration::from_secs(timeout);
+            let mut last_pct: f64 = -1.0;
+            loop {
+                let task = get(&format!("/tasks/{id}"))?;
+                if task.get("error").is_some() {
+                    println!("{}", serde_json::to_string_pretty(&task)?);
+                    return Ok(1);
+                }
+                let status = task["status"].as_str().unwrap_or("");
+                let total = task["total_bytes"].as_i64().unwrap_or(0);
+                let done = task["done_bytes"].as_i64().unwrap_or(0);
+                let speed = task["speed"].as_i64().unwrap_or(0);
+                let pct = if total > 0 { (done as f64) / (total as f64) * 100.0 } else { 0.0 };
+
+                if (pct - last_pct).abs() >= 0.1 || status != "downloading" {
+                    if total > 0 {
+                        eprint!("\r[{status:>11}] {pct:5.1}%  {}/s   ", human_bytes(speed));
+                    } else {
+                        eprint!("\r[{status:>11}] {}/s   ", human_bytes(speed));
+                    }
+                    use std::io::Write;
+                    let _ = std::io::stderr().flush();
+                    last_pct = pct;
+                }
+
+                match status {
+                    "done" => {
+                        eprintln!();
+                        print_json(&task);
+                        return Ok(0);
+                    }
+                    "error" => {
+                        eprintln!();
+                        print_json(&task);
+                        return Ok(2);
+                    }
+                    _ => {}
+                }
+                if std::time::Instant::now() >= deadline {
+                    eprintln!("\n超时");
+                    return Ok(124);
+                }
+                std::thread::sleep(std::time::Duration::from_millis(800));
+            }
+        }
+
+        Commands::WaitAll { timeout } => {
+            ensure_daemon()?;
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(timeout);
+            loop {
+                let tasks_v = get("/tasks")?;
+                let tasks = tasks_v.as_array().cloned().unwrap_or_default();
+                let active: Vec<&Value> = tasks.iter().filter(|t| {
+                    !t["trashed"].as_bool().unwrap_or(false)
+                        && matches!(t["status"].as_str().unwrap_or(""), "queued" | "downloading" | "paused")
+                }).collect();
+                let total = tasks.len();
+                let done = total.saturating_sub(active.len());
+                eprint!("\r[{done}/{total}] active={}   ", active.len());
+                use std::io::Write;
+                let _ = std::io::stderr().flush();
+
+                if active.is_empty() {
+                    eprintln!();
+                    println!("{{\"tasks\":{},\"finished\":true}}", total);
+                    return Ok(0);
+                }
+                if std::time::Instant::now() >= deadline {
+                    eprintln!("\n超时");
+                    println!("{{\"tasks\":{},\"finished\":false,\"active\":{}}}", total, active.len());
+                    return Ok(124);
+                }
+                std::thread::sleep(std::time::Duration::from_secs(1));
+            }
         }
 
         Commands::Remove { id, delete_file } => {
@@ -298,4 +392,17 @@ fn delete(path: &str) -> Result<()> {
 
 fn print_json(v: &Value) {
     println!("{}", serde_json::to_string_pretty(v).unwrap_or_default());
+}
+
+fn human_bytes(b: i64) -> String {
+    let f = b.max(0) as f64;
+    if f >= 1024.0 * 1024.0 * 1024.0 {
+        format!("{:.2} GB", f / 1024.0 / 1024.0 / 1024.0)
+    } else if f >= 1024.0 * 1024.0 {
+        format!("{:.2} MB", f / 1024.0 / 1024.0)
+    } else if f >= 1024.0 {
+        format!("{:.1} KB", f / 1024.0)
+    } else {
+        format!("{} B", b)
+    }
 }
