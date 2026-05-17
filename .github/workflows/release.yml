@@ -79,6 +79,15 @@ jobs:
       - name: Install JS deps
         run: pnpm install --frozen-lockfile
 
+      - name: Build frontend (embed into daemon)
+        shell: bash
+        run: |
+          pnpm build
+          mkdir -p core/web/dist
+          # 清掉 core/web/dist 旧内容（保留 .gitkeep），再拷贝
+          find core/web/dist -mindepth 1 ! -name '.gitkeep' -delete
+          cp -r dist/. core/web/dist/
+
       - name: Build Go daemon (${{ matrix.goos }}/${{ matrix.goarch }})
         working-directory: core
         env:
