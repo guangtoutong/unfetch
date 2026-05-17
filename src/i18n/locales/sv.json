@@ -1,57 +1,200 @@
 {
-  "app": { "name": "unfetch", "tagline": "En nedladdningshanterare för människor och AI" },
-  "titlebar": { "settings": "Inställningar", "miniMode": "Växla till minifönster", "minimize": "Minimera", "maximize": "Maximera", "close": "Stäng" },
-  "sidebar": { "section": "Filter", "all": "Alla", "downloading": "Aktiva", "done": "Klara", "error": "Misslyckade", "trash": "Papperskorg" },
-  "toolbar": {
-    "title": { "all": "Alla uppgifter", "downloading": "Aktiva (inkl. pausade / i kö)", "paused": "Pausade", "done": "Klara", "error": "Misslyckade uppgifter", "queued": "I kö", "trash": "Papperskorg" },
-    "search": "Sök uppgifter...", "addTask": "Lägg till", "pauseAll": "Pausa alla", "resumeAll": "Starta alla", "restoreAll": "Återställ alla", "emptyTrash": "Töm papperskorgen", "confirmEmpty": "Bekräfta"
+  "app": {
+    "name": "unfetch",
+    "tagline": "En nedladdningshanterare för människor och AI"
   },
-  "status": { "queued": "I kö", "downloading": "Laddar ner", "paused": "Pausad", "done": "Klar", "error": "Misslyckad" },
+  "titlebar": {
+    "settings": "Inställningar",
+    "miniMode": "Växla till minifönster",
+    "minimize": "Minimera",
+    "maximize": "Maximera",
+    "close": "Stäng"
+  },
+  "sidebar": {
+    "section": "Filter",
+    "all": "Alla",
+    "downloading": "Aktiva",
+    "done": "Klara",
+    "error": "Misslyckade",
+    "trash": "Papperskorg"
+  },
+  "toolbar": {
+    "title": {
+      "all": "Alla uppgifter",
+      "downloading": "Aktiva (inkl. pausade / i kö)",
+      "paused": "Pausade",
+      "done": "Klara",
+      "error": "Misslyckade uppgifter",
+      "queued": "I kö",
+      "trash": "Papperskorg"
+    },
+    "search": "Sök uppgifter...",
+    "addTask": "Lägg till",
+    "pauseAll": "Pausa alla",
+    "resumeAll": "Starta alla",
+    "restoreAll": "Återställ alla",
+    "emptyTrash": "Töm papperskorgen",
+    "confirmEmpty": "Bekräfta"
+  },
+  "status": {
+    "queued": "I kö",
+    "downloading": "Laddar ner",
+    "paused": "Pausad",
+    "done": "Klar",
+    "error": "Misslyckad"
+  },
   "task": {
-    "pause": "Paus", "resume": "Återuppta", "retry": "Försök igen", "openFolder": "Öppna mapp", "playInUnflick": "Spela i Unflick", "copyUrl": "Kopiera URL",
-    "trash": "Flytta till papperskorg", "restore": "Återställ", "hardDelete": "Ta bort permanent (inkl. fil)", "delete": "Ta bort", "confirmDelete": "Bekräfta borttagning",
-    "retryBadge": "Försök {{count}}", "remaining": "{{time}} kvar", "waitingToStart": "Väntar på start...", "errorPrefix": "Fel: ", "speed": "{{value}}/s"
+    "pause": "Paus",
+    "resume": "Återuppta",
+    "retry": "Försök igen",
+    "openFolder": "Öppna mapp",
+    "playInUnflick": "Spela i Unflick",
+    "copyUrl": "Kopiera URL",
+    "trash": "Flytta till papperskorg",
+    "restore": "Återställ",
+    "hardDelete": "Ta bort permanent (inkl. fil)",
+    "delete": "Ta bort",
+    "confirmDelete": "Bekräfta borttagning",
+    "retryBadge": "Försök {{count}}",
+    "remaining": "{{time}} kvar",
+    "waitingToStart": "Väntar på start...",
+    "errorPrefix": "Fel: ",
+    "speed": "{{value}}/s",
+    "utp": {
+      "triggeredBadge": "uTP aktivt",
+      "triggeredTitle": "Bytte till endast uTP efter långsam start.",
+      "suggestBtn": "Prova uTP",
+      "switching": "Växlar…",
+      "suggestTitle": "Låg hastighet — ISP kan strypa BT TCP. Klicka för att slå på auto-uTP och starta om uppgiften."
+    }
   },
   "addTask": {
-    "title": "Lägg till nedladdning", "subtitle": "Stöder HTTP, BT / magnet och över 1000 videosajter", "batchToggle": "Batch", "url": "URL", "urlBatch": "URL:er (en per rad)",
+    "title": "Lägg till nedladdning",
+    "subtitle": "Stöder HTTP, BT / magnet och över 1000 videosajter",
+    "batchToggle": "Batch",
+    "url": "URL",
+    "urlBatch": "URL:er (en per rad)",
     "urlPlaceholder": "Klistra in en URL, magnetlänk eller videosida-adress...",
     "urlBatchPlaceholder": "https://example.com/file1.zip\nhttps://example.com/file2.zip\nmagnet:?xt=urn:btih:...",
-    "detectedType": "Detekterad typ: ", "willCreate": "{{count}} uppgifter skapas", "quality": "Kvalitet", "threads": "Trådar: {{count}}",
-    "saveDir": "Målmapp", "browse": "Bläddra", "saveDirPlaceholder": "Använd standardmapp", "tags": "Taggar", "tagsPlaceholder": "Skriv och tryck Enter",
-    "advanced": "Avancerade alternativ", "proxy": "Proxy", "proxyPlaceholder": "http://127.0.0.1:7890",
-    "startAt": "⏰ Schemalagd start (tomt = direkt)", "clear": "Rensa", "checksum": "Kontrollsumma (verifieras vid slutförande)",
-    "sha256Placeholder": "SHA-256 (64 hex)", "md5Placeholder": "MD5 (32 hex)",
-    "cookies": "Cookies (Netscape-format)", "cookiesPlaceholder": "Klistra in cookies...", "playAfter": "Spela i Unflick när klar",
-    "cancel": "Avbryt", "submit": "Starta nedladdning", "submitBatch": "Starta nedladdningar ({{count}})", "submitting": "Lägger till...",
-    "errorEmpty": "Ange en URL", "errorEmptyBatch": "Klistra in minst en URL (en per rad)", "errorFail": "Misslyckades, kontrollera URL"
+    "detectedType": "Detekterad typ: ",
+    "willCreate": "{{count}} uppgifter skapas",
+    "quality": "Kvalitet",
+    "threads": "Trådar: {{count}}",
+    "saveDir": "Målmapp",
+    "browse": "Bläddra",
+    "saveDirPlaceholder": "Använd standardmapp",
+    "tags": "Taggar",
+    "tagsPlaceholder": "Skriv och tryck Enter",
+    "advanced": "Avancerade alternativ",
+    "proxy": "Proxy",
+    "proxyPlaceholder": "http://127.0.0.1:7890",
+    "startAt": "⏰ Schemalagd start (tomt = direkt)",
+    "clear": "Rensa",
+    "checksum": "Kontrollsumma (verifieras vid slutförande)",
+    "sha256Placeholder": "SHA-256 (64 hex)",
+    "md5Placeholder": "MD5 (32 hex)",
+    "cookies": "Cookies (Netscape-format)",
+    "cookiesPlaceholder": "Klistra in cookies...",
+    "playAfter": "Spela i Unflick när klar",
+    "cancel": "Avbryt",
+    "submit": "Starta nedladdning",
+    "submitBatch": "Starta nedladdningar ({{count}})",
+    "submitting": "Lägger till...",
+    "errorEmpty": "Ange en URL",
+    "errorEmptyBatch": "Klistra in minst en URL (en per rad)",
+    "errorFail": "Misslyckades, kontrollera URL"
   },
-  "urlType": { "http": "HTTP-nedladdning", "bt": "BT / Magnetlänk", "ytdlp": "Videosajt" },
-  "quality": { "best": "Bästa kvalitet", "1080p": "1080p", "720p": "720p", "480p": "480p", "audio": "Endast ljud" },
+  "urlType": {
+    "http": "HTTP-nedladdning",
+    "bt": "BT / Magnetlänk",
+    "ytdlp": "Videosajt"
+  },
+  "quality": {
+    "best": "Bästa kvalitet",
+    "1080p": "1080p",
+    "720p": "720p",
+    "480p": "480p",
+    "audio": "Endast ljud"
+  },
   "settings": {
-    "title": "Inställningar", "downloadDir": "Nedladdningsmapp", "concurrency": "Samtidighet", "maxConcurrent": "Max samtidiga uppgifter", "httpThreads": "HTTP-trådar",
-    "speedLimit": "Hastighetsgräns", "globalSpeedLimit": "Global gräns", "noLimit": "Obegränsat",
-    "speedSchedule": "Tidsbegränsning", "scheduleAdd": "+ Lägg till tidsfönster",
+    "title": "Inställningar",
+    "downloadDir": "Nedladdningsmapp",
+    "concurrency": "Samtidighet",
+    "maxConcurrent": "Max samtidiga uppgifter",
+    "httpThreads": "HTTP-trådar",
+    "speedLimit": "Hastighetsgräns",
+    "globalSpeedLimit": "Global gräns",
+    "noLimit": "Obegränsat",
+    "speedSchedule": "Tidsbegränsning",
+    "scheduleAdd": "+ Lägg till tidsfönster",
     "scheduleEmpty": "Inga tidsfönster ännu. Klicka på \"Lägg till\" nedan för att sätta gränser per tidsfönster.",
     "scheduleHint": "Högre prioritet än global gräns. Annars används den globala.",
-    "proxy": "Nätverksproxy", "systemProxy": "Använd systemproxy", "proxyOverride": "Manuellt (åsidosätter systemproxy)",
-    "player": "Spelarintegration", "autoPlayUnflick": "Spela i Unflick när klar", "autoPlayHint": "Endast video / ljud",
-    "retryAndDone": "Försök igen & när klar", "autoRetry": "Automatiska försök", "autoRetryHint": "Intervall 1m / 3m / 10m, max 3",
+    "proxy": "Nätverksproxy",
+    "systemProxy": "Använd systemproxy",
+    "proxyOverride": "Manuellt (åsidosätter systemproxy)",
+    "player": "Spelarintegration",
+    "autoPlayUnflick": "Spela i Unflick när klar",
+    "autoPlayHint": "Endast video / ljud",
+    "retryAndDone": "Försök igen & när klar",
+    "autoRetry": "Automatiska försök",
+    "autoRetryHint": "Intervall 1m / 3m / 10m, max 3",
     "onAllDone": "Åtgärd när allt är klart",
-    "onAllDoneOptions": { "none": "Gör inget", "notify": "Visa avisering", "open_dir": "Öppna mapp", "sleep": "Vila", "shutdown": "Stäng av (30s)" },
+    "onAllDoneOptions": {
+      "none": "Gör inget",
+      "notify": "Visa avisering",
+      "open_dir": "Öppna mapp",
+      "sleep": "Vila",
+      "shutdown": "Stäng av (30s)"
+    },
     "onAllDoneHint": "Återställs till \"Gör inget\" efter körning",
-    "system": "Start & system", "autostart": "Starta vid inloggning", "autostartHint": "Tyst start i bakgrunden efter inloggning",
-    "minimizeToTray": "Minimera till systemfält vid stängning", "minimizeToTrayHint": "Nedladdningar fortsätter i bakgrunden",
-    "clipboardSniff": "Övervaka urklipp", "clipboardSniffHint": "Föreslå nedladdning när URL / magnet kopieras",
-    "language": "Språk"
+    "system": "Start & system",
+    "autostart": "Starta vid inloggning",
+    "autostartHint": "Tyst start i bakgrunden efter inloggning",
+    "minimizeToTray": "Minimera till systemfält vid stängning",
+    "minimizeToTrayHint": "Nedladdningar fortsätter i bakgrunden",
+    "clipboardSniff": "Övervaka urklipp",
+    "clipboardSniffHint": "Föreslå nedladdning när URL / magnet kopieras",
+    "language": "Språk",
+    "theme": "Tema",
+    "btOptim": "BT-optimering",
+    "forceUTP": "Tvinga uTP (TCP av)",
+    "forceUTPHint": "Vissa ISP:er blockerar BT-TCP-portar; byte till uTP (UDP) kan återställa anslutningar men begränsar vissa peer-källor.",
+    "autoUtpFallback": "Automatisk uTP-växling",
+    "autoUtpFallbackHint": "Växlar till endast uTP efter 30 s om hastigheten stannar under 100 KB/s. Bra mot ISP-strypning av BT."
   },
-  "statusBar": { "connected": "Ansluten", "disconnected": "Frånkopplad", "totalSpeed": "Totalt" },
-  "tray": { "show": "Visa huvudfönster", "toggleMini": "Växla mini", "pauseAll": "Pausa alla", "resumeAll": "Återuppta alla", "quit": "Avsluta" },
-  "clipboard": { "detected": "Nedladdningslänk hittad", "download": "Ladda ner", "dismiss": "Avfärda" },
-  "drop": { "release": "Släpp för att ladda ner", "supports": "Stöder .torrent / URL-länkar" },
+  "statusBar": {
+    "connected": "Ansluten",
+    "disconnected": "Frånkopplad",
+    "totalSpeed": "Totalt"
+  },
+  "tray": {
+    "show": "Visa huvudfönster",
+    "toggleMini": "Växla mini",
+    "pauseAll": "Pausa alla",
+    "resumeAll": "Återuppta alla",
+    "quit": "Avsluta"
+  },
+  "clipboard": {
+    "detected": "Nedladdningslänk hittad",
+    "download": "Ladda ner",
+    "dismiss": "Avfärda"
+  },
+  "drop": {
+    "release": "Släpp för att ladda ner",
+    "supports": "Stöder .torrent / URL-länkar"
+  },
   "empty": {
-    "noTasks": "Inga nedladdningsuppgifter", "noTasksHint": "Klicka på \"Lägg till\" uppe till höger",
-    "noMatch": "Inga matchande uppgifter", "noMatchHint": "Försök med ett annat sökord",
-    "trashEmpty": "Papperskorgen är tom", "trashEmptyHint": "Borttagna uppgifter lagras tillfälligt här"
+    "noTasks": "Inga nedladdningsuppgifter",
+    "noTasksHint": "Klicka på \"Lägg till\" uppe till höger",
+    "noMatch": "Inga matchande uppgifter",
+    "noMatchHint": "Försök med ett annat sökord",
+    "trashEmpty": "Papperskorgen är tom",
+    "trashEmptyHint": "Borttagna uppgifter lagras tillfälligt här"
   },
-  "notify": { "downloadDone": "Nedladdning klar", "downloadFailed": "Nedladdning misslyckades", "allDone": "Alla nedladdningar klara", "allDoneMessage": "Alla uppgifter är klara" }
+  "notify": {
+    "downloadDone": "Nedladdning klar",
+    "downloadFailed": "Nedladdning misslyckades",
+    "allDone": "Alla nedladdningar klara",
+    "allDoneMessage": "Alla uppgifter är klara"
+  }
 }

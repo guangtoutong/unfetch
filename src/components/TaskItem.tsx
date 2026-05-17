@@ -64,6 +64,7 @@ const FileIcon: React.FC<{ filename: string; type: string }> = ({ filename, type
 // 慢速 BT 任务提示：连续 60s < 100KB/s 时显示"试试 uTP"按钮
 // 点击后开启全局 bt_auto_utp_fallback + pause/resume 当前任务以触发 fallback
 const SlowUTPHint: React.FC<{ task: Task }> = ({ task }) => {
+  const { t } = useTranslation()
   const config = useSettingsStore((s) => s.config)
   const updateConfig = useSettingsStore((s) => s.updateConfig)
   const { pauseTask, resumeTask } = useTaskStore()
@@ -123,9 +124,9 @@ const SlowUTPHint: React.FC<{ task: Task }> = ({ task }) => {
         cursor: acting ? 'wait' : 'pointer',
         letterSpacing: 0.3,
       }}
-      title="速度偏慢可能是 ISP 屏蔽了 BT 端口；点击开启自动 uTP fallback 并重启本任务"
+      title={t('task.utp.suggestTitle')}
     >
-      {acting ? '切换中…' : '试试 uTP'}
+      {acting ? t('task.utp.switching') : t('task.utp.suggestBtn')}
     </button>
   )
 }
@@ -651,9 +652,9 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
                 fontWeight: 600,
                 letterSpacing: 0.3,
               }}
-              title="速度偏慢，已自动切到 uTP-only 模式重连"
+              title={t('task.utp.triggeredTitle')}
             >
-              已切 uTP
+              {t('task.utp.triggeredBadge')}
             </span>
           )}
 

@@ -1,57 +1,200 @@
 {
-  "app": { "name": "unfetch", "tagline": "Menedżer pobierania dla ludzi i AI" },
-  "titlebar": { "settings": "Ustawienia", "miniMode": "Przełącz na mini okno", "minimize": "Minimalizuj", "maximize": "Maksymalizuj", "close": "Zamknij" },
-  "sidebar": { "section": "Filtr", "all": "Wszystko", "downloading": "Aktywne", "done": "Ukończone", "error": "Nieudane", "trash": "Kosz" },
-  "toolbar": {
-    "title": { "all": "Wszystkie zadania", "downloading": "Aktywne (w tym wstrzymane / w kolejce)", "paused": "Wstrzymane", "done": "Ukończone", "error": "Nieudane", "queued": "W kolejce", "trash": "Kosz" },
-    "search": "Szukaj zadań...", "addTask": "Dodaj zadanie", "pauseAll": "Wstrzymaj wszystkie", "resumeAll": "Wznów wszystkie", "restoreAll": "Przywróć wszystkie", "emptyTrash": "Opróżnij kosz", "confirmEmpty": "Potwierdź"
+  "app": {
+    "name": "unfetch",
+    "tagline": "Menedżer pobierania dla ludzi i AI"
   },
-  "status": { "queued": "W kolejce", "downloading": "Pobieranie", "paused": "Wstrzymane", "done": "Ukończone", "error": "Błąd" },
+  "titlebar": {
+    "settings": "Ustawienia",
+    "miniMode": "Przełącz na mini okno",
+    "minimize": "Minimalizuj",
+    "maximize": "Maksymalizuj",
+    "close": "Zamknij"
+  },
+  "sidebar": {
+    "section": "Filtr",
+    "all": "Wszystko",
+    "downloading": "Aktywne",
+    "done": "Ukończone",
+    "error": "Nieudane",
+    "trash": "Kosz"
+  },
+  "toolbar": {
+    "title": {
+      "all": "Wszystkie zadania",
+      "downloading": "Aktywne (w tym wstrzymane / w kolejce)",
+      "paused": "Wstrzymane",
+      "done": "Ukończone",
+      "error": "Nieudane",
+      "queued": "W kolejce",
+      "trash": "Kosz"
+    },
+    "search": "Szukaj zadań...",
+    "addTask": "Dodaj zadanie",
+    "pauseAll": "Wstrzymaj wszystkie",
+    "resumeAll": "Wznów wszystkie",
+    "restoreAll": "Przywróć wszystkie",
+    "emptyTrash": "Opróżnij kosz",
+    "confirmEmpty": "Potwierdź"
+  },
+  "status": {
+    "queued": "W kolejce",
+    "downloading": "Pobieranie",
+    "paused": "Wstrzymane",
+    "done": "Ukończone",
+    "error": "Błąd"
+  },
   "task": {
-    "pause": "Pauza", "resume": "Wznów", "retry": "Ponów", "openFolder": "Otwórz folder", "playInUnflick": "Odtwórz w Unflick", "copyUrl": "Kopiuj URL",
-    "trash": "Przenieś do kosza", "restore": "Przywróć", "hardDelete": "Usuń trwale (z plikiem)", "delete": "Usuń", "confirmDelete": "Potwierdź usunięcie",
-    "retryBadge": "Próba {{count}}", "remaining": "Pozostało {{time}}", "waitingToStart": "Oczekiwanie na start...", "errorPrefix": "Błąd: ", "speed": "{{value}}/s"
+    "pause": "Pauza",
+    "resume": "Wznów",
+    "retry": "Ponów",
+    "openFolder": "Otwórz folder",
+    "playInUnflick": "Odtwórz w Unflick",
+    "copyUrl": "Kopiuj URL",
+    "trash": "Przenieś do kosza",
+    "restore": "Przywróć",
+    "hardDelete": "Usuń trwale (z plikiem)",
+    "delete": "Usuń",
+    "confirmDelete": "Potwierdź usunięcie",
+    "retryBadge": "Próba {{count}}",
+    "remaining": "Pozostało {{time}}",
+    "waitingToStart": "Oczekiwanie na start...",
+    "errorPrefix": "Błąd: ",
+    "speed": "{{value}}/s",
+    "utp": {
+      "triggeredBadge": "uTP aktywne",
+      "triggeredTitle": "Przełączono na tylko uTP po wolnym starcie.",
+      "suggestBtn": "Spróbuj uTP",
+      "switching": "Przełączam…",
+      "suggestTitle": "Wolna prędkość — ISP może dławić BT TCP. Kliknij aby włączyć fallback uTP i zrestartować zadanie."
+    }
   },
   "addTask": {
-    "title": "Dodaj zadanie pobierania", "subtitle": "Obsługa HTTP, BT / magnet i ponad 1000 serwisów wideo", "batchToggle": "Wsadowy", "url": "URL", "urlBatch": "Adresy URL (po jednym w wierszu)",
+    "title": "Dodaj zadanie pobierania",
+    "subtitle": "Obsługa HTTP, BT / magnet i ponad 1000 serwisów wideo",
+    "batchToggle": "Wsadowy",
+    "url": "URL",
+    "urlBatch": "Adresy URL (po jednym w wierszu)",
     "urlPlaceholder": "Wklej URL, link magnet lub adres strony wideo...",
     "urlBatchPlaceholder": "https://example.com/file1.zip\nhttps://example.com/file2.zip\nmagnet:?xt=urn:btih:...",
-    "detectedType": "Wykryty typ: ", "willCreate": "Zostanie utworzonych {{count}} zadań", "quality": "Jakość", "threads": "Wątki: {{count}}",
-    "saveDir": "Folder docelowy", "browse": "Przeglądaj", "saveDirPlaceholder": "Użyj folderu domyślnego", "tags": "Tagi", "tagsPlaceholder": "Wpisz i naciśnij Enter",
-    "advanced": "Opcje zaawansowane", "proxy": "Proxy", "proxyPlaceholder": "http://127.0.0.1:7890",
-    "startAt": "⏰ Zaplanowany start (puste = natychmiast)", "clear": "Wyczyść", "checksum": "Suma kontrolna (weryfikacja po zakończeniu)",
-    "sha256Placeholder": "SHA-256 (64 hex)", "md5Placeholder": "MD5 (32 hex)",
-    "cookies": "Cookies (format Netscape)", "cookiesPlaceholder": "Wklej cookies...", "playAfter": "Odtwórz w Unflick po zakończeniu",
-    "cancel": "Anuluj", "submit": "Rozpocznij pobieranie", "submitBatch": "Rozpocznij pobierania ({{count}})", "submitting": "Dodawanie...",
-    "errorEmpty": "Wprowadź URL", "errorEmptyBatch": "Wklej co najmniej jeden URL (po jednym w wierszu)", "errorFail": "Nie udało się dodać, sprawdź URL"
+    "detectedType": "Wykryty typ: ",
+    "willCreate": "Zostanie utworzonych {{count}} zadań",
+    "quality": "Jakość",
+    "threads": "Wątki: {{count}}",
+    "saveDir": "Folder docelowy",
+    "browse": "Przeglądaj",
+    "saveDirPlaceholder": "Użyj folderu domyślnego",
+    "tags": "Tagi",
+    "tagsPlaceholder": "Wpisz i naciśnij Enter",
+    "advanced": "Opcje zaawansowane",
+    "proxy": "Proxy",
+    "proxyPlaceholder": "http://127.0.0.1:7890",
+    "startAt": "⏰ Zaplanowany start (puste = natychmiast)",
+    "clear": "Wyczyść",
+    "checksum": "Suma kontrolna (weryfikacja po zakończeniu)",
+    "sha256Placeholder": "SHA-256 (64 hex)",
+    "md5Placeholder": "MD5 (32 hex)",
+    "cookies": "Cookies (format Netscape)",
+    "cookiesPlaceholder": "Wklej cookies...",
+    "playAfter": "Odtwórz w Unflick po zakończeniu",
+    "cancel": "Anuluj",
+    "submit": "Rozpocznij pobieranie",
+    "submitBatch": "Rozpocznij pobierania ({{count}})",
+    "submitting": "Dodawanie...",
+    "errorEmpty": "Wprowadź URL",
+    "errorEmptyBatch": "Wklej co najmniej jeden URL (po jednym w wierszu)",
+    "errorFail": "Nie udało się dodać, sprawdź URL"
   },
-  "urlType": { "http": "Pobieranie HTTP", "bt": "BT / Link magnet", "ytdlp": "Serwis wideo" },
-  "quality": { "best": "Najwyższa jakość", "1080p": "1080p", "720p": "720p", "480p": "480p", "audio": "Tylko audio" },
+  "urlType": {
+    "http": "Pobieranie HTTP",
+    "bt": "BT / Link magnet",
+    "ytdlp": "Serwis wideo"
+  },
+  "quality": {
+    "best": "Najwyższa jakość",
+    "1080p": "1080p",
+    "720p": "720p",
+    "480p": "480p",
+    "audio": "Tylko audio"
+  },
   "settings": {
-    "title": "Preferencje", "downloadDir": "Folder pobierania", "concurrency": "Równoległość", "maxConcurrent": "Maks. równoległych zadań", "httpThreads": "Wątki HTTP",
-    "speedLimit": "Limit prędkości", "globalSpeedLimit": "Limit globalny", "noLimit": "Bez limitu",
-    "speedSchedule": "Limit godzinowy", "scheduleAdd": "+ Dodaj przedział",
+    "title": "Preferencje",
+    "downloadDir": "Folder pobierania",
+    "concurrency": "Równoległość",
+    "maxConcurrent": "Maks. równoległych zadań",
+    "httpThreads": "Wątki HTTP",
+    "speedLimit": "Limit prędkości",
+    "globalSpeedLimit": "Limit globalny",
+    "noLimit": "Bez limitu",
+    "speedSchedule": "Limit godzinowy",
+    "scheduleAdd": "+ Dodaj przedział",
     "scheduleEmpty": "Brak przedziałów. Kliknij \"Dodaj\" poniżej, aby ustawić limity czasowe.",
     "scheduleHint": "Priorytet nad limitem globalnym. Brak dopasowania = limit globalny.",
-    "proxy": "Proxy sieciowe", "systemProxy": "Użyj proxy systemowego", "proxyOverride": "Ręczne (zastępuje proxy systemowe)",
-    "player": "Integracja odtwarzacza", "autoPlayUnflick": "Odtwórz w Unflick po zakończeniu", "autoPlayHint": "Tylko wideo / audio",
-    "retryAndDone": "Ponów & po zakończeniu", "autoRetry": "Auto ponowienie", "autoRetryHint": "Odstępy 1m / 3m / 10m, max 3",
+    "proxy": "Proxy sieciowe",
+    "systemProxy": "Użyj proxy systemowego",
+    "proxyOverride": "Ręczne (zastępuje proxy systemowe)",
+    "player": "Integracja odtwarzacza",
+    "autoPlayUnflick": "Odtwórz w Unflick po zakończeniu",
+    "autoPlayHint": "Tylko wideo / audio",
+    "retryAndDone": "Ponów & po zakończeniu",
+    "autoRetry": "Auto ponowienie",
+    "autoRetryHint": "Odstępy 1m / 3m / 10m, max 3",
     "onAllDone": "Akcja po zakończeniu wszystkich",
-    "onAllDoneOptions": { "none": "Nic nie rób", "notify": "Powiadom", "open_dir": "Otwórz folder", "sleep": "Uśpij", "shutdown": "Wyłącz (30s)" },
+    "onAllDoneOptions": {
+      "none": "Nic nie rób",
+      "notify": "Powiadom",
+      "open_dir": "Otwórz folder",
+      "sleep": "Uśpij",
+      "shutdown": "Wyłącz (30s)"
+    },
     "onAllDoneHint": "Resetuje się do \"Nic nie rób\" po wykonaniu",
-    "system": "Uruchamianie & system", "autostart": "Uruchom przy logowaniu", "autostartHint": "Cichy start w tle po zalogowaniu",
-    "minimizeToTray": "Minimalizuj do zasobnika przy zamknięciu", "minimizeToTrayHint": "Pobierania kontynuują w tle",
-    "clipboardSniff": "Monitor schowka", "clipboardSniffHint": "Zaproponuj pobranie po skopiowaniu URL / magnet",
-    "language": "Język"
+    "system": "Uruchamianie & system",
+    "autostart": "Uruchom przy logowaniu",
+    "autostartHint": "Cichy start w tle po zalogowaniu",
+    "minimizeToTray": "Minimalizuj do zasobnika przy zamknięciu",
+    "minimizeToTrayHint": "Pobierania kontynuują w tle",
+    "clipboardSniff": "Monitor schowka",
+    "clipboardSniffHint": "Zaproponuj pobranie po skopiowaniu URL / magnet",
+    "language": "Język",
+    "theme": "Motyw",
+    "btOptim": "Optymalizacja BT",
+    "forceUTP": "Wymuś uTP (wyłącz TCP)",
+    "forceUTPHint": "Niektórzy ISP blokują porty TCP BT; przejście na uTP (UDP) może przywrócić połączenia, ale ogranicza część źródeł peerów.",
+    "autoUtpFallback": "Automatyczny fallback uTP",
+    "autoUtpFallbackHint": "Przełącza na tylko uTP po 30 s, jeśli prędkość spada poniżej 100 KB/s. Idealne gdy ISP dławi BT."
   },
-  "statusBar": { "connected": "Połączono", "disconnected": "Rozłączono", "totalSpeed": "Łącznie" },
-  "tray": { "show": "Pokaż główne okno", "toggleMini": "Przełącz mini", "pauseAll": "Wstrzymaj wszystkie", "resumeAll": "Wznów wszystkie", "quit": "Wyjdź" },
-  "clipboard": { "detected": "Wykryto link pobierania", "download": "Pobierz", "dismiss": "Odrzuć" },
-  "drop": { "release": "Puść aby pobrać", "supports": "Obsługa .torrent / linków URL" },
+  "statusBar": {
+    "connected": "Połączono",
+    "disconnected": "Rozłączono",
+    "totalSpeed": "Łącznie"
+  },
+  "tray": {
+    "show": "Pokaż główne okno",
+    "toggleMini": "Przełącz mini",
+    "pauseAll": "Wstrzymaj wszystkie",
+    "resumeAll": "Wznów wszystkie",
+    "quit": "Wyjdź"
+  },
+  "clipboard": {
+    "detected": "Wykryto link pobierania",
+    "download": "Pobierz",
+    "dismiss": "Odrzuć"
+  },
+  "drop": {
+    "release": "Puść aby pobrać",
+    "supports": "Obsługa .torrent / linków URL"
+  },
   "empty": {
-    "noTasks": "Brak zadań pobierania", "noTasksHint": "Kliknij \"Dodaj zadanie\" w prawym górnym rogu",
-    "noMatch": "Brak pasujących zadań", "noMatchHint": "Spróbuj innego słowa kluczowego",
-    "trashEmpty": "Kosz jest pusty", "trashEmptyHint": "Usunięte zadania trafiają tu tymczasowo"
+    "noTasks": "Brak zadań pobierania",
+    "noTasksHint": "Kliknij \"Dodaj zadanie\" w prawym górnym rogu",
+    "noMatch": "Brak pasujących zadań",
+    "noMatchHint": "Spróbuj innego słowa kluczowego",
+    "trashEmpty": "Kosz jest pusty",
+    "trashEmptyHint": "Usunięte zadania trafiają tu tymczasowo"
   },
-  "notify": { "downloadDone": "Pobieranie zakończone", "downloadFailed": "Pobieranie nie powiodło się", "allDone": "Wszystkie pobierania zakończone", "allDoneMessage": "Wszystkie zadania ukończone" }
+  "notify": {
+    "downloadDone": "Pobieranie zakończone",
+    "downloadFailed": "Pobieranie nie powiodło się",
+    "allDone": "Wszystkie pobierania zakończone",
+    "allDoneMessage": "Wszystkie zadania ukończone"
+  }
 }

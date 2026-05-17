@@ -1,4 +1,4 @@
-/* CSS 变量 - 颜色系统 */
+/* CSS 变量 - 颜色系统（默认 deep-indigo 主题；运行时由 themeStore 覆盖） */
 :root {
   --bg-base: #070710;
   --bg-sidebar: #0c0c1a;
@@ -10,6 +10,7 @@
 
   --primary: #6366f1;
   --primary-glow: rgba(99, 102, 241, 0.4);
+  --primary-rgb: 99, 102, 241;
   --success: #22c55e;
   --warning: #f59e0b;
   --error: #ef4444;
@@ -18,6 +19,11 @@
   --text-primary: #e2e8f0;
   --text-secondary: #64748b;
   --text-muted: #374151;
+
+  --surface-input: rgba(99, 102, 241, 0.06);
+  --surface-hover: rgba(99, 102, 241, 0.10);
+  --scrollbar-thumb: rgba(99, 102, 241, 0.25);
+  --scrollbar-thumb-hover: rgba(99, 102, 241, 0.45);
 }
 
 /* Reset */
@@ -55,12 +61,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.25);
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.45);
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* 流光动画 */
@@ -111,7 +117,7 @@ body {
 
 /* 输入框样式 */
 .input-base {
-  background: rgba(99, 102, 241, 0.06);
+  background: var(--surface-input);
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--text-primary);
@@ -124,7 +130,7 @@ body {
 
 .input-base:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
 }
 
 .input-base::placeholder {
@@ -158,7 +164,7 @@ body {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #4f46e5;
+  filter: brightness(1.1);
   box-shadow: 0 0 16px var(--primary-glow);
 }
 
@@ -169,7 +175,7 @@ body {
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: rgba(99, 102, 241, 0.1);
+  background: var(--surface-hover);
   color: var(--text-primary);
   border-color: var(--border-strong);
 }
@@ -208,7 +214,7 @@ input[type="range"]::-webkit-slider-thumb {
 
 /* select */
 select {
-  background: rgba(99, 102, 241, 0.06);
+  background: var(--surface-input);
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--text-primary);

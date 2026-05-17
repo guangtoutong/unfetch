@@ -1,57 +1,200 @@
 {
-  "app": { "name": "unfetch", "tagline": "Менеджер завантажень для людей і ШІ" },
-  "titlebar": { "settings": "Налаштування", "miniMode": "Перейти до міні-вікна", "minimize": "Згорнути", "maximize": "Розгорнути", "close": "Закрити" },
-  "sidebar": { "section": "Фільтр", "all": "Усі", "downloading": "Активні", "done": "Завершено", "error": "Невдалі", "trash": "Кошик" },
-  "toolbar": {
-    "title": { "all": "Усі завдання", "downloading": "Активні (вкл. призупинені / у черзі)", "paused": "Призупинені", "done": "Завершено", "error": "Невдалі завдання", "queued": "У черзі", "trash": "Кошик" },
-    "search": "Пошук завдань...", "addTask": "Додати", "pauseAll": "Призупинити все", "resumeAll": "Запустити все", "restoreAll": "Відновити все", "emptyTrash": "Очистити кошик", "confirmEmpty": "Підтвердити"
+  "app": {
+    "name": "unfetch",
+    "tagline": "Менеджер завантажень для людей і ШІ"
   },
-  "status": { "queued": "У черзі", "downloading": "Завантаження", "paused": "Призупинено", "done": "Завершено", "error": "Помилка" },
+  "titlebar": {
+    "settings": "Налаштування",
+    "miniMode": "Перейти до міні-вікна",
+    "minimize": "Згорнути",
+    "maximize": "Розгорнути",
+    "close": "Закрити"
+  },
+  "sidebar": {
+    "section": "Фільтр",
+    "all": "Усі",
+    "downloading": "Активні",
+    "done": "Завершено",
+    "error": "Невдалі",
+    "trash": "Кошик"
+  },
+  "toolbar": {
+    "title": {
+      "all": "Усі завдання",
+      "downloading": "Активні (вкл. призупинені / у черзі)",
+      "paused": "Призупинені",
+      "done": "Завершено",
+      "error": "Невдалі завдання",
+      "queued": "У черзі",
+      "trash": "Кошик"
+    },
+    "search": "Пошук завдань...",
+    "addTask": "Додати",
+    "pauseAll": "Призупинити все",
+    "resumeAll": "Запустити все",
+    "restoreAll": "Відновити все",
+    "emptyTrash": "Очистити кошик",
+    "confirmEmpty": "Підтвердити"
+  },
+  "status": {
+    "queued": "У черзі",
+    "downloading": "Завантаження",
+    "paused": "Призупинено",
+    "done": "Завершено",
+    "error": "Помилка"
+  },
   "task": {
-    "pause": "Пауза", "resume": "Відновити", "retry": "Повторити", "openFolder": "Відкрити папку", "playInUnflick": "Відтворити в Unflick", "copyUrl": "Копіювати URL",
-    "trash": "Перемістити в кошик", "restore": "Відновити", "hardDelete": "Видалити назавжди (з файлом)", "delete": "Видалити", "confirmDelete": "Підтвердити видалення",
-    "retryBadge": "Спроба {{count}}", "remaining": "{{time}} залишилось", "waitingToStart": "Очікування початку...", "errorPrefix": "Помилка: ", "speed": "{{value}}/с"
+    "pause": "Пауза",
+    "resume": "Відновити",
+    "retry": "Повторити",
+    "openFolder": "Відкрити папку",
+    "playInUnflick": "Відтворити в Unflick",
+    "copyUrl": "Копіювати URL",
+    "trash": "Перемістити в кошик",
+    "restore": "Відновити",
+    "hardDelete": "Видалити назавжди (з файлом)",
+    "delete": "Видалити",
+    "confirmDelete": "Підтвердити видалення",
+    "retryBadge": "Спроба {{count}}",
+    "remaining": "{{time}} залишилось",
+    "waitingToStart": "Очікування початку...",
+    "errorPrefix": "Помилка: ",
+    "speed": "{{value}}/с",
+    "utp": {
+      "triggeredBadge": "uTP активний",
+      "triggeredTitle": "Перемкнено на лише uTP після повільного старту.",
+      "suggestBtn": "Спробувати uTP",
+      "switching": "Перемикання…",
+      "suggestTitle": "Низька швидкість — провайдер може блокувати BT TCP. Натисніть, щоб увімкнути авто-uTP і перезапустити."
+    }
   },
   "addTask": {
-    "title": "Додати завдання завантаження", "subtitle": "Підтримує HTTP, BT / magnet і 1000+ відеосайтів", "batchToggle": "Пакетно", "url": "URL", "urlBatch": "URL-адреси (по одній на рядок)",
+    "title": "Додати завдання завантаження",
+    "subtitle": "Підтримує HTTP, BT / magnet і 1000+ відеосайтів",
+    "batchToggle": "Пакетно",
+    "url": "URL",
+    "urlBatch": "URL-адреси (по одній на рядок)",
     "urlPlaceholder": "Вставте URL, magnet-посилання або адресу сторінки відео...",
     "urlBatchPlaceholder": "https://example.com/file1.zip\nhttps://example.com/file2.zip\nmagnet:?xt=urn:btih:...",
-    "detectedType": "Виявлений тип: ", "willCreate": "Буде створено {{count}} завдань", "quality": "Якість", "threads": "Потоки: {{count}}",
-    "saveDir": "Папка для збереження", "browse": "Огляд", "saveDirPlaceholder": "Використати папку за замовчуванням", "tags": "Теги", "tagsPlaceholder": "Введіть і натисніть Enter",
-    "advanced": "Розширені параметри", "proxy": "Проксі", "proxyPlaceholder": "http://127.0.0.1:7890",
-    "startAt": "⏰ Запланований запуск (порожнє = негайно)", "clear": "Очистити", "checksum": "Контрольна сума (перевіряється після завершення)",
-    "sha256Placeholder": "SHA-256 (64 hex)", "md5Placeholder": "MD5 (32 hex)",
-    "cookies": "Cookies (формат Netscape)", "cookiesPlaceholder": "Вставте cookies...", "playAfter": "Відтворити в Unflick після завершення",
-    "cancel": "Скасувати", "submit": "Почати завантаження", "submitBatch": "Почати завантаження ({{count}})", "submitting": "Додавання...",
-    "errorEmpty": "Введіть URL", "errorEmptyBatch": "Вставте принаймні одну URL (по одній на рядок)", "errorFail": "Не вдалося додати, перевірте URL"
+    "detectedType": "Виявлений тип: ",
+    "willCreate": "Буде створено {{count}} завдань",
+    "quality": "Якість",
+    "threads": "Потоки: {{count}}",
+    "saveDir": "Папка для збереження",
+    "browse": "Огляд",
+    "saveDirPlaceholder": "Використати папку за замовчуванням",
+    "tags": "Теги",
+    "tagsPlaceholder": "Введіть і натисніть Enter",
+    "advanced": "Розширені параметри",
+    "proxy": "Проксі",
+    "proxyPlaceholder": "http://127.0.0.1:7890",
+    "startAt": "⏰ Запланований запуск (порожнє = негайно)",
+    "clear": "Очистити",
+    "checksum": "Контрольна сума (перевіряється після завершення)",
+    "sha256Placeholder": "SHA-256 (64 hex)",
+    "md5Placeholder": "MD5 (32 hex)",
+    "cookies": "Cookies (формат Netscape)",
+    "cookiesPlaceholder": "Вставте cookies...",
+    "playAfter": "Відтворити в Unflick після завершення",
+    "cancel": "Скасувати",
+    "submit": "Почати завантаження",
+    "submitBatch": "Почати завантаження ({{count}})",
+    "submitting": "Додавання...",
+    "errorEmpty": "Введіть URL",
+    "errorEmptyBatch": "Вставте принаймні одну URL (по одній на рядок)",
+    "errorFail": "Не вдалося додати, перевірте URL"
   },
-  "urlType": { "http": "HTTP-завантаження", "bt": "BT / magnet-посилання", "ytdlp": "Відеосайт" },
-  "quality": { "best": "Найкраща якість", "1080p": "1080p", "720p": "720p", "480p": "480p", "audio": "Тільки аудіо" },
+  "urlType": {
+    "http": "HTTP-завантаження",
+    "bt": "BT / magnet-посилання",
+    "ytdlp": "Відеосайт"
+  },
+  "quality": {
+    "best": "Найкраща якість",
+    "1080p": "1080p",
+    "720p": "720p",
+    "480p": "480p",
+    "audio": "Тільки аудіо"
+  },
   "settings": {
-    "title": "Уподобання", "downloadDir": "Папка завантажень", "concurrency": "Паралельність", "maxConcurrent": "Макс. одночасних завдань", "httpThreads": "HTTP-потоки",
-    "speedLimit": "Обмеження швидкості", "globalSpeedLimit": "Глобальне обмеження", "noLimit": "Без обмежень",
-    "speedSchedule": "Розклад обмежень", "scheduleAdd": "+ Додати інтервал",
+    "title": "Уподобання",
+    "downloadDir": "Папка завантажень",
+    "concurrency": "Паралельність",
+    "maxConcurrent": "Макс. одночасних завдань",
+    "httpThreads": "HTTP-потоки",
+    "speedLimit": "Обмеження швидкості",
+    "globalSpeedLimit": "Глобальне обмеження",
+    "noLimit": "Без обмежень",
+    "speedSchedule": "Розклад обмежень",
+    "scheduleAdd": "+ Додати інтервал",
     "scheduleEmpty": "Інтервалів ще немає. Натисніть «Додати» нижче, щоб встановити обмеження за інтервалом часу.",
     "scheduleHint": "Пріоритет вищий за глобальне обмеження. Якщо немає збігу — використовується глобальне.",
-    "proxy": "Мережевий проксі", "systemProxy": "Використовувати системний проксі", "proxyOverride": "Вручну (перевизначає системний проксі)",
-    "player": "Інтеграція плеєра", "autoPlayUnflick": "Відтворити в Unflick після завершення", "autoPlayHint": "Лише відео / аудіо",
-    "retryAndDone": "Повтор & по завершенні", "autoRetry": "Авто-повтор", "autoRetryHint": "Інтервали 1m / 3m / 10m, максимум 3",
+    "proxy": "Мережевий проксі",
+    "systemProxy": "Використовувати системний проксі",
+    "proxyOverride": "Вручну (перевизначає системний проксі)",
+    "player": "Інтеграція плеєра",
+    "autoPlayUnflick": "Відтворити в Unflick після завершення",
+    "autoPlayHint": "Лише відео / аудіо",
+    "retryAndDone": "Повтор & по завершенні",
+    "autoRetry": "Авто-повтор",
+    "autoRetryHint": "Інтервали 1m / 3m / 10m, максимум 3",
     "onAllDone": "Дія при завершенні всіх",
-    "onAllDoneOptions": { "none": "Нічого не робити", "notify": "Сповістити", "open_dir": "Відкрити папку", "sleep": "Сон", "shutdown": "Вимкнути (30с)" },
+    "onAllDoneOptions": {
+      "none": "Нічого не робити",
+      "notify": "Сповістити",
+      "open_dir": "Відкрити папку",
+      "sleep": "Сон",
+      "shutdown": "Вимкнути (30с)"
+    },
     "onAllDoneHint": "Скидається до «Нічого не робити» після виконання",
-    "system": "Запуск & система", "autostart": "Запуск при вході", "autostartHint": "Тихий запуск у фоновому режимі",
-    "minimizeToTray": "Згорнути в трей при закритті", "minimizeToTrayHint": "Завантаження продовжуються у фоні",
-    "clipboardSniff": "Стеження за буфером обміну", "clipboardSniffHint": "Пропонувати завантаження при копіюванні URL / magnet",
-    "language": "Мова"
+    "system": "Запуск & система",
+    "autostart": "Запуск при вході",
+    "autostartHint": "Тихий запуск у фоновому режимі",
+    "minimizeToTray": "Згорнути в трей при закритті",
+    "minimizeToTrayHint": "Завантаження продовжуються у фоні",
+    "clipboardSniff": "Стеження за буфером обміну",
+    "clipboardSniffHint": "Пропонувати завантаження при копіюванні URL / magnet",
+    "language": "Мова",
+    "theme": "Тема",
+    "btOptim": "Оптимізація BT",
+    "forceUTP": "Примусово uTP (вимкнути TCP)",
+    "forceUTPHint": "Деякі провайдери блокують TCP-порти BT; перемикання на uTP (UDP) може відновити з'єднання, але обмежить частину джерел.",
+    "autoUtpFallback": "Авто-перехід на uTP",
+    "autoUtpFallbackHint": "Перемикає на лише uTP через 30 с, якщо швидкість нижча за 100 КБ/с. Підходить для провайдерів, що блокують BT."
   },
-  "statusBar": { "connected": "Підключено", "disconnected": "Не підключено", "totalSpeed": "Загалом" },
-  "tray": { "show": "Показати головне вікно", "toggleMini": "Перемкнути міні", "pauseAll": "Призупинити все", "resumeAll": "Відновити все", "quit": "Вийти" },
-  "clipboard": { "detected": "Виявлено посилання на завантаження", "download": "Завантажити", "dismiss": "Ігнорувати" },
-  "drop": { "release": "Відпустіть для завантаження", "supports": "Підтримує .torrent / URL-посилання" },
+  "statusBar": {
+    "connected": "Підключено",
+    "disconnected": "Не підключено",
+    "totalSpeed": "Загалом"
+  },
+  "tray": {
+    "show": "Показати головне вікно",
+    "toggleMini": "Перемкнути міні",
+    "pauseAll": "Призупинити все",
+    "resumeAll": "Відновити все",
+    "quit": "Вийти"
+  },
+  "clipboard": {
+    "detected": "Виявлено посилання на завантаження",
+    "download": "Завантажити",
+    "dismiss": "Ігнорувати"
+  },
+  "drop": {
+    "release": "Відпустіть для завантаження",
+    "supports": "Підтримує .torrent / URL-посилання"
+  },
   "empty": {
-    "noTasks": "Завдань завантаження немає", "noTasksHint": "Натисніть «Додати» у верхньому правому куті",
-    "noMatch": "Немає збігів", "noMatchHint": "Спробуйте інше ключове слово",
-    "trashEmpty": "Кошик порожній", "trashEmptyHint": "Видалені завдання тимчасово зберігаються тут"
+    "noTasks": "Завдань завантаження немає",
+    "noTasksHint": "Натисніть «Додати» у верхньому правому куті",
+    "noMatch": "Немає збігів",
+    "noMatchHint": "Спробуйте інше ключове слово",
+    "trashEmpty": "Кошик порожній",
+    "trashEmptyHint": "Видалені завдання тимчасово зберігаються тут"
   },
-  "notify": { "downloadDone": "Завантаження завершено", "downloadFailed": "Помилка завантаження", "allDone": "Усі завантаження завершено", "allDoneMessage": "Усі завдання завершено" }
+  "notify": {
+    "downloadDone": "Завантаження завершено",
+    "downloadFailed": "Помилка завантаження",
+    "allDone": "Усі завантаження завершено",
+    "allDoneMessage": "Усі завдання завершено"
+  }
 }

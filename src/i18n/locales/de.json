@@ -1,57 +1,200 @@
 {
-  "app": { "name": "unfetch", "tagline": "Ein Download-Manager für Menschen und KI" },
-  "titlebar": { "settings": "Einstellungen", "miniMode": "Zur Mini-Ansicht wechseln", "minimize": "Minimieren", "maximize": "Maximieren", "close": "Schließen" },
-  "sidebar": { "section": "Filter", "all": "Alle", "downloading": "Aktiv", "done": "Fertig", "error": "Fehlgeschlagen", "trash": "Papierkorb" },
-  "toolbar": {
-    "title": { "all": "Alle Aufgaben", "downloading": "Aktiv (inkl. Pausiert / Warteschlange)", "paused": "Pausiert", "done": "Abgeschlossen", "error": "Fehlgeschlagene Aufgaben", "queued": "In Warteschlange", "trash": "Papierkorb" },
-    "search": "Aufgaben suchen...", "addTask": "Aufgabe hinzufügen", "pauseAll": "Alle pausieren", "resumeAll": "Alle starten", "restoreAll": "Alle wiederherstellen", "emptyTrash": "Papierkorb leeren", "confirmEmpty": "Bestätigen"
+  "app": {
+    "name": "unfetch",
+    "tagline": "Ein Download-Manager für Menschen und KI"
   },
-  "status": { "queued": "Wartet", "downloading": "Lädt", "paused": "Pausiert", "done": "Fertig", "error": "Fehler" },
+  "titlebar": {
+    "settings": "Einstellungen",
+    "miniMode": "Zur Mini-Ansicht wechseln",
+    "minimize": "Minimieren",
+    "maximize": "Maximieren",
+    "close": "Schließen"
+  },
+  "sidebar": {
+    "section": "Filter",
+    "all": "Alle",
+    "downloading": "Aktiv",
+    "done": "Fertig",
+    "error": "Fehlgeschlagen",
+    "trash": "Papierkorb"
+  },
+  "toolbar": {
+    "title": {
+      "all": "Alle Aufgaben",
+      "downloading": "Aktiv (inkl. Pausiert / Warteschlange)",
+      "paused": "Pausiert",
+      "done": "Abgeschlossen",
+      "error": "Fehlgeschlagene Aufgaben",
+      "queued": "In Warteschlange",
+      "trash": "Papierkorb"
+    },
+    "search": "Aufgaben suchen...",
+    "addTask": "Aufgabe hinzufügen",
+    "pauseAll": "Alle pausieren",
+    "resumeAll": "Alle starten",
+    "restoreAll": "Alle wiederherstellen",
+    "emptyTrash": "Papierkorb leeren",
+    "confirmEmpty": "Bestätigen"
+  },
+  "status": {
+    "queued": "Wartet",
+    "downloading": "Lädt",
+    "paused": "Pausiert",
+    "done": "Fertig",
+    "error": "Fehler"
+  },
   "task": {
-    "pause": "Pause", "resume": "Fortsetzen", "retry": "Erneut versuchen", "openFolder": "Ordner öffnen", "playInUnflick": "In Unflick abspielen", "copyUrl": "URL kopieren",
-    "trash": "In Papierkorb", "restore": "Wiederherstellen", "hardDelete": "Endgültig löschen (inkl. Datei)", "delete": "Löschen", "confirmDelete": "Löschen bestätigen",
-    "retryBadge": "Versuch {{count}}", "remaining": "{{time}} übrig", "waitingToStart": "Wartet auf Start...", "errorPrefix": "Fehler: ", "speed": "{{value}}/s"
+    "pause": "Pause",
+    "resume": "Fortsetzen",
+    "retry": "Erneut versuchen",
+    "openFolder": "Ordner öffnen",
+    "playInUnflick": "In Unflick abspielen",
+    "copyUrl": "URL kopieren",
+    "trash": "In Papierkorb",
+    "restore": "Wiederherstellen",
+    "hardDelete": "Endgültig löschen (inkl. Datei)",
+    "delete": "Löschen",
+    "confirmDelete": "Löschen bestätigen",
+    "retryBadge": "Versuch {{count}}",
+    "remaining": "{{time}} übrig",
+    "waitingToStart": "Wartet auf Start...",
+    "errorPrefix": "Fehler: ",
+    "speed": "{{value}}/s",
+    "utp": {
+      "triggeredBadge": "uTP aktiv",
+      "triggeredTitle": "Nach langsamem Start auf uTP-only umgeschaltet.",
+      "suggestBtn": "uTP testen",
+      "switching": "Wechselt…",
+      "suggestTitle": "Geschwindigkeit gering — evtl. ISP-Drosselung. Klicken: Auto-uTP-Fallback aktivieren und Aufgabe neu starten."
+    }
   },
   "addTask": {
-    "title": "Download-Aufgabe hinzufügen", "subtitle": "Unterstützt HTTP, BT / Magnet und 1000+ Videoseiten", "batchToggle": "Stapel", "url": "Download-URL", "urlBatch": "Download-URLs (eine pro Zeile)",
+    "title": "Download-Aufgabe hinzufügen",
+    "subtitle": "Unterstützt HTTP, BT / Magnet und 1000+ Videoseiten",
+    "batchToggle": "Stapel",
+    "url": "Download-URL",
+    "urlBatch": "Download-URLs (eine pro Zeile)",
     "urlPlaceholder": "URL, Magnet-Link oder Videoseiten-Adresse einfügen...",
     "urlBatchPlaceholder": "https://example.com/file1.zip\nhttps://example.com/file2.zip\nmagnet:?xt=urn:btih:...",
-    "detectedType": "Erkannter Typ: ", "willCreate": "{{count}} Aufgaben werden erstellt", "quality": "Videoqualität", "threads": "Download-Threads: {{count}}",
-    "saveDir": "Zielordner", "browse": "Durchsuchen", "saveDirPlaceholder": "Standardordner verwenden", "tags": "Tags", "tagsPlaceholder": "Eingabe und Enter (z.B. Filme / Software / Arbeit)",
-    "advanced": "Erweiterte Optionen", "proxy": "Proxy", "proxyPlaceholder": "http://127.0.0.1:7890",
-    "startAt": "⏰ Geplanter Start (leer = sofort)", "clear": "Löschen", "checksum": "Prüfsumme (nach Fertigstellung)",
-    "sha256Placeholder": "SHA-256 (64 Hex-Zeichen)", "md5Placeholder": "MD5 (32 Hex-Zeichen)",
-    "cookies": "Cookies (Netscape-Format)", "cookiesPlaceholder": "Cookie-Inhalt einfügen...", "playAfter": "Nach Abschluss in Unflick abspielen",
-    "cancel": "Abbrechen", "submit": "Download starten", "submitBatch": "Downloads starten ({{count}})", "submitting": "Hinzufügen...",
-    "errorEmpty": "Bitte URL eingeben", "errorEmptyBatch": "Bitte mindestens eine URL einfügen (eine pro Zeile)", "errorFail": "Hinzufügen fehlgeschlagen, URL prüfen"
+    "detectedType": "Erkannter Typ: ",
+    "willCreate": "{{count}} Aufgaben werden erstellt",
+    "quality": "Videoqualität",
+    "threads": "Download-Threads: {{count}}",
+    "saveDir": "Zielordner",
+    "browse": "Durchsuchen",
+    "saveDirPlaceholder": "Standardordner verwenden",
+    "tags": "Tags",
+    "tagsPlaceholder": "Eingabe und Enter (z.B. Filme / Software / Arbeit)",
+    "advanced": "Erweiterte Optionen",
+    "proxy": "Proxy",
+    "proxyPlaceholder": "http://127.0.0.1:7890",
+    "startAt": "⏰ Geplanter Start (leer = sofort)",
+    "clear": "Löschen",
+    "checksum": "Prüfsumme (nach Fertigstellung)",
+    "sha256Placeholder": "SHA-256 (64 Hex-Zeichen)",
+    "md5Placeholder": "MD5 (32 Hex-Zeichen)",
+    "cookies": "Cookies (Netscape-Format)",
+    "cookiesPlaceholder": "Cookie-Inhalt einfügen...",
+    "playAfter": "Nach Abschluss in Unflick abspielen",
+    "cancel": "Abbrechen",
+    "submit": "Download starten",
+    "submitBatch": "Downloads starten ({{count}})",
+    "submitting": "Hinzufügen...",
+    "errorEmpty": "Bitte URL eingeben",
+    "errorEmptyBatch": "Bitte mindestens eine URL einfügen (eine pro Zeile)",
+    "errorFail": "Hinzufügen fehlgeschlagen, URL prüfen"
   },
-  "urlType": { "http": "HTTP-Download", "bt": "BT / Magnet-Link", "ytdlp": "Videoseite" },
-  "quality": { "best": "Beste Qualität", "1080p": "1080p", "720p": "720p", "480p": "480p", "audio": "Nur Audio" },
+  "urlType": {
+    "http": "HTTP-Download",
+    "bt": "BT / Magnet-Link",
+    "ytdlp": "Videoseite"
+  },
+  "quality": {
+    "best": "Beste Qualität",
+    "1080p": "1080p",
+    "720p": "720p",
+    "480p": "480p",
+    "audio": "Nur Audio"
+  },
   "settings": {
-    "title": "Einstellungen", "downloadDir": "Download-Ordner", "concurrency": "Parallelität", "maxConcurrent": "Maximale parallele Aufgaben", "httpThreads": "HTTP-Download-Threads",
-    "speedLimit": "Geschwindigkeitslimit", "globalSpeedLimit": "Globales Limit", "noLimit": "Unbegrenzt",
-    "speedSchedule": "Zeitplan-Limit", "scheduleAdd": "+ Zeitfenster hinzufügen",
+    "title": "Einstellungen",
+    "downloadDir": "Download-Ordner",
+    "concurrency": "Parallelität",
+    "maxConcurrent": "Maximale parallele Aufgaben",
+    "httpThreads": "HTTP-Download-Threads",
+    "speedLimit": "Geschwindigkeitslimit",
+    "globalSpeedLimit": "Globales Limit",
+    "noLimit": "Unbegrenzt",
+    "speedSchedule": "Zeitplan-Limit",
+    "scheduleAdd": "+ Zeitfenster hinzufügen",
     "scheduleEmpty": "Noch keine Zeitfenster. Klicken Sie unten auf „Hinzufügen\", um Limits einzustellen.",
     "scheduleHint": "Höhere Priorität als globales Limit. Wenn keine Übereinstimmung, gilt globales Limit.",
-    "proxy": "Netzwerk-Proxy", "systemProxy": "Systemproxy verwenden", "proxyOverride": "Manuell (überschreibt Systemproxy)",
-    "player": "Player-Integration", "autoPlayUnflick": "Nach Abschluss in Unflick abspielen", "autoPlayHint": "Nur Video / Audio",
-    "retryAndDone": "Wiederholung & nach Abschluss", "autoRetry": "Automatisch wiederholen", "autoRetryHint": "1m / 3m / 10m Abstand, max. 3 Versuche",
+    "proxy": "Netzwerk-Proxy",
+    "systemProxy": "Systemproxy verwenden",
+    "proxyOverride": "Manuell (überschreibt Systemproxy)",
+    "player": "Player-Integration",
+    "autoPlayUnflick": "Nach Abschluss in Unflick abspielen",
+    "autoPlayHint": "Nur Video / Audio",
+    "retryAndDone": "Wiederholung & nach Abschluss",
+    "autoRetry": "Automatisch wiederholen",
+    "autoRetryHint": "1m / 3m / 10m Abstand, max. 3 Versuche",
     "onAllDone": "Aktion bei allen Downloads fertig",
-    "onAllDoneOptions": { "none": "Nichts tun", "notify": "Benachrichtigen", "open_dir": "Download-Ordner öffnen", "sleep": "Standby", "shutdown": "Herunterfahren (30s Verzögerung)" },
+    "onAllDoneOptions": {
+      "none": "Nichts tun",
+      "notify": "Benachrichtigen",
+      "open_dir": "Download-Ordner öffnen",
+      "sleep": "Standby",
+      "shutdown": "Herunterfahren (30s Verzögerung)"
+    },
     "onAllDoneHint": "Setzt sich nach einmaliger Ausführung auf „Nichts tun\" zurück",
-    "system": "Start & System", "autostart": "Beim Anmelden starten", "autostartHint": "Nach Anmeldung im Hintergrund starten",
-    "minimizeToTray": "Beim Schließen in Tray minimieren", "minimizeToTrayHint": "Downloads laufen weiter, wenn das Fenster geschlossen wird",
-    "clipboardSniff": "Zwischenablage überwachen", "clipboardSniffHint": "Download-Vorschlag beim Kopieren einer URL / Magnet",
-    "language": "Sprache"
+    "system": "Start & System",
+    "autostart": "Beim Anmelden starten",
+    "autostartHint": "Nach Anmeldung im Hintergrund starten",
+    "minimizeToTray": "Beim Schließen in Tray minimieren",
+    "minimizeToTrayHint": "Downloads laufen weiter, wenn das Fenster geschlossen wird",
+    "clipboardSniff": "Zwischenablage überwachen",
+    "clipboardSniffHint": "Download-Vorschlag beim Kopieren einer URL / Magnet",
+    "language": "Sprache",
+    "theme": "Design",
+    "btOptim": "BT-Optimierung",
+    "forceUTP": "uTP erzwingen (TCP aus)",
+    "forceUTPHint": "Einige ISPs blockieren BT-TCP-Ports; ein Wechsel zu uTP (UDP) kann Verbindungen wiederherstellen, schränkt aber manche Peer-Quellen ein.",
+    "autoUtpFallback": "Automatischer uTP-Fallback",
+    "autoUtpFallbackHint": "Wechselt nach 30 s automatisch zu uTP-only, wenn die Geschwindigkeit unter 100 KB/s bleibt. Ideal bei ISP-Drosselung."
   },
-  "statusBar": { "connected": "Verbunden", "disconnected": "Getrennt", "totalSpeed": "Gesamt" },
-  "tray": { "show": "Hauptfenster anzeigen", "toggleMini": "Mini-Ansicht umschalten", "pauseAll": "Alle pausieren", "resumeAll": "Alle fortsetzen", "quit": "Beenden" },
-  "clipboard": { "detected": "Download-Link erkannt", "download": "Herunterladen", "dismiss": "Ignorieren" },
-  "drop": { "release": "Loslassen zum Herunterladen", "supports": "Unterstützt .torrent / URL-Links" },
+  "statusBar": {
+    "connected": "Verbunden",
+    "disconnected": "Getrennt",
+    "totalSpeed": "Gesamt"
+  },
+  "tray": {
+    "show": "Hauptfenster anzeigen",
+    "toggleMini": "Mini-Ansicht umschalten",
+    "pauseAll": "Alle pausieren",
+    "resumeAll": "Alle fortsetzen",
+    "quit": "Beenden"
+  },
+  "clipboard": {
+    "detected": "Download-Link erkannt",
+    "download": "Herunterladen",
+    "dismiss": "Ignorieren"
+  },
+  "drop": {
+    "release": "Loslassen zum Herunterladen",
+    "supports": "Unterstützt .torrent / URL-Links"
+  },
   "empty": {
-    "noTasks": "Noch keine Downloads", "noTasksHint": "Klicke oben rechts auf „Aufgabe hinzufügen\"",
-    "noMatch": "Keine passenden Aufgaben", "noMatchHint": "Anderen Suchbegriff probieren",
-    "trashEmpty": "Papierkorb ist leer", "trashEmptyHint": "Gelöschte Aufgaben landen hier vorübergehend"
+    "noTasks": "Noch keine Downloads",
+    "noTasksHint": "Klicke oben rechts auf „Aufgabe hinzufügen\"",
+    "noMatch": "Keine passenden Aufgaben",
+    "noMatchHint": "Anderen Suchbegriff probieren",
+    "trashEmpty": "Papierkorb ist leer",
+    "trashEmptyHint": "Gelöschte Aufgaben landen hier vorübergehend"
   },
-  "notify": { "downloadDone": "Download abgeschlossen", "downloadFailed": "Download fehlgeschlagen", "allDone": "Alle Downloads fertig", "allDoneMessage": "Alle Aufgaben abgeschlossen" }
+  "notify": {
+    "downloadDone": "Download abgeschlossen",
+    "downloadFailed": "Download fehlgeschlagen",
+    "allDone": "Alle Downloads fertig",
+    "allDoneMessage": "Alle Aufgaben abgeschlossen"
+  }
 }

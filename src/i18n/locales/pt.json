@@ -1,57 +1,200 @@
 {
-  "app": { "name": "unfetch", "tagline": "Gerenciador de downloads para humanos e IA" },
-  "titlebar": { "settings": "Configurações", "miniMode": "Mudar para mini janela", "minimize": "Minimizar", "maximize": "Maximizar", "close": "Fechar" },
-  "sidebar": { "section": "Filtro", "all": "Todos", "downloading": "Ativos", "done": "Concluído", "error": "Falhou", "trash": "Lixeira" },
-  "toolbar": {
-    "title": { "all": "Todas as tarefas", "downloading": "Ativos (incl. pausados / fila)", "paused": "Pausados", "done": "Concluídos", "error": "Tarefas com falha", "queued": "Na fila", "trash": "Lixeira" },
-    "search": "Buscar tarefas...", "addTask": "Adicionar", "pauseAll": "Pausar tudo", "resumeAll": "Iniciar tudo", "restoreAll": "Restaurar tudo", "emptyTrash": "Esvaziar lixeira", "confirmEmpty": "Confirmar"
+  "app": {
+    "name": "unfetch",
+    "tagline": "Gerenciador de downloads para humanos e IA"
   },
-  "status": { "queued": "Na fila", "downloading": "Baixando", "paused": "Pausada", "done": "Concluída", "error": "Falhou" },
+  "titlebar": {
+    "settings": "Configurações",
+    "miniMode": "Mudar para mini janela",
+    "minimize": "Minimizar",
+    "maximize": "Maximizar",
+    "close": "Fechar"
+  },
+  "sidebar": {
+    "section": "Filtro",
+    "all": "Todos",
+    "downloading": "Ativos",
+    "done": "Concluído",
+    "error": "Falhou",
+    "trash": "Lixeira"
+  },
+  "toolbar": {
+    "title": {
+      "all": "Todas as tarefas",
+      "downloading": "Ativos (incl. pausados / fila)",
+      "paused": "Pausados",
+      "done": "Concluídos",
+      "error": "Tarefas com falha",
+      "queued": "Na fila",
+      "trash": "Lixeira"
+    },
+    "search": "Buscar tarefas...",
+    "addTask": "Adicionar",
+    "pauseAll": "Pausar tudo",
+    "resumeAll": "Iniciar tudo",
+    "restoreAll": "Restaurar tudo",
+    "emptyTrash": "Esvaziar lixeira",
+    "confirmEmpty": "Confirmar"
+  },
+  "status": {
+    "queued": "Na fila",
+    "downloading": "Baixando",
+    "paused": "Pausada",
+    "done": "Concluída",
+    "error": "Falhou"
+  },
   "task": {
-    "pause": "Pausar", "resume": "Retomar", "retry": "Tentar novamente", "openFolder": "Abrir pasta", "playInUnflick": "Reproduzir no Unflick", "copyUrl": "Copiar URL",
-    "trash": "Mover para lixeira", "restore": "Restaurar", "hardDelete": "Excluir permanentemente (com arquivo)", "delete": "Excluir", "confirmDelete": "Confirmar exclusão",
-    "retryBadge": "Tentativa {{count}}", "remaining": "{{time}} restante", "waitingToStart": "Aguardando início...", "errorPrefix": "Erro: ", "speed": "{{value}}/s"
+    "pause": "Pausar",
+    "resume": "Retomar",
+    "retry": "Tentar novamente",
+    "openFolder": "Abrir pasta",
+    "playInUnflick": "Reproduzir no Unflick",
+    "copyUrl": "Copiar URL",
+    "trash": "Mover para lixeira",
+    "restore": "Restaurar",
+    "hardDelete": "Excluir permanentemente (com arquivo)",
+    "delete": "Excluir",
+    "confirmDelete": "Confirmar exclusão",
+    "retryBadge": "Tentativa {{count}}",
+    "remaining": "{{time}} restante",
+    "waitingToStart": "Aguardando início...",
+    "errorPrefix": "Erro: ",
+    "speed": "{{value}}/s",
+    "utp": {
+      "triggeredBadge": "uTP ativo",
+      "triggeredTitle": "Alterado para somente uTP após início lento.",
+      "suggestBtn": "Tentar uTP",
+      "switching": "Mudando…",
+      "suggestTitle": "Velocidade baixa — o ISP pode estar limitando BT TCP. Clique para ativar fallback uTP e reiniciar."
+    }
   },
   "addTask": {
-    "title": "Adicionar tarefa de download", "subtitle": "Suporta HTTP, BT / magnet e mais de 1000 sites de vídeo", "batchToggle": "Lote", "url": "URL", "urlBatch": "URLs (uma por linha)",
+    "title": "Adicionar tarefa de download",
+    "subtitle": "Suporta HTTP, BT / magnet e mais de 1000 sites de vídeo",
+    "batchToggle": "Lote",
+    "url": "URL",
+    "urlBatch": "URLs (uma por linha)",
     "urlPlaceholder": "Cole uma URL, link magnet ou endereço de página de vídeo...",
     "urlBatchPlaceholder": "https://example.com/file1.zip\nhttps://example.com/file2.zip\nmagnet:?xt=urn:btih:...",
-    "detectedType": "Tipo detectado: ", "willCreate": "Serão criadas {{count}} tarefas", "quality": "Qualidade", "threads": "Threads: {{count}}",
-    "saveDir": "Pasta de destino", "browse": "Procurar", "saveDirPlaceholder": "Usar pasta padrão", "tags": "Tags", "tagsPlaceholder": "Digite e pressione Enter",
-    "advanced": "Opções avançadas", "proxy": "Proxy", "proxyPlaceholder": "http://127.0.0.1:7890",
-    "startAt": "⏰ Início agendado (vazio = imediato)", "clear": "Limpar", "checksum": "Soma de verificação (ao concluir)",
-    "sha256Placeholder": "SHA-256 (64 hex)", "md5Placeholder": "MD5 (32 hex)",
-    "cookies": "Cookies (formato Netscape)", "cookiesPlaceholder": "Cole cookies...", "playAfter": "Reproduzir no Unflick ao terminar",
-    "cancel": "Cancelar", "submit": "Iniciar download", "submitBatch": "Iniciar downloads ({{count}})", "submitting": "Adicionando...",
-    "errorEmpty": "Insira uma URL", "errorEmptyBatch": "Cole pelo menos uma URL (uma por linha)", "errorFail": "Falha ao adicionar, verifique a URL"
+    "detectedType": "Tipo detectado: ",
+    "willCreate": "Serão criadas {{count}} tarefas",
+    "quality": "Qualidade",
+    "threads": "Threads: {{count}}",
+    "saveDir": "Pasta de destino",
+    "browse": "Procurar",
+    "saveDirPlaceholder": "Usar pasta padrão",
+    "tags": "Tags",
+    "tagsPlaceholder": "Digite e pressione Enter",
+    "advanced": "Opções avançadas",
+    "proxy": "Proxy",
+    "proxyPlaceholder": "http://127.0.0.1:7890",
+    "startAt": "⏰ Início agendado (vazio = imediato)",
+    "clear": "Limpar",
+    "checksum": "Soma de verificação (ao concluir)",
+    "sha256Placeholder": "SHA-256 (64 hex)",
+    "md5Placeholder": "MD5 (32 hex)",
+    "cookies": "Cookies (formato Netscape)",
+    "cookiesPlaceholder": "Cole cookies...",
+    "playAfter": "Reproduzir no Unflick ao terminar",
+    "cancel": "Cancelar",
+    "submit": "Iniciar download",
+    "submitBatch": "Iniciar downloads ({{count}})",
+    "submitting": "Adicionando...",
+    "errorEmpty": "Insira uma URL",
+    "errorEmptyBatch": "Cole pelo menos uma URL (uma por linha)",
+    "errorFail": "Falha ao adicionar, verifique a URL"
   },
-  "urlType": { "http": "Download HTTP", "bt": "BT / Link magnet", "ytdlp": "Site de vídeo" },
-  "quality": { "best": "Melhor qualidade", "1080p": "1080p", "720p": "720p", "480p": "480p", "audio": "Somente áudio" },
+  "urlType": {
+    "http": "Download HTTP",
+    "bt": "BT / Link magnet",
+    "ytdlp": "Site de vídeo"
+  },
+  "quality": {
+    "best": "Melhor qualidade",
+    "1080p": "1080p",
+    "720p": "720p",
+    "480p": "480p",
+    "audio": "Somente áudio"
+  },
   "settings": {
-    "title": "Preferências", "downloadDir": "Pasta de downloads", "concurrency": "Simultaneidade", "maxConcurrent": "Tarefas simultâneas máx", "httpThreads": "Threads HTTP",
-    "speedLimit": "Limite de velocidade", "globalSpeedLimit": "Limite global", "noLimit": "Ilimitado",
-    "speedSchedule": "Limite por horário", "scheduleAdd": "+ Adicionar intervalo",
+    "title": "Preferências",
+    "downloadDir": "Pasta de downloads",
+    "concurrency": "Simultaneidade",
+    "maxConcurrent": "Tarefas simultâneas máx",
+    "httpThreads": "Threads HTTP",
+    "speedLimit": "Limite de velocidade",
+    "globalSpeedLimit": "Limite global",
+    "noLimit": "Ilimitado",
+    "speedSchedule": "Limite por horário",
+    "scheduleAdd": "+ Adicionar intervalo",
     "scheduleEmpty": "Sem intervalos. Clique em \"Adicionar\" abaixo para definir limites.",
     "scheduleHint": "Prioridade sobre o limite global. Sem correspondência usa o global.",
-    "proxy": "Proxy de rede", "systemProxy": "Usar proxy do sistema", "proxyOverride": "Manual (sobrescreve proxy do sistema)",
-    "player": "Integração do player", "autoPlayUnflick": "Reproduzir no Unflick ao terminar", "autoPlayHint": "Apenas vídeo / áudio",
-    "retryAndDone": "Tentativa & ao concluir", "autoRetry": "Repetir automaticamente", "autoRetryHint": "Intervalos 1m / 3m / 10m, máx 3",
+    "proxy": "Proxy de rede",
+    "systemProxy": "Usar proxy do sistema",
+    "proxyOverride": "Manual (sobrescreve proxy do sistema)",
+    "player": "Integração do player",
+    "autoPlayUnflick": "Reproduzir no Unflick ao terminar",
+    "autoPlayHint": "Apenas vídeo / áudio",
+    "retryAndDone": "Tentativa & ao concluir",
+    "autoRetry": "Repetir automaticamente",
+    "autoRetryHint": "Intervalos 1m / 3m / 10m, máx 3",
     "onAllDone": "Ação quando tudo terminar",
-    "onAllDoneOptions": { "none": "Não fazer nada", "notify": "Notificar", "open_dir": "Abrir pasta", "sleep": "Suspender", "shutdown": "Desligar (30s)" },
+    "onAllDoneOptions": {
+      "none": "Não fazer nada",
+      "notify": "Notificar",
+      "open_dir": "Abrir pasta",
+      "sleep": "Suspender",
+      "shutdown": "Desligar (30s)"
+    },
     "onAllDoneHint": "Redefine para \"Não fazer nada\" após executar",
-    "system": "Inicialização & sistema", "autostart": "Iniciar ao entrar", "autostartHint": "Início silencioso em segundo plano",
-    "minimizeToTray": "Minimizar para bandeja ao fechar", "minimizeToTrayHint": "Os downloads continuam em segundo plano",
-    "clipboardSniff": "Monitor da área de transferência", "clipboardSniffHint": "Sugerir download ao copiar URL / magnet",
-    "language": "Idioma"
+    "system": "Inicialização & sistema",
+    "autostart": "Iniciar ao entrar",
+    "autostartHint": "Início silencioso em segundo plano",
+    "minimizeToTray": "Minimizar para bandeja ao fechar",
+    "minimizeToTrayHint": "Os downloads continuam em segundo plano",
+    "clipboardSniff": "Monitor da área de transferência",
+    "clipboardSniffHint": "Sugerir download ao copiar URL / magnet",
+    "language": "Idioma",
+    "theme": "Tema",
+    "btOptim": "Otimização BT",
+    "forceUTP": "Forçar uTP (TCP desativado)",
+    "forceUTPHint": "Alguns ISPs bloqueiam portas TCP de BT; mudar para uTP (UDP) pode restaurar conexões mas limita algumas fontes de peers.",
+    "autoUtpFallback": "Fallback automático para uTP",
+    "autoUtpFallbackHint": "Muda para somente uTP após 30 s se a velocidade ficar abaixo de 100 KB/s. Ideal quando o ISP limita BT."
   },
-  "statusBar": { "connected": "Conectado", "disconnected": "Desconectado", "totalSpeed": "Total" },
-  "tray": { "show": "Mostrar janela principal", "toggleMini": "Alternar mini", "pauseAll": "Pausar tudo", "resumeAll": "Retomar tudo", "quit": "Sair" },
-  "clipboard": { "detected": "Link de download detectado", "download": "Baixar", "dismiss": "Ignorar" },
-  "drop": { "release": "Solte para baixar", "supports": "Suporta .torrent / URLs" },
+  "statusBar": {
+    "connected": "Conectado",
+    "disconnected": "Desconectado",
+    "totalSpeed": "Total"
+  },
+  "tray": {
+    "show": "Mostrar janela principal",
+    "toggleMini": "Alternar mini",
+    "pauseAll": "Pausar tudo",
+    "resumeAll": "Retomar tudo",
+    "quit": "Sair"
+  },
+  "clipboard": {
+    "detected": "Link de download detectado",
+    "download": "Baixar",
+    "dismiss": "Ignorar"
+  },
+  "drop": {
+    "release": "Solte para baixar",
+    "supports": "Suporta .torrent / URLs"
+  },
   "empty": {
-    "noTasks": "Sem tarefas de download", "noTasksHint": "Clique em \"Adicionar tarefa\" no canto superior direito",
-    "noMatch": "Sem correspondências", "noMatchHint": "Tente outra palavra-chave",
-    "trashEmpty": "Lixeira vazia", "trashEmptyHint": "As tarefas excluídas ficam aqui temporariamente"
+    "noTasks": "Sem tarefas de download",
+    "noTasksHint": "Clique em \"Adicionar tarefa\" no canto superior direito",
+    "noMatch": "Sem correspondências",
+    "noMatchHint": "Tente outra palavra-chave",
+    "trashEmpty": "Lixeira vazia",
+    "trashEmptyHint": "As tarefas excluídas ficam aqui temporariamente"
   },
-  "notify": { "downloadDone": "Download concluído", "downloadFailed": "Falha no download", "allDone": "Todos os downloads concluídos", "allDoneMessage": "Todas as tarefas concluídas" }
+  "notify": {
+    "downloadDone": "Download concluído",
+    "downloadFailed": "Falha no download",
+    "allDone": "Todos os downloads concluídos",
+    "allDoneMessage": "Todas as tarefas concluídas"
+  }
 }

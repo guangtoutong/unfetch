@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '../stores/settingsStore'
 import {
   getAutostart,
@@ -9,8 +10,11 @@ import {
   setMinimizeToTray,
 } from '../lib/systemIntegration'
 import { SpeedScheduleEditor } from './SpeedScheduleEditor'
+import { useThemeStore } from '../stores/themeStore'
+import { THEMES } from '../themes/themes'
 
 export const SettingsPanel: React.FC = () => {
+  const { t } = useTranslation()
   const { isOpen, setOpen, config, updateConfig } = useSettingsStore()
   const [detectedProxy, setDetectedProxy] = useState<string>('')
   const [autostart, setAuto] = useState<boolean>(false)
@@ -152,6 +156,19 @@ export const SettingsPanel: React.FC = () => {
 
             {/* 设置内容 */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+              {/* 主题皮肤 */}
+              <Section title={t('settings.theme')} icon={
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="13.5" cy="6.5" r=".5" />
+                  <circle cx="17.5" cy="10.5" r=".5" />
+                  <circle cx="8.5" cy="7.5" r=".5" />
+                  <circle cx="6.5" cy="12.5" r=".5" />
+                  <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125 0-.937.748-1.688 1.688-1.688h1.996c3.094 0 5.605-2.422 5.605-5.5C22 6.578 17.5 2 12 2z" />
+                </svg>
+              }>
+                <ThemePicker />
+              </Section>
 
               {/* 下载目录 */}
               <Section title="下载目录" icon={
@@ -416,7 +433,7 @@ export const SettingsPanel: React.FC = () => {
 
               <Divider />
 
-              <Section title="BT 优化" icon={
+              <Section title={t('settings.btOptim')} icon={
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 2L2 7l10 5 10-5-10-5z" />
                   <path d="M2 17l10 5 10-5" />
@@ -424,14 +441,14 @@ export const SettingsPanel: React.FC = () => {
                 </svg>
               }>
                 <ToggleRow
-                  label="强制 uTP 模式（关闭 TCP）"
-                  description="部分 ISP 屏蔽 BT 的 TCP 端口；切换到 uTP (UDP) 后可能恢复连接，但同时会限制部分 peer 来源"
+                  label={t('settings.forceUTP')}
+                  description={t('settings.forceUTPHint')}
                   checked={!!config.bt_force_utp}
                   onChange={(v) => updateConfig({ bt_force_utp: v })}
                 />
                 <ToggleRow
-                  label="自动 uTP fallback"
-                  description="BT 任务启动 30 秒内速度低于 100 KB/s 时，自动切到 uTP-only 重连一次。无需用户介入，适合国内 ISP 屏蔽场景"
+                  label={t('settings.autoUtpFallback')}
+                  description={t('settings.autoUtpFallbackHint')}
                   checked={!!config.bt_auto_utp_fallback}
                   onChange={(v) => updateConfig({ bt_auto_utp_fallback: v })}
                 />
@@ -445,6 +462,54 @@ export const SettingsPanel: React.FC = () => {
 }
 
 // 辅助组件
+
+const ThemePicker: React.FC = () => {
+  const themeId = useThemeStore((s) => s.themeId)
+  const setTheme = useThemeStore((s) => s.setTheme)
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(96px, 1fr))', gap: 8 }}>
+      {THEMES.map((t) => {
+        const active = t.id === themeId
+        return (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setTheme(t.id)}
+            title={t.desc}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'stretch',
+              gap: 6,
+              padding: 8,
+              borderRadius: 10,
+              border: `1px solid ${active ? 'var(--primary)' : 'var(--border)'}`,
+              background: active ? 'var(--surface-hover)' : 'var(--bg-card)',
+              cursor: 'pointer',
+              transition: 'border-color 0.15s, background 0.15s',
+              boxShadow: active ? `0 0 0 2px rgba(var(--primary-rgb), 0.18)` : 'none',
+              textAlign: 'left',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                height: 24,
+                borderRadius: 6,
+                overflow: 'hidden',
+                border: '1px solid rgba(0,0,0,0.15)',
+              }}
+            >
+              <div style={{ flex: 1, background: t.preview[0] }} />
+              <div style={{ flex: 1, background: t.preview[1] }} />
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-primary)', fontWeight: 600 }}>{t.name}</div>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
 
 const Section: React.FC<{ title: string; icon: React.ReactNode; children: React.ReactNode }> = ({
   title,

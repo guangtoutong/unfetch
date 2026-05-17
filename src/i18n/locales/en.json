@@ -59,7 +59,14 @@
     "remaining": "{{time}} left",
     "waitingToStart": "Waiting to start...",
     "errorPrefix": "Error: ",
-    "speed": "{{value}}/s"
+    "speed": "{{value}}/s",
+    "utp": {
+      "triggeredBadge": "uTP active",
+      "triggeredTitle": "Switched to uTP-only after slow start.",
+      "suggestBtn": "Try uTP",
+      "switching": "Switching...",
+      "suggestTitle": "Speed is slow — ISP may be throttling BT TCP. Click to enable auto uTP fallback and restart this task."
+    }
   },
   "addTask": {
     "title": "Add download task",
@@ -147,7 +154,13 @@
     "minimizeToTrayHint": "Tasks keep downloading after the window is closed",
     "clipboardSniff": "Clipboard sniffer",
     "clipboardSniffHint": "Prompt to download when you copy a URL / magnet link",
-    "language": "Language"
+    "language": "Language",
+    "theme": "Theme",
+    "btOptim": "BT optimization",
+    "forceUTP": "Force uTP (disable TCP)",
+    "forceUTPHint": "Some ISPs block BT TCP ports; switching to uTP (UDP) may restore connections but limits some peer sources.",
+    "autoUtpFallback": "Auto uTP fallback",
+    "autoUtpFallbackHint": "Switch to uTP-only after 30s if speed stays below 100 KB/s. No user action required — best for ISPs that throttle BT."
   },
   "statusBar": {
     "connected": "Connected",
