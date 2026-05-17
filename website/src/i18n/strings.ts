@@ -42,7 +42,7 @@ interface Strings {
     lead: string
     platforms: {
       macos: { name: string; note: string; primary: string }
-      windows: { name: string; note: string; primary: string; secondary: string }
+      windows: { name: string; note: string; primary: string }
       linux: { name: string; note: string; primary: string; secondary: string; tertiary: string }
     }
     notes: { macos: string; windows: string; linux: string }
@@ -103,7 +103,7 @@ const en: Strings = {
     lead: 'Free, open source, MIT-style license. No account, no telemetry, no ads.',
     platforms: {
       macos: { name: 'macOS', note: 'Universal · Apple Silicon + Intel · Notarized', primary: 'Download .dmg' },
-      windows: { name: 'Windows', note: 'x64 · Windows 10/11', primary: 'Download .msi', secondary: '.exe installer' },
+      windows: { name: 'Windows', note: 'x64 · Windows 10/11 · NSIS installer', primary: 'Download .exe' },
       linux: { name: 'Linux', note: 'x64 · .AppImage / .deb / .rpm', primary: 'Download .AppImage', secondary: '.deb (Debian/Ubuntu)', tertiary: '.rpm (Fedora/RHEL)' },
     },
     notes: {
@@ -168,7 +168,7 @@ const zh: Strings = {
     lead: '免费、开源，MIT 风格许可证。无需账号，无遥测，无广告。',
     platforms: {
       macos: { name: 'macOS', note: 'Universal · Apple Silicon + Intel · 已 Apple 公证', primary: '下载 .dmg' },
-      windows: { name: 'Windows', note: 'x64 · Windows 10 / 11', primary: '下载 .msi', secondary: '.exe 安装器' },
+      windows: { name: 'Windows', note: 'x64 · Windows 10 / 11 · NSIS 安装器', primary: '下载 .exe' },
       linux: { name: 'Linux', note: 'x64 · .AppImage / .deb / .rpm', primary: '下载 .AppImage', secondary: '.deb (Debian / Ubuntu)', tertiary: '.rpm (Fedora / RHEL)' },
     },
     notes: {

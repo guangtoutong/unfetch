@@ -149,7 +149,7 @@ const currentLang = LANGS.find((l) => l.code === lang) || LANGS[0]
       const BASE = 'https://github.com/guangtoutong/unfetch/releases/download/v' + VERSION + '/'
 
       let osLabel = 'Windows'
-      let assetFile = 'unfetch_' + VERSION + '_x64_en-US.msi'
+      let assetFile = 'unfetch_' + VERSION + '_x64-setup.exe'
       if (/Mac|iPhone|iPad/i.test(ua) || platform.includes('mac')) {
         // 只发 universal dmg，Apple Silicon 和 Intel 共用
         osLabel = 'macOS'
