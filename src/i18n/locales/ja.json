@@ -104,7 +104,13 @@
     "errorEmptyBatch": "少なくとも1つの URL を貼り付け（1行に1つ）",
     "errorFail": "追加失敗、URL を確認してください",
     "template": "タスクテンプレート",
-    "templateNone": "なし（テンプレート未使用）"
+    "templateNone": "なし（テンプレート未使用）",
+    "customTrackers": "カスタムトラッカー（1 行 1 つ）",
+    "customTrackersHint": "内蔵の公開トラッカーと統合され peer プールを拡大",
+    "mirrors": "ミラー URL（1 行 1 つ）",
+    "mirrorsHint": "同じファイルを複数ソースから並行ダウンロード。失敗時は次のミラーで再試行。",
+    "dependsOn": "依存タスク ID（カンマ区切り）",
+    "dependsOnHint": "リストされたすべてのタスクが完了するまで待機します"
   },
   "urlType": {
     "http": "HTTP ダウンロード",

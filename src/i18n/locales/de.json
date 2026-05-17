@@ -104,7 +104,13 @@
     "errorEmptyBatch": "Bitte mindestens eine URL einfügen (eine pro Zeile)",
     "errorFail": "Hinzufügen fehlgeschlagen, URL prüfen",
     "template": "Aufgaben-Vorlage",
-    "templateNone": "Keine (keine Vorlage)"
+    "templateNone": "Keine (keine Vorlage)",
+    "customTrackers": "Eigene Tracker (einer pro Zeile)",
+    "customTrackersHint": "Wird mit eingebauten öffentlichen Trackern kombiniert",
+    "mirrors": "Mirror-URLs (eine pro Zeile)",
+    "mirrorsHint": "Gleiche Datei aus mehreren Quellen — Chunks verteilt, fehlgeschlagene Chunks wechseln zum nächsten Mirror",
+    "dependsOn": "Abhängig von (Task-IDs, kommagetrennt)",
+    "dependsOnHint": "Diese Aufgabe wartet, bis alle aufgeführten Aufgaben abgeschlossen sind"
   },
   "urlType": {
     "http": "HTTP-Download",

@@ -79,6 +79,8 @@ type Task struct {
 	ActualSHA256   string `json:"actual_sha256,omitempty"`
 	SelectedFiles  []int  `json:"selected_files,omitempty"` // BT 任务：仅下载这些下标的文件
 	CustomTrackers []string `json:"custom_trackers,omitempty"` // 额外的 tracker URL（BT 任务）
+	Mirrors        []string `json:"mirrors,omitempty"` // HTTP 任务：额外的镜像 URL（同一文件的多个来源）
+	DependsOn      []string `json:"depends_on,omitempty"` // 依赖任务 ID，全部 done 后才开始下载
 	// BT 运行时统计（不持久化）
 	PeersConnected int `json:"peers_connected,omitempty"`
 	PeersTotal     int `json:"peers_total,omitempty"`
@@ -108,6 +110,10 @@ type AddTaskRequest struct {
 	SelectedFiles []int      `json:"selected_files,omitempty"`
 	// BT 任务专用：额外 tracker URL
 	CustomTrackers []string  `json:"custom_trackers,omitempty"`
+	// HTTP 任务专用：额外镜像 URL（同一文件多源并发下载）
+	Mirrors        []string  `json:"mirrors,omitempty"`
+	// 任务依赖：列出的任务 ID 全部 done 后才开始
+	DependsOn      []string  `json:"depends_on,omitempty"`
 	// 任务模板名（从 Config.TaskTemplates 中查找，覆盖未显式提供的字段）
 	Template       string    `json:"template,omitempty"`
 }

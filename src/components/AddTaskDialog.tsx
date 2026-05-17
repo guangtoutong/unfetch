@@ -86,6 +86,10 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
   const [previewing, setPreviewing] = useState(false)
   // BT 自定义 tracker
   const [customTrackers, setCustomTrackers] = useState('')
+  // HTTP 多镜像源
+  const [mirrors, setMirrors] = useState('')
+  // 任务依赖
+  const [dependsOn, setDependsOn] = useState('')
 
   const urlInputRef = useRef<HTMLInputElement>(null)
   const batchRef = useRef<HTMLTextAreaElement>(null)
@@ -122,6 +126,8 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
       setTorrentPreview(null)
       setPreviewing(false)
       setCustomTrackers('')
+      setMirrors('')
+      setDependsOn('')
     }
   }, [open, batchMode])
 
@@ -156,6 +162,14 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
       .split(/[\r\n]+/)
       .map((s) => s.trim())
       .filter(Boolean)
+    const mirrorList = mirrors
+      .split(/[\r\n]+/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+    const depList = dependsOn
+      .split(/[\s,;]+/)
+      .map((s) => s.trim())
+      .filter(Boolean)
     return {
       url: u,
       save_dir: saveDir || undefined,
@@ -170,6 +184,8 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
       expected_md5: md5 || undefined,
       selected_files: selectedFiles,
       custom_trackers: detectedType === 'bt' && trackerList.length > 0 ? trackerList : undefined,
+      mirrors: detectedType === 'http' && mirrorList.length > 0 ? mirrorList : undefined,
+      depends_on: depList.length > 0 ? depList : undefined,
       template: template || undefined,
     }
   }
@@ -559,7 +575,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                         {urlType === 'bt' && (
                           <div>
                             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>
-                              自定义 Tracker（每行一个，可选）
+                              {t('addTask.customTrackers')}
                             </label>
                             <textarea
                               placeholder={'udp://my-private.tracker:6969/announce\nhttp://example.com:8080/announce'}
@@ -569,10 +585,47 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                               style={{ minHeight: 60, fontFamily: 'monospace', fontSize: 11, resize: 'vertical' }}
                             />
                             <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3 }}>
-                              会和内置 32 个公共 tracker 合并使用，扩大 peer 池
+                              {t('addTask.customTrackersHint')}
                             </div>
                           </div>
                         )}
+
+                        {/* HTTP 多镜像源 */}
+                        {urlType === 'http' && (
+                          <div>
+                            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>
+                              {t('addTask.mirrors')}
+                            </label>
+                            <textarea
+                              placeholder={'https://mirror1.example.com/file.iso\nhttps://mirror2.example.com/file.iso'}
+                              value={mirrors}
+                              onChange={(e) => setMirrors(e.target.value)}
+                              className="input-base"
+                              style={{ minHeight: 60, fontFamily: 'monospace', fontSize: 11, resize: 'vertical' }}
+                            />
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3 }}>
+                              {t('addTask.mirrorsHint')}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 任务依赖 */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>
+                            {t('addTask.dependsOn')}
+                          </label>
+                          <input
+                            type="text"
+                            value={dependsOn}
+                            onChange={(e) => setDependsOn(e.target.value)}
+                            placeholder="task-id-1, task-id-2"
+                            className="input-base"
+                            style={{ fontFamily: 'monospace', fontSize: 11 }}
+                          />
+                          <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3 }}>
+                            {t('addTask.dependsOnHint')}
+                          </div>
+                        </div>
 
                         {/* 定时下载 */}
                         <div>

@@ -104,7 +104,13 @@
     "errorEmptyBatch": "Plak minstens één URL (één per regel)",
     "errorFail": "Toevoegen mislukt, controleer de URL",
     "template": "Taaksjabloon",
-    "templateNone": "Geen (geen sjabloon)"
+    "templateNone": "Geen (geen sjabloon)",
+    "customTrackers": "Aangepaste trackers (één per regel)",
+    "customTrackersHint": "Gecombineerd met ingebouwde publieke trackers",
+    "mirrors": "Mirror-URLs (één per regel)",
+    "mirrorsHint": "Zelfde bestand uit meerdere bronnen — chunks verdeeld, mislukte chunks naar volgende mirror",
+    "dependsOn": "Hangt af van (taak-IDs, kommagescheiden)",
+    "dependsOnHint": "Deze taak wacht tot alle vermelde taken klaar zijn"
   },
   "urlType": {
     "http": "HTTP-download",

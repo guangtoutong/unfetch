@@ -104,7 +104,13 @@
     "errorEmptyBatch": "최소 하나의 URL을 붙여넣으세요 (한 줄에 하나)",
     "errorFail": "추가 실패, URL을 확인하세요",
     "template": "작업 템플릿",
-    "templateNone": "없음 (템플릿 미사용)"
+    "templateNone": "없음 (템플릿 미사용)",
+    "customTrackers": "커스텀 트래커 (한 줄에 하나)",
+    "customTrackersHint": "내장 공개 트래커와 병합하여 피어 풀 확장",
+    "mirrors": "미러 URL (한 줄에 하나)",
+    "mirrorsHint": "동일 파일을 여러 소스에서 병렬 다운로드. 실패 시 다음 미러로 재시도.",
+    "dependsOn": "의존 작업 ID (쉼표 구분)",
+    "dependsOnHint": "나열된 모든 작업이 완료될 때까지 대기합니다"
   },
   "urlType": {
     "http": "HTTP 다운로드",

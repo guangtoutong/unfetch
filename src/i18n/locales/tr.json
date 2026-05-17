@@ -104,7 +104,13 @@
     "errorEmptyBatch": "Lütfen en az bir URL yapıştırın (her satıra bir tane)",
     "errorFail": "Eklenemedi, URL'yi kontrol edin",
     "template": "Görev şablonu",
-    "templateNone": "Yok (şablonsuz)"
+    "templateNone": "Yok (şablonsuz)",
+    "customTrackers": "Özel izleyiciler (her satır bir tane)",
+    "customTrackersHint": "Yerleşik halka açık izleyicilerle birleştirilir",
+    "mirrors": "Yansı URL'ler (her satır bir tane)",
+    "mirrorsHint": "Aynı dosya birden fazla kaynaktan — parçalar dağıtılır, başarısız olanlar sonraki yansıya geçer",
+    "dependsOn": "Bağlı görevler (görev kimlikleri, virgülle ayrılmış)",
+    "dependsOnHint": "Bu görev, listelenen tüm görevler tamamlanana kadar bekler"
   },
   "urlType": {
     "http": "HTTP indirme",

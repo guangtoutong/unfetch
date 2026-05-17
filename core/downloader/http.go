@@ -104,12 +104,21 @@ func (d *HTTPDownloader) buildHTTPClient(proxy string) *http.Client {
 	}
 }
 
-// Download 执行下载，支持断点续传和多线程
+// Download 执行下载，支持断点续传 + 多线程 + 多镜像源
 func (d *HTTPDownloader) Download(ctx context.Context, task *types.Task, onProgress func()) error {
 	cfg := d.getConfig()
 	client := d.buildHTTPClient(task.Proxy)
 
-	// HEAD 请求获取文件信息
+	// 镜像源列表：主 URL + task.Mirrors
+	allURLs := []string{task.URL}
+	for _, m := range task.Mirrors {
+		m = strings.TrimSpace(m)
+		if m != "" && m != task.URL {
+			allURLs = append(allURLs, m)
+		}
+	}
+
+	// HEAD 请求主 URL 获取文件信息
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, task.URL, nil)
 	if err != nil {
 		return fmt.Errorf("create HEAD request: %w", err)
@@ -124,6 +133,37 @@ func (d *HTTPDownloader) Download(ctx context.Context, task *types.Task, onProgr
 
 	totalSize := resp.ContentLength
 	acceptRanges := resp.Header.Get("Accept-Ranges") == "bytes"
+
+	// 探活：剩余镜像必须 size 一致且支持 Range，否则剔除
+	validURLs := []string{task.URL}
+	if len(allURLs) > 1 && totalSize > 0 && acceptRanges {
+		for _, u := range allURLs[1:] {
+			mReq, mErr := http.NewRequestWithContext(ctx, http.MethodHead, u, nil)
+			if mErr != nil {
+				slog.Warn("mirror HEAD build failed, skip", "url", u, "err", mErr)
+				continue
+			}
+			mReq.Header.Set("User-Agent", "unfetch/1.0")
+			mResp, mErr := client.Do(mReq)
+			if mErr != nil {
+				slog.Warn("mirror HEAD failed, skip", "url", u, "err", mErr)
+				continue
+			}
+			mResp.Body.Close()
+			if mResp.ContentLength != totalSize {
+				slog.Warn("mirror size mismatch, skip", "url", u, "size", mResp.ContentLength, "expected", totalSize)
+				continue
+			}
+			if mResp.Header.Get("Accept-Ranges") != "bytes" {
+				slog.Warn("mirror does not support Range, skip", "url", u)
+				continue
+			}
+			validURLs = append(validURLs, u)
+		}
+		if len(validURLs) > 1 {
+			slog.Info("multi-mirror download", "count", len(validURLs))
+		}
+	}
 
 	// 确定文件名
 	filename := task.Filename
@@ -213,13 +253,14 @@ func (d *HTTPDownloader) Download(ctx context.Context, task *types.Task, onProgr
 	// 状态保存 mutex
 	var stateMu sync.Mutex
 
-	// 启动多线程下载
+	// 启动多线程下载（chunk i 优先用 mirror[i % N]，失败时 fallback 到下一个）
 	g, gctx := errgroup.WithContext(ctx)
 	for i := range state.Chunks {
 		chunkIdx := i
+		preferredURL := validURLs[chunkIdx%len(validURLs)]
 		g.Go(func() error {
-			return d.downloadChunk(
-				gctx, client, task.URL,
+			return d.downloadChunkMulti(
+				gctx, client, preferredURL, validURLs,
 				file, &state.Chunks[chunkIdx],
 				&task.DoneBytes, tb,
 				func() {
@@ -277,6 +318,49 @@ func verifyChecksum(savePath string, task *types.Task) error {
 	}
 	slog.Info("checksum ok", "sha256", sum256)
 	return nil
+}
+
+// downloadChunkMulti 单 chunk 尝试 preferredURL，失败时按 mirrors 顺序 fallback
+// chunk.Downloaded 在失败重试时保留，新请求用 Range 续传
+func (d *HTTPDownloader) downloadChunkMulti(
+	ctx context.Context,
+	client *http.Client,
+	preferredURL string,
+	mirrors []string,
+	file *os.File,
+	chunk *chunkState,
+	doneBytes *int64,
+	tb *tokenBucket,
+	onSave func(),
+) error {
+	// 候选 URL 序列：preferred 先，其他按原序
+	tried := map[string]bool{}
+	queue := []string{preferredURL}
+	tried[preferredURL] = true
+	for _, m := range mirrors {
+		if !tried[m] {
+			queue = append(queue, m)
+			tried[m] = true
+		}
+	}
+
+	var lastErr error
+	for _, u := range queue {
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+		err := d.downloadChunk(ctx, client, u, file, chunk, doneBytes, tb, onSave)
+		if err == nil {
+			return nil
+		}
+		// ctx 取消不算镜像失败
+		if ctx.Err() != nil {
+			return err
+		}
+		slog.Warn("chunk failed on mirror, falling back", "url", u, "err", err)
+		lastErr = err
+	}
+	return lastErr
 }
 
 func (d *HTTPDownloader) downloadChunk(

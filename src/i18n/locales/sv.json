@@ -104,7 +104,13 @@
     "errorEmptyBatch": "Klistra in minst en URL (en per rad)",
     "errorFail": "Misslyckades, kontrollera URL",
     "template": "Uppgiftsmall",
-    "templateNone": "Ingen (ingen mall)"
+    "templateNone": "Ingen (ingen mall)",
+    "customTrackers": "Anpassade trackers (en per rad)",
+    "customTrackersHint": "Kombineras med inbyggda publika trackers",
+    "mirrors": "Spegel-URLer (en per rad)",
+    "mirrorsHint": "Samma fil från flera källor — chunks fördelas, misslyckade byter till nästa spegel",
+    "dependsOn": "Beror på (uppgift-ID:n, kommaseparerade)",
+    "dependsOnHint": "Denna uppgift väntar tills alla listade uppgifter är klara"
   },
   "urlType": {
     "http": "HTTP-nedladdning",

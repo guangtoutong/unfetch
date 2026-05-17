@@ -104,7 +104,13 @@
     "errorEmptyBatch": "Veuillez coller au moins une URL (une par ligne)",
     "errorFail": "Échec, vérifiez l'URL",
     "template": "Modèle de tâche",
-    "templateNone": "Aucun (pas de modèle)"
+    "templateNone": "Aucun (pas de modèle)",
+    "customTrackers": "Trackers personnalisés (un par ligne)",
+    "customTrackersHint": "Combiné aux trackers publics intégrés",
+    "mirrors": "URLs miroir (une par ligne)",
+    "mirrorsHint": "Même fichier de plusieurs sources — chunks répartis, échec bascule au miroir suivant",
+    "dependsOn": "Dépend de (IDs de tâche, séparées par virgule)",
+    "dependsOnHint": "Cette tâche attend que toutes les tâches listées soient terminées"
   },
   "urlType": {
     "http": "Téléchargement HTTP",

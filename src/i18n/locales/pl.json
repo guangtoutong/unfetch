@@ -104,7 +104,13 @@
     "errorEmptyBatch": "Wklej co najmniej jeden URL (po jednym w wierszu)",
     "errorFail": "Nie udało się dodać, sprawdź URL",
     "template": "Szablon zadania",
-    "templateNone": "Brak (bez szablonu)"
+    "templateNone": "Brak (bez szablonu)",
+    "customTrackers": "Własne trackery (jeden na linię)",
+    "customTrackersHint": "Łączone z wbudowanymi publicznymi trackerami",
+    "mirrors": "URL kopii lustrzanych (jeden na linię)",
+    "mirrorsHint": "Ten sam plik z wielu źródeł — chunki rozproszone, niepowodzenia przełączają na kolejne źródło",
+    "dependsOn": "Zależy od (ID zadań, oddzielone przecinkami)",
+    "dependsOnHint": "To zadanie czeka na ukończenie wszystkich wymienionych zadań"
   },
   "urlType": {
     "http": "Pobieranie HTTP",

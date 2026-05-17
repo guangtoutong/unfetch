@@ -104,7 +104,13 @@
     "errorEmptyBatch": "Please paste at least one URL (one per line)",
     "errorFail": "Failed to add, please check the URL",
     "template": "Task template",
-    "templateNone": "None (no template)"
+    "templateNone": "None (no template)",
+    "customTrackers": "Custom trackers (one per line)",
+    "customTrackersHint": "Merged with built-in public trackers to expand the peer pool",
+    "mirrors": "Mirror URLs (one per line)",
+    "mirrorsHint": "Same file from multiple sources — chunks distributed across mirrors, failed chunks retry on next mirror",
+    "dependsOn": "Depends on (task IDs, comma separated)",
+    "dependsOnHint": "This task waits until all listed tasks finish (status=done) before starting"
   },
   "urlType": {
     "http": "HTTP download",

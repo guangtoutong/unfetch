@@ -172,6 +172,8 @@ func (m *Manager) AddTask(req types.AddTaskRequest, taskType types.TaskType) (*t
 		ExpectedMD5:    req.ExpectedMD5,
 		SelectedFiles:  req.SelectedFiles,
 		CustomTrackers: req.CustomTrackers,
+		Mirrors:        req.Mirrors,
+		DependsOn:      req.DependsOn,
 		CreatedAt: time.Now(),
 	}
 
@@ -193,6 +195,52 @@ func (m *Manager) AddTask(req types.AddTaskRequest, taskType types.TaskType) (*t
 
 // startDownload 在信号量控制下启动下载
 func (m *Manager) startDownload(task *types.Task) {
+	// 依赖等待：必须先于 semaphore，避免互相依赖时 semaphore 死锁
+	if len(task.DependsOn) > 0 {
+		for {
+			m.mu.RLock()
+			cur, ok := m.tasks[task.ID]
+			if !ok || cur.Trashed || cur.Status == types.StatusPaused {
+				m.mu.RUnlock()
+				return
+			}
+			allDone := true
+			missing := false
+			for _, depID := range cur.DependsOn {
+				dep, exists := m.tasks[depID]
+				if !exists {
+					// 依赖不存在（被删除）→ 跳过依赖
+					continue
+				}
+				if dep.Trashed {
+					// 依赖被删除/进垃圾箱 → 跳过
+					continue
+				}
+				if dep.Status == types.StatusError {
+					// 依赖失败 → 本任务也置错
+					m.mu.RUnlock()
+					m.mu.Lock()
+					cur.Status = types.StatusError
+					cur.Error = "依赖任务失败: " + depID
+					m.mu.Unlock()
+					_ = m.store.SaveTask(cur)
+					m.notify(cur)
+					return
+				}
+				if dep.Status != types.StatusDone {
+					allDone = false
+					break
+				}
+			}
+			_ = missing
+			m.mu.RUnlock()
+			if allDone {
+				break
+			}
+			time.Sleep(5 * time.Second)
+		}
+	}
+
 	// 等待信号量（控制并发数）
 	m.semaphore <- struct{}{}
 	defer func() { <-m.semaphore }()

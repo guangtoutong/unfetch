@@ -216,6 +216,8 @@ func (h *Handlers) AddTask(w http.ResponseWriter, r *http.Request) {
 		ExpectedMD5:    req.ExpectedMD5,
 		SelectedFiles:  req.SelectedFiles,
 		CustomTrackers: req.CustomTrackers,
+		Mirrors:        req.Mirrors,
+		DependsOn:      req.DependsOn,
 	}, taskType)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, fmt.Sprintf("add task failed: %v", err))

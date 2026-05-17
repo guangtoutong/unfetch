@@ -104,7 +104,13 @@
     "errorEmptyBatch": "Incolla almeno un URL (uno per riga)",
     "errorFail": "Aggiunta fallita, controlla l'URL",
     "template": "Modello di attività",
-    "templateNone": "Nessuno (nessun modello)"
+    "templateNone": "Nessuno (nessun modello)",
+    "customTrackers": "Tracker personalizzati (uno per riga)",
+    "customTrackersHint": "Combinato con i tracker pubblici integrati",
+    "mirrors": "URL mirror (uno per riga)",
+    "mirrorsHint": "Stesso file da più fonti — chunk distribuiti, fallimenti cambiano al prossimo mirror",
+    "dependsOn": "Dipende da (ID task, separati da virgola)",
+    "dependsOnHint": "Questa task attende il completamento di tutte le task elencate"
   },
   "urlType": {
     "http": "Download HTTP",

@@ -104,7 +104,13 @@
     "errorEmptyBatch": "请粘贴至少一个 URL（每行一个）",
     "errorFail": "添加失败，请检查地址",
     "template": "任务模板",
-    "templateNone": "无（不应用模板）"
+    "templateNone": "无（不应用模板）",
+    "customTrackers": "自定义 Tracker（每行一个，可选）",
+    "customTrackersHint": "会和内置公共 tracker 合并使用，扩大 peer 池",
+    "mirrors": "镜像 URL（每行一个，可选）",
+    "mirrorsHint": "同一文件多源并发：chunk 在镜像间分发；失败 chunk 自动切到下个镜像",
+    "dependsOn": "依赖任务 ID（逗号分隔，可选）",
+    "dependsOnHint": "此任务等列出的所有任务全部完成后才开始"
   },
   "urlType": {
     "http": "HTTP 下载",

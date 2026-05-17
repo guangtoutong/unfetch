@@ -38,6 +38,8 @@ export interface Task {
   actual_sha256?: string
   selected_files?: number[]
   custom_trackers?: string[]
+  mirrors?: string[]
+  depends_on?: string[]
   peers_connected?: number
   peers_total?: number
   seeders?: number
@@ -108,6 +110,8 @@ export interface AddTaskRequest {
   expected_md5?: string
   selected_files?: number[]
   custom_trackers?: string[]
+  mirrors?: string[]
+  depends_on?: string[]
   template?: string
 }
 

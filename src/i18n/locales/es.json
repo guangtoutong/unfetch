@@ -104,7 +104,13 @@
     "errorEmptyBatch": "Pega al menos una URL (una por línea)",
     "errorFail": "Error al añadir, comprueba la URL",
     "template": "Plantilla de tarea",
-    "templateNone": "Ninguna (sin plantilla)"
+    "templateNone": "Ninguna (sin plantilla)",
+    "customTrackers": "Trackers personalizados (uno por línea)",
+    "customTrackersHint": "Combinado con trackers públicos integrados",
+    "mirrors": "URLs espejo (una por línea)",
+    "mirrorsHint": "Mismo archivo desde varias fuentes — chunks distribuidos, fallos cambian al siguiente espejo",
+    "dependsOn": "Depende de (IDs de tarea, separados por coma)",
+    "dependsOnHint": "Esta tarea espera a que todas las tareas listadas terminen"
   },
   "urlType": {
     "http": "Descarga HTTP",

@@ -104,7 +104,13 @@
     "errorEmptyBatch": "Cole pelo menos uma URL (uma por linha)",
     "errorFail": "Falha ao adicionar, verifique a URL",
     "template": "Modelo de tarefa",
-    "templateNone": "Nenhum (sem modelo)"
+    "templateNone": "Nenhum (sem modelo)",
+    "customTrackers": "Trackers personalizados (um por linha)",
+    "customTrackersHint": "Combinado com trackers públicos integrados",
+    "mirrors": "URLs espelho (uma por linha)",
+    "mirrorsHint": "Mesmo arquivo de várias fontes — chunks distribuídos, falhas trocam para o próximo espelho",
+    "dependsOn": "Depende de (IDs de tarefa, separados por vírgula)",
+    "dependsOnHint": "Esta tarefa aguarda até que todas as tarefas listadas terminem"
   },
   "urlType": {
     "http": "Download HTTP",
