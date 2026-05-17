@@ -133,36 +133,25 @@ const currentLang = LANGS.find((l) => l.code === lang) || LANGS[0]
       })
     })()
 
-    // Hero "Download" 按钮：完全静态直链。根据 UA 探测 OS，把 href 换成
-    //   github.com/.../releases/download/v<VER>/<file>
-    // 这样 GitHub 一旦发布 release，链接就 302 到 CDN 实际文件 — 不依赖 GitHub
-    // API、也不会先跳到 release 页让用户自己挑。
-    //
-    // 版本号要和 src/components/Download.astro + scripts/release.sh 同步。
-    (function () {
+    // Hero "Download" 按钮：默认 href 已是 macOS universal dmg。JS 探测 OS
+    // 后，从按钮上的 data-{os}-href / data-{os}-text 属性读对应平台的链接和
+    // 文案,把 href 换成 "Download for Windows" 这种完整短语,而不是 base + 后缀。
+    // 模式参考 notebook/web 的 Hero.astro。
+    // 前导 ; 防止上一个 IIFE 的 })() 后没分号导致两个 IIFE 被合并成函数调用。
+    ;(function () {
       const btn = document.getElementById('download-cta')
       const label = document.getElementById('download-cta-label')
       if (!btn) return
       const ua = navigator.userAgent || ''
-      const platform = (navigator.platform || '').toLowerCase()
-      const VERSION = '0.2.0'
-      const BASE = 'https://github.com/guangtoutong/unfetch/releases/download/v' + VERSION + '/'
-
-      let osLabel = 'Windows'
-      let assetFile = 'unfetch_' + VERSION + '_x64-setup.exe'
-      if (/Mac|iPhone|iPad/i.test(ua) || platform.includes('mac')) {
-        // 只发 universal dmg，Apple Silicon 和 Intel 共用
-        osLabel = 'macOS'
-        assetFile = 'unfetch_' + VERSION + '_universal.dmg'
-      } else if (/Linux|X11/i.test(ua)) {
-        osLabel = 'Linux'
-        assetFile = 'unfetch_' + VERSION + '_amd64.AppImage'
-      }
-      btn.href = BASE + assetFile
-      if (label) {
-        const base = (label.textContent || '').trim()
-        label.textContent = base + ' · ' + osLabel
-      }
+      const platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || ''
+      let os = 'mac'
+      if (/Win/i.test(ua) || /Windows/i.test(platform)) os = 'win'
+      else if (/Linux/i.test(ua) && !/Android/i.test(ua)) os = 'linux'
+      else if (/Mac|iPhone|iPad/i.test(ua) || /Mac/i.test(platform)) os = 'mac'
+      const href = btn.getAttribute('data-' + os + '-href')
+      const text = btn.getAttribute('data-' + os + '-text')
+      if (href) btn.setAttribute('href', href)
+      if (text && label) label.textContent = text
     })()
   </script>
 </body>

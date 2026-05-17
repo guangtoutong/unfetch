@@ -30,8 +30,13 @@ interface Strings {
     title: string
     subtitle: string
     download: string
+    downloadForMac: string
+    downloadForWindows: string
+    downloadForLinux: string
+    allPlatforms: string
     mcp: string
     requirements: string
+    chips: string[]
   }
   features: {
     title: string
@@ -79,9 +84,14 @@ const en: Strings = {
     tag: 'v0.2.0 · Free · Open Source · No ads · No telemetry',
     title: 'Downloads built for humans and AI',
     subtitle: 'Fast multi-mirror HTTP, BT with selective file picker, 1000+ video sites, RSS auto-fetch, completion hooks, remote Web UI, 5 themes — driven by GUI, CLI or AI (MCP).',
-    download: 'Download',
+    download: 'Download unfetch',
+    downloadForMac: 'Download for macOS',
+    downloadForWindows: 'Download for Windows',
+    downloadForLinux: 'Download for Linux',
+    allPlatforms: 'See all platforms ↓',
     mcp: 'Use with AI (MCP)',
     requirements: 'Windows 10+ · macOS 11+ · Linux x64 · ~8 MB',
+    chips: ['⚡ Multi-mirror HTTP', '🧲 BT / Magnet', '🎬 1000+ sites', '🤖 MCP-native', '🌐 Remote Web UI', '🎨 5 themes'],
   },
   features: {
     title: 'Everything a download manager should be',
@@ -144,9 +154,14 @@ const zh: Strings = {
     tag: 'v0.2.0 · 免费 · 开源 · 无广告 · 无遥测',
     title: '为人和 AI 设计的下载工具',
     subtitle: '多镜像 HTTP、BT 文件选择、1000+ 视频网站、RSS 订阅、完成钩子、远程 Web UI、5 套主题 — GUI / CLI / AI（MCP）都能驱动。',
-    download: '立即下载',
+    download: '下载 unfetch',
+    downloadForMac: '下载 macOS 版本',
+    downloadForWindows: '下载 Windows 版本',
+    downloadForLinux: '下载 Linux 版本',
+    allPlatforms: '查看所有平台 ↓',
     mcp: '在 AI 里使用 (MCP)',
     requirements: 'Windows 10+ · macOS 11+ · Linux x64 · 约 8 MB',
+    chips: ['⚡ 多镜像 HTTP', '🧲 BT / 磁力', '🎬 1000+ 视频网站', '🤖 MCP 原生', '🌐 远程 Web UI', '🎨 5 套主题'],
   },
   features: {
     title: '下载管理器该有的样子',

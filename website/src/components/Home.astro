@@ -6,6 +6,13 @@ interface Props { lang: string }
 const { lang } = Astro.props
 const s = getStrings(lang)
 const mcpHref = lang === 'en' ? '/mcp' : `/${lang}/mcp`
+
+const VERSION = '0.2.0'
+const REPO = 'guangtoutong/unfetch'
+const baseUrl = `https://github.com/${REPO}/releases/download/v${VERSION}`
+const dlMac = `${baseUrl}/unfetch_${VERSION}_universal.dmg`
+const dlWin = `${baseUrl}/unfetch_${VERSION}_x64-setup.exe`
+const dlLinux = `${baseUrl}/unfetch_${VERSION}_amd64.AppImage`
 ---
 <section style="padding: 80px 0 60px;">
   <div class="container" style="text-align: center;">
@@ -19,7 +26,15 @@ const mcpHref = lang === 'en' ? '/mcp' : `/${lang}/mcp`
       {s.hero.subtitle}
     </p>
     <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-      <a id="download-cta" href="https://github.com/guangtoutong/unfetch/releases/download/v0.2.0/unfetch_0.2.0_universal.dmg" data-default-label={s.hero.download}
+      <a id="download-cta"
+         href={dlMac}
+         data-default-text={s.hero.download}
+         data-mac-text={s.hero.downloadForMac}
+         data-win-text={s.hero.downloadForWindows}
+         data-linux-text={s.hero.downloadForLinux}
+         data-mac-href={dlMac}
+         data-win-href={dlWin}
+         data-linux-href={dlLinux}
          style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 8px 24px rgba(99,102,241,0.4);">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
           <polyline points="8 17 12 21 16 17" />
@@ -39,6 +54,13 @@ const mcpHref = lang === 'en' ? '/mcp' : `/${lang}/mcp`
     </div>
     <p style="margin-top: 16px; font-size: 12px; color: var(--muted);">{s.hero.requirements}</p>
 
+    <div style="margin-top: 14px;">
+      <a href={(lang === 'en' ? '/' : `/${lang}/`) + '#download'}
+         style="display: inline-block; color: var(--muted); font-size: 13px; border-bottom: 1px dashed rgba(255,255,255,0.18); padding-bottom: 1px;">
+        {s.hero.allPlatforms}
+      </a>
+    </div>
+
     <div class="stats-row">
       <a href="https://github.com/guangtoutong/unfetch/stargazers" target="_blank" rel="noreferrer">
         <img src="https://img.shields.io/github/stars/guangtoutong/unfetch?label=stars&color=0d1117&labelColor=0d1117&style=flat" alt="GitHub stars" height="22" />
@@ -49,6 +71,12 @@ const mcpHref = lang === 'en' ? '/mcp' : `/${lang}/mcp`
       <a href="https://github.com/guangtoutong/unfetch/releases/latest" target="_blank" rel="noreferrer">
         <img src="https://img.shields.io/github/v/release/guangtoutong/unfetch?label=latest&color=0d1117&labelColor=0d1117&style=flat" alt="latest release" height="22" />
       </a>
+    </div>
+
+    <div style="margin-top: 28px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+      {s.hero.chips.map((c) => (
+        <span style="display: inline-block; padding: 6px 12px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--border); font-size: 12px; color: var(--muted);">{c}</span>
+      ))}
     </div>
   </div>
 </section>
