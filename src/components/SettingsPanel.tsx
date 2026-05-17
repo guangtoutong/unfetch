@@ -429,6 +429,12 @@ export const SettingsPanel: React.FC = () => {
                   checked={!!config.bt_force_utp}
                   onChange={(v) => updateConfig({ bt_force_utp: v })}
                 />
+                <ToggleRow
+                  label="自动 uTP fallback"
+                  description="BT 任务启动 30 秒内速度低于 100 KB/s 时，自动切到 uTP-only 重连一次。无需用户介入，适合国内 ISP 屏蔽场景"
+                  checked={!!config.bt_auto_utp_fallback}
+                  onChange={(v) => updateConfig({ bt_auto_utp_fallback: v })}
+                />
               </Section>
             </div>
           </motion.div>

@@ -1,7 +1,8 @@
-import React, { forwardRef, useMemo, useState } from 'react'
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useTaskStore } from '../stores/taskStore'
+import { useSettingsStore } from '../stores/settingsStore'
 import { ContextMenu, type MenuItem } from './ContextMenu'
 import {
   formatBytes,
@@ -57,6 +58,75 @@ const FileIcon: React.FC<{ filename: string; type: string }> = ({ filename, type
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
       <polyline points="14 2 14 8 20 8" />
     </svg>
+  )
+}
+
+// 慢速 BT 任务提示：连续 60s < 100KB/s 时显示"试试 uTP"按钮
+// 点击后开启全局 bt_auto_utp_fallback + pause/resume 当前任务以触发 fallback
+const SlowUTPHint: React.FC<{ task: Task }> = ({ task }) => {
+  const config = useSettingsStore((s) => s.config)
+  const updateConfig = useSettingsStore((s) => s.updateConfig)
+  const { pauseTask, resumeTask } = useTaskStore()
+  const slowSinceRef = useRef<number | null>(null)
+  const [showHint, setShowHint] = useState(false)
+  const [acting, setActing] = useState(false)
+
+  useEffect(() => {
+    // 不显示的前置条件：已切过、用户已强制 uTP、已开启自动 fallback
+    if (task.auto_utp_triggered || config.bt_force_utp || config.bt_auto_utp_fallback) {
+      setShowHint(false)
+      slowSinceRef.current = null
+      return
+    }
+    const SLOW = 100 * 1024
+    const WINDOW = 60_000
+    if (task.speed < SLOW) {
+      if (slowSinceRef.current === null) slowSinceRef.current = Date.now()
+      if (Date.now() - slowSinceRef.current >= WINDOW) setShowHint(true)
+    } else {
+      slowSinceRef.current = null
+      setShowHint(false)
+    }
+  }, [task.speed, task.auto_utp_triggered, config.bt_force_utp, config.bt_auto_utp_fallback])
+
+  if (!showHint) return null
+
+  const onClick = async () => {
+    if (acting) return
+    setActing(true)
+    try {
+      await updateConfig({ bt_auto_utp_fallback: true })
+      await pauseTask(task.id)
+      // 间隔 400ms 再 resume，避免 daemon 还没释放 client
+      setTimeout(() => {
+        resumeTask(task.id).catch(() => {})
+        setActing(false)
+      }, 400)
+    } catch {
+      setActing(false)
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={acting}
+      style={{
+        fontSize: 10,
+        padding: '2px 8px',
+        borderRadius: 4,
+        background: 'rgba(245,158,11,0.18)',
+        color: '#f59e0b',
+        border: '1px solid rgba(245,158,11,0.4)',
+        fontWeight: 600,
+        cursor: acting ? 'wait' : 'pointer',
+        letterSpacing: 0.3,
+      }}
+      title="速度偏慢可能是 ISP 屏蔽了 BT 端口；点击开启自动 uTP fallback 并重启本任务"
+    >
+      {acting ? '切换中…' : '试试 uTP'}
+    </button>
   )
 }
 
@@ -568,6 +638,27 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
               </span>
             </>
           )}
+
+          {/* BT 已自动切 uTP 徽章 */}
+          {task.type === 'bt' && task.auto_utp_triggered && (
+            <span
+              style={{
+                fontSize: 10,
+                padding: '2px 6px',
+                borderRadius: 4,
+                background: 'rgba(168,85,247,0.18)',
+                color: '#a855f7',
+                fontWeight: 600,
+                letterSpacing: 0.3,
+              }}
+              title="速度偏慢，已自动切到 uTP-only 模式重连"
+            >
+              已切 uTP
+            </span>
+          )}
+
+          {/* 慢速提示按钮 */}
+          {task.type === 'bt' && task.status === 'downloading' && <SlowUTPHint task={task} />}
 
           {/* BT 类型：peer / seeder 统计 */}
           {task.type === 'bt' && task.status === 'downloading' && (task.peers_connected || task.peers_total || task.seeders) !== undefined && (

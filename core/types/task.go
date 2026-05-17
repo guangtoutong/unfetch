@@ -83,6 +83,8 @@ type Task struct {
 	PeersConnected int `json:"peers_connected,omitempty"`
 	PeersTotal     int `json:"peers_total,omitempty"`
 	Seeders        int `json:"seeders,omitempty"`
+	// BT：daemon 检测速度低自动切到 uTP-only 后置 true，仅本次任务有效
+	AutoUTPTriggered bool `json:"auto_utp_triggered,omitempty"`
 	CreatedAt  time.Time  `json:"created_at"`
 	FinishedAt *time.Time `json:"finished_at,omitempty"`
 	Error      string     `json:"error,omitempty"`
@@ -130,6 +132,7 @@ type Config struct {
 	MaxRetries      int    `json:"max_retries"`  // 默认 3
 	OnAllDone       OnAllDoneAction `json:"on_all_done"`
 	BTForceUTP      bool   `json:"bt_force_utp"` // 强制 uTP（关闭 TCP），绕开 ISP BT 端口屏蔽
+	BTAutoUTPFallback bool `json:"bt_auto_utp_fallback"` // 速度低时自动切 uTP-only 重连
 
 	// 远程 Web UI
 	RemoteEnabled bool   `json:"remote_enabled"` // true 时绑定 0.0.0.0 + 强制 token

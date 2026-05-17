@@ -88,8 +88,36 @@ func (d *BTDownloader) getConfig() *types.Config {
 	return d.config
 }
 
+// errSlowFallback 内部信号：speed 长时间过低，外层应当切到 uTP-only 重试
+var errSlowFallback = fmt.Errorf("slow speed, triggering uTP fallback")
+
 // Download 下载 BT 任务（magnet 或 .torrent 文件 URL）
+// 支持自动 uTP fallback：当 cfg.BTAutoUTPFallback=true 时，
+// 初始连接 30s 内速度持续 <100KB/s 会自动 drop 重建 client 切 uTP-only 重试一次。
 func (d *BTDownloader) Download(ctx context.Context, task *types.Task, onProgress func()) error {
+	// 第一轮：按配置（默认 TCP+uTP，或用户已强制 uTP-only）
+	// 第二轮（仅 BTAutoUTPFallback 触发）：强制 uTP-only
+	for attempt := 0; attempt < 2; attempt++ {
+		forceUTP := attempt > 0
+		err := d.downloadOnce(ctx, task, onProgress, forceUTP)
+		if err == nil {
+			return nil
+		}
+		// 只有"慢速 fallback"才进入第二轮，其他错误直接返回
+		if err != errSlowFallback {
+			return err
+		}
+		// 第二轮前置标记
+		task.AutoUTPTriggered = true
+		onProgress()
+		slog.Info("bt: auto-fallback to uTP-only after slow start", "id", task.ID)
+	}
+	return nil
+}
+
+// downloadOnce 真正跑一轮下载。forceUTP 为 true 时关 TCP，仅走 uTP。
+// 返回 errSlowFallback 表示初始 30s 速度过低且开启了 BTAutoUTPFallback，期望外层切 uTP 重试。
+func (d *BTDownloader) downloadOnce(ctx context.Context, task *types.Task, onProgress func(), forceUTP bool) error {
 	cfg := d.getConfig()
 
 	// 确保下载目录存在
@@ -119,10 +147,10 @@ func (d *BTDownloader) Download(ctx context.Context, task *types.Task, onProgres
 	clientCfg.DisableWebtorrent = false    // WebTorrent peer (浏览器端)
 	clientCfg.AcceptPeerConnections = true
 	clientCfg.DropMutuallyCompletePeers = true
-	// uTP-only 模式：绕开 ISP 对 BT TCP 端口的屏蔽
-	if cfg != nil && cfg.BTForceUTP {
+	// uTP-only 模式：用户强制 / 本轮 fallback 强制
+	if forceUTP || (cfg != nil && cfg.BTForceUTP) {
 		clientCfg.DisableTCP = true
-		slog.Info("bt: uTP-only mode enabled")
+		slog.Info("bt: uTP-only mode enabled", "reason", map[bool]string{true: "auto-fallback", false: "user-forced"}[forceUTP])
 	} else {
 		clientCfg.DisableTCP = false
 	}
@@ -261,6 +289,12 @@ func (d *BTDownloader) Download(ctx context.Context, task *types.Task, onProgres
 	ticker := time.NewTicker(500 * time.Millisecond)
 	defer ticker.Stop()
 
+	startTime := time.Now()
+	initialDone := task.DoneBytes // 断点续传时不为 0
+	slowCheckDone := false
+	// 仅在第一轮（未 forceUTP）+ 开启了自动 fallback + 用户未强制 uTP 时启用检测
+	autoFallbackArmed := !forceUTP && cfg != nil && cfg.BTAutoUTPFallback && !cfg.BTForceUTP
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -275,6 +309,22 @@ func (d *BTDownloader) Download(ctx context.Context, task *types.Task, onProgres
 			task.PeersConnected = stats.ActivePeers
 			task.PeersTotal = stats.TotalPeers
 			task.Seeders = stats.ConnectedSeeders
+
+			// 30s 后检查初始速度；< 100 KB/s 触发 uTP fallback
+			if autoFallbackArmed && !slowCheckDone {
+				elapsed := time.Since(startTime)
+				if elapsed >= 30*time.Second {
+					slowCheckDone = true
+					downloaded := done - initialDone
+					rate := float64(downloaded) / elapsed.Seconds()
+					if rate < 100*1024 {
+						slog.Info("bt: slow start detected, dropping for uTP fallback",
+							"id", task.ID, "rate_kbs", int(rate/1024))
+						t.Drop()
+						return errSlowFallback
+					}
+				}
+			}
 
 			if t.Complete.Bool() {
 				task.DoneBytes = task.TotalBytes

@@ -41,6 +41,7 @@ export interface Task {
   peers_connected?: number
   peers_total?: number
   seeders?: number
+  auto_utp_triggered?: boolean
 }
 
 export interface SpeedScheduleEntry {
@@ -62,6 +63,7 @@ export interface Config {
   max_retries?: number
   on_all_done?: OnAllDoneAction
   bt_force_utp?: boolean
+  bt_auto_utp_fallback?: boolean
 }
 
 export interface AddTaskRequest {
