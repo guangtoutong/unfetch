@@ -102,7 +102,9 @@
     "submitting": "Dodawanie...",
     "errorEmpty": "Wprowadź URL",
     "errorEmptyBatch": "Wklej co najmniej jeden URL (po jednym w wierszu)",
-    "errorFail": "Nie udało się dodać, sprawdź URL"
+    "errorFail": "Nie udało się dodać, sprawdź URL",
+    "template": "Szablon zadania",
+    "templateNone": "Brak (bez szablonu)"
   },
   "urlType": {
     "http": "Pobieranie HTTP",
@@ -160,7 +162,49 @@
     "forceUTP": "Wymuś uTP (wyłącz TCP)",
     "forceUTPHint": "Niektórzy ISP blokują porty TCP BT; przejście na uTP (UDP) może przywrócić połączenia, ale ogranicza część źródeł peerów.",
     "autoUtpFallback": "Automatyczny fallback uTP",
-    "autoUtpFallbackHint": "Przełącza na tylko uTP po 30 s, jeśli prędkość spada poniżej 100 KB/s. Idealne gdy ISP dławi BT."
+    "autoUtpFallbackHint": "Przełącza na tylko uTP po 30 s, jeśli prędkość spada poniżej 100 KB/s. Idealne gdy ISP dławi BT.",
+    "rss": {
+      "title": "Subskrypcje RSS",
+      "empty": "Brak kanałów",
+      "add": "+ Dodaj kanał",
+      "name": "Nazwa",
+      "url": "URL RSS",
+      "regex": "Regex tytułu (puste = wszystkie)",
+      "interval": "Interwał (min)",
+      "saveDir": "Folder (puste = domyślny)",
+      "tags": "Tagi (oddzielone przecinkami)",
+      "enabled": "Włączone",
+      "delete": "Usuń",
+      "hint": "Nowe pozycje są kolejkowane; deduplikacja GUID jest zapisywana."
+    },
+    "hooks": {
+      "title": "Hooki po zakończeniu",
+      "webhookLabel": "URL webhooka",
+      "webhookHint": "POST JSON po zakończeniu",
+      "execLabel": "Polecenie powłoki",
+      "execHint": "Symbole: {id} {filename} {save_path} {full_path} {url}"
+    },
+    "templates": {
+      "title": "Szablony zadań",
+      "empty": "Brak szablonów",
+      "add": "+ Dodaj szablon",
+      "name": "Nazwa",
+      "cookies": "Cookies (Netscape)",
+      "userAgent": "User-Agent",
+      "headers": "Dodatkowe nagłówki (jeden na linię: Key: Value)",
+      "delete": "Usuń",
+      "hint": "Wstępne ustawienia logowania i UA per strona; wybierz po nazwie przy dodawaniu."
+    },
+    "remote": {
+      "title": "Zdalny Web UI",
+      "enable": "Włącz dostęp zdalny",
+      "enableHint": "Wiąże z 0.0.0.0:19543. Dostępne z urządzeń w tej samej LAN.",
+      "token": "Token dostępu",
+      "tokenGen": "Wygeneruj ponownie",
+      "tokenHint": "Trzymaj w tajemnicy — kto go ma, ma pełną kontrolę.",
+      "urlHint": "Zeskanuj QR lub otwórz URL",
+      "restart": "Uruchom daemon ponownie, by zastosować"
+    }
   },
   "statusBar": {
     "connected": "Połączono",

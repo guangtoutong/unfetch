@@ -102,7 +102,9 @@
     "submitting": "添加中...",
     "errorEmpty": "请输入下载地址",
     "errorEmptyBatch": "请粘贴至少一个 URL（每行一个）",
-    "errorFail": "添加失败，请检查地址"
+    "errorFail": "添加失败，请检查地址",
+    "template": "任务模板",
+    "templateNone": "无（不应用模板）"
   },
   "urlType": {
     "http": "HTTP 下载",
@@ -160,7 +162,49 @@
     "forceUTP": "强制 uTP 模式（关闭 TCP）",
     "forceUTPHint": "部分 ISP 屏蔽 BT 的 TCP 端口；切换到 uTP (UDP) 后可能恢复连接，但同时会限制部分 peer 来源。",
     "autoUtpFallback": "自动 uTP fallback",
-    "autoUtpFallbackHint": "BT 任务启动 30 秒内速度低于 100 KB/s 时，自动切到 uTP-only 重连一次。无需用户介入，适合国内 ISP 屏蔽场景。"
+    "autoUtpFallbackHint": "BT 任务启动 30 秒内速度低于 100 KB/s 时，自动切到 uTP-only 重连一次。无需用户介入，适合国内 ISP 屏蔽场景。",
+    "rss": {
+      "title": "RSS 订阅",
+      "empty": "暂无订阅源",
+      "add": "+ 添加订阅",
+      "name": "名称",
+      "url": "RSS URL",
+      "regex": "标题正则过滤（空 = 全部接收）",
+      "interval": "轮询间隔（分钟）",
+      "saveDir": "保存目录（空 = 默认）",
+      "tags": "标签（逗号分隔）",
+      "enabled": "启用",
+      "delete": "删除",
+      "hint": "新条目自动入队下载；GUID 去重持久化"
+    },
+    "hooks": {
+      "title": "完成钩子",
+      "webhookLabel": "Webhook URL",
+      "webhookHint": "任务完成时 POST JSON {id, filename, save_path, url, ...}",
+      "execLabel": "执行命令",
+      "execHint": "占位符：{id} {filename} {save_path} {full_path} {url}"
+    },
+    "templates": {
+      "title": "任务模板",
+      "empty": "暂无模板",
+      "add": "+ 添加模板",
+      "name": "名称",
+      "cookies": "Cookies (Netscape)",
+      "userAgent": "User-Agent",
+      "headers": "额外 Headers（每行一对：Key: Value）",
+      "delete": "删除",
+      "hint": "为特定网站预设登录态和 UA；在添加任务时按名称引用"
+    },
+    "remote": {
+      "title": "远程 Web UI",
+      "enable": "启用远程访问",
+      "enableHint": "开启后绑定 0.0.0.0:19543，可通过同局域网设备访问",
+      "token": "访问 Token",
+      "tokenGen": "重新生成",
+      "tokenHint": "妥善保管，等同于完整控制权",
+      "urlHint": "扫码或浏览器访问",
+      "restart": "修改后需重启 daemon 生效"
+    }
   },
   "statusBar": {
     "connected": "已连接",

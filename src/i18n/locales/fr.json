@@ -102,7 +102,9 @@
     "submitting": "Ajout...",
     "errorEmpty": "Veuillez saisir une URL",
     "errorEmptyBatch": "Veuillez coller au moins une URL (une par ligne)",
-    "errorFail": "Échec, vérifiez l'URL"
+    "errorFail": "Échec, vérifiez l'URL",
+    "template": "Modèle de tâche",
+    "templateNone": "Aucun (pas de modèle)"
   },
   "urlType": {
     "http": "Téléchargement HTTP",
@@ -160,7 +162,49 @@
     "forceUTP": "Forcer uTP (TCP désactivé)",
     "forceUTPHint": "Certains FAI bloquent les ports TCP BT ; basculer en uTP (UDP) peut rétablir la connexion mais limite certaines sources de pairs.",
     "autoUtpFallback": "Bascule uTP automatique",
-    "autoUtpFallbackHint": "Passe en uTP-only après 30 s si la vitesse reste sous 100 Ko/s. Idéal contre les FAI qui bridens le BT."
+    "autoUtpFallbackHint": "Passe en uTP-only après 30 s si la vitesse reste sous 100 Ko/s. Idéal contre les FAI qui bridens le BT.",
+    "rss": {
+      "title": "Abonnements RSS",
+      "empty": "Aucun flux",
+      "add": "+ Ajouter un flux",
+      "name": "Nom",
+      "url": "URL RSS",
+      "regex": "Regex de titre (vide = tout)",
+      "interval": "Intervalle (min)",
+      "saveDir": "Dossier (vide = défaut)",
+      "tags": "Tags (virgules)",
+      "enabled": "Activé",
+      "delete": "Supprimer",
+      "hint": "Les nouveaux éléments sont mis en file automatiquement ; déduplication GUID persistée."
+    },
+    "hooks": {
+      "title": "Hooks de fin",
+      "webhookLabel": "URL du webhook",
+      "webhookHint": "POST JSON à la fin de la tâche",
+      "execLabel": "Commande shell",
+      "execHint": "Variables : {id} {filename} {save_path} {full_path} {url}"
+    },
+    "templates": {
+      "title": "Modèles de tâche",
+      "empty": "Aucun modèle",
+      "add": "+ Ajouter un modèle",
+      "name": "Nom",
+      "cookies": "Cookies (Netscape)",
+      "userAgent": "User-Agent",
+      "headers": "En-têtes (un par ligne : Key: Value)",
+      "delete": "Supprimer",
+      "hint": "Pré-configurez login et UA par site ; sélectionnez par nom à l'ajout."
+    },
+    "remote": {
+      "title": "Interface Web distante",
+      "enable": "Activer l'accès distant",
+      "enableHint": "Lié à 0.0.0.0:19543. Accessible depuis les appareils du même réseau.",
+      "token": "Jeton d'accès",
+      "tokenGen": "Régénérer",
+      "tokenHint": "Gardez-le secret — quiconque l'a obtient le contrôle total.",
+      "urlHint": "Scanner le QR ou ouvrir l'URL",
+      "restart": "Redémarrer le daemon pour appliquer"
+    }
   },
   "statusBar": {
     "connected": "Connecté",

@@ -102,7 +102,9 @@
     "submitting": "Hinzufügen...",
     "errorEmpty": "Bitte URL eingeben",
     "errorEmptyBatch": "Bitte mindestens eine URL einfügen (eine pro Zeile)",
-    "errorFail": "Hinzufügen fehlgeschlagen, URL prüfen"
+    "errorFail": "Hinzufügen fehlgeschlagen, URL prüfen",
+    "template": "Aufgaben-Vorlage",
+    "templateNone": "Keine (keine Vorlage)"
   },
   "urlType": {
     "http": "HTTP-Download",
@@ -160,7 +162,49 @@
     "forceUTP": "uTP erzwingen (TCP aus)",
     "forceUTPHint": "Einige ISPs blockieren BT-TCP-Ports; ein Wechsel zu uTP (UDP) kann Verbindungen wiederherstellen, schränkt aber manche Peer-Quellen ein.",
     "autoUtpFallback": "Automatischer uTP-Fallback",
-    "autoUtpFallbackHint": "Wechselt nach 30 s automatisch zu uTP-only, wenn die Geschwindigkeit unter 100 KB/s bleibt. Ideal bei ISP-Drosselung."
+    "autoUtpFallbackHint": "Wechselt nach 30 s automatisch zu uTP-only, wenn die Geschwindigkeit unter 100 KB/s bleibt. Ideal bei ISP-Drosselung.",
+    "rss": {
+      "title": "RSS-Abos",
+      "empty": "Keine Feeds",
+      "add": "+ Feed hinzufügen",
+      "name": "Name",
+      "url": "RSS-URL",
+      "regex": "Titel-Regex (leer = alle)",
+      "interval": "Abfrageintervall (Min.)",
+      "saveDir": "Speicherort (leer = Standard)",
+      "tags": "Tags (kommagetrennt)",
+      "enabled": "Aktiv",
+      "delete": "Löschen",
+      "hint": "Neue Einträge werden automatisch eingereiht; GUID-Deduplizierung wird persistiert."
+    },
+    "hooks": {
+      "title": "Abschluss-Hooks",
+      "webhookLabel": "Webhook-URL",
+      "webhookHint": "POSTet JSON nach Abschluss",
+      "execLabel": "Shell-Befehl",
+      "execHint": "Platzhalter: {id} {filename} {save_path} {full_path} {url}"
+    },
+    "templates": {
+      "title": "Aufgaben-Vorlagen",
+      "empty": "Keine Vorlagen",
+      "add": "+ Vorlage hinzufügen",
+      "name": "Name",
+      "cookies": "Cookies (Netscape)",
+      "userAgent": "User-Agent",
+      "headers": "Zusatz-Header (eine pro Zeile: Key: Value)",
+      "delete": "Löschen",
+      "hint": "Voreinstellungen für Login & UA pro Site; beim Hinzufügen einer Aufgabe nach Name auswählen."
+    },
+    "remote": {
+      "title": "Remote-Web-UI",
+      "enable": "Fernzugriff aktivieren",
+      "enableHint": "Bindet an 0.0.0.0:19543. Erreichbar von Geräten im selben LAN.",
+      "token": "Zugriffs-Token",
+      "tokenGen": "Neu generieren",
+      "tokenHint": "Geheim halten — wer den Token hat, hat volle Kontrolle.",
+      "urlHint": "QR scannen oder URL im Browser öffnen",
+      "restart": "Daemon neu starten, um Änderungen zu übernehmen"
+    }
   },
   "statusBar": {
     "connected": "Verbunden",

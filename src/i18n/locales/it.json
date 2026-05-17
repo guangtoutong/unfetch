@@ -102,7 +102,9 @@
     "submitting": "Aggiunta...",
     "errorEmpty": "Inserisci un URL",
     "errorEmptyBatch": "Incolla almeno un URL (uno per riga)",
-    "errorFail": "Aggiunta fallita, controlla l'URL"
+    "errorFail": "Aggiunta fallita, controlla l'URL",
+    "template": "Modello di attività",
+    "templateNone": "Nessuno (nessun modello)"
   },
   "urlType": {
     "http": "Download HTTP",
@@ -160,7 +162,49 @@
     "forceUTP": "Forza uTP (TCP disattivato)",
     "forceUTPHint": "Alcuni ISP bloccano le porte TCP del BT; passare a uTP (UDP) può ripristinare la connessione ma limita alcune fonti di peer.",
     "autoUtpFallback": "Fallback uTP automatico",
-    "autoUtpFallbackHint": "Passa a solo uTP dopo 30 s se la velocità resta sotto 100 KB/s. Utile quando l'ISP limita il BT."
+    "autoUtpFallbackHint": "Passa a solo uTP dopo 30 s se la velocità resta sotto 100 KB/s. Utile quando l'ISP limita il BT.",
+    "rss": {
+      "title": "Sottoscrizioni RSS",
+      "empty": "Nessun feed",
+      "add": "+ Aggiungi feed",
+      "name": "Nome",
+      "url": "URL RSS",
+      "regex": "Regex del titolo (vuoto = tutti)",
+      "interval": "Intervallo (min)",
+      "saveDir": "Cartella (vuoto = default)",
+      "tags": "Tag (separati da virgola)",
+      "enabled": "Attivo",
+      "delete": "Elimina",
+      "hint": "I nuovi elementi vengono accodati; deduplica GUID persistente."
+    },
+    "hooks": {
+      "title": "Hook al completamento",
+      "webhookLabel": "URL del webhook",
+      "webhookHint": "POST JSON al completamento",
+      "execLabel": "Comando shell",
+      "execHint": "Segnaposto: {id} {filename} {save_path} {full_path} {url}"
+    },
+    "templates": {
+      "title": "Modelli di attività",
+      "empty": "Nessun modello",
+      "add": "+ Aggiungi modello",
+      "name": "Nome",
+      "cookies": "Cookies (Netscape)",
+      "userAgent": "User-Agent",
+      "headers": "Header extra (uno per riga: Key: Value)",
+      "delete": "Elimina",
+      "hint": "Preset login e UA per sito; seleziona per nome quando aggiungi una task."
+    },
+    "remote": {
+      "title": "UI Web remota",
+      "enable": "Abilita accesso remoto",
+      "enableHint": "Si lega a 0.0.0.0:19543. Raggiungibile da dispositivi sulla stessa LAN.",
+      "token": "Token di accesso",
+      "tokenGen": "Rigenera",
+      "tokenHint": "Tienilo segreto — chi lo ha ottiene controllo totale.",
+      "urlHint": "Scansiona QR o apri URL",
+      "restart": "Riavvia il daemon per applicare"
+    }
   },
   "statusBar": {
     "connected": "Connesso",

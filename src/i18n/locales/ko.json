@@ -102,7 +102,9 @@
     "submitting": "추가 중...",
     "errorEmpty": "다운로드 URL을 입력하세요",
     "errorEmptyBatch": "최소 하나의 URL을 붙여넣으세요 (한 줄에 하나)",
-    "errorFail": "추가 실패, URL을 확인하세요"
+    "errorFail": "추가 실패, URL을 확인하세요",
+    "template": "작업 템플릿",
+    "templateNone": "없음 (템플릿 미사용)"
   },
   "urlType": {
     "http": "HTTP 다운로드",
@@ -160,7 +162,49 @@
     "forceUTP": "uTP 강제 (TCP 비활성화)",
     "forceUTPHint": "일부 ISP는 BT TCP 포트를 차단합니다. uTP (UDP)로 전환하면 연결이 복구될 수 있지만 일부 피어 소스가 제한됩니다.",
     "autoUtpFallback": "uTP 자동 전환",
-    "autoUtpFallbackHint": "BT 작업 시작 30초 안에 속도가 100 KB/s 미만이면 자동으로 uTP 전용으로 재연결합니다. ISP가 BT를 차단하는 환경에 적합."
+    "autoUtpFallbackHint": "BT 작업 시작 30초 안에 속도가 100 KB/s 미만이면 자동으로 uTP 전용으로 재연결합니다. ISP가 BT를 차단하는 환경에 적합.",
+    "rss": {
+      "title": "RSS 구독",
+      "empty": "피드 없음",
+      "add": "+ 피드 추가",
+      "name": "이름",
+      "url": "RSS URL",
+      "regex": "제목 정규식 (비어있으면 모두 수락)",
+      "interval": "폴링 간격 (분)",
+      "saveDir": "저장 폴더 (비어있으면 기본)",
+      "tags": "태그 (쉼표 구분)",
+      "enabled": "활성화",
+      "delete": "삭제",
+      "hint": "새 항목은 자동으로 큐에 추가됩니다. GUID 중복 제거는 영구 저장됩니다."
+    },
+    "hooks": {
+      "title": "완료 훅",
+      "webhookLabel": "Webhook URL",
+      "webhookHint": "작업 완료 시 JSON POST",
+      "execLabel": "셸 명령",
+      "execHint": "플레이스홀더: {id} {filename} {save_path} {full_path} {url}"
+    },
+    "templates": {
+      "title": "작업 템플릿",
+      "empty": "템플릿 없음",
+      "add": "+ 템플릿 추가",
+      "name": "이름",
+      "cookies": "Cookies (Netscape)",
+      "userAgent": "User-Agent",
+      "headers": "추가 헤더 (한 줄에 하나: Key: Value)",
+      "delete": "삭제",
+      "hint": "사이트별 로그인과 UA를 사전 설정. 작업 추가 시 이름으로 참조."
+    },
+    "remote": {
+      "title": "원격 웹 UI",
+      "enable": "원격 액세스 활성화",
+      "enableHint": "활성화하면 0.0.0.0:19543에 바인딩됩니다. 같은 LAN 기기에서 접근 가능.",
+      "token": "액세스 토큰",
+      "tokenGen": "재생성",
+      "tokenHint": "안전하게 보관하세요. 이 토큰은 완전한 제어 권한입니다.",
+      "urlHint": "QR 스캔 또는 브라우저에서 열기",
+      "restart": "변경 사항을 적용하려면 daemon 재시작"
+    }
   },
   "statusBar": {
     "connected": "연결됨",

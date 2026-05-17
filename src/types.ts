@@ -50,6 +50,23 @@ export interface SpeedScheduleEntry {
   limit: number
 }
 
+export interface RSSFeed {
+  name: string
+  url: string
+  filter_regex?: string
+  interval_min: number
+  enabled: boolean
+  save_dir?: string
+  tags?: string[]
+}
+
+export interface TaskTemplate {
+  name: string
+  cookies?: string
+  user_agent?: string
+  headers?: Record<string, string>
+}
+
 export interface Config {
   download_dir: string
   max_concurrent: number
@@ -64,6 +81,16 @@ export interface Config {
   on_all_done?: OnAllDoneAction
   bt_force_utp?: boolean
   bt_auto_utp_fallback?: boolean
+  // v0.1.1+ 远程 Web UI
+  remote_enabled?: boolean
+  remote_token?: string
+  // RSS 订阅
+  rss_feeds?: RSSFeed[]
+  // 完成钩子
+  on_complete_webhook?: string
+  on_complete_exec?: string
+  // 任务模板
+  task_templates?: TaskTemplate[]
 }
 
 export interface AddTaskRequest {
@@ -81,6 +108,7 @@ export interface AddTaskRequest {
   expected_md5?: string
   selected_files?: number[]
   custom_trackers?: string[]
+  template?: string
 }
 
 export interface TorrentFile {

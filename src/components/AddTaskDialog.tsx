@@ -79,6 +79,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
   const [startAt, setStartAt] = useState('') // datetime-local
   const [sha256, setSha256] = useState('')
   const [md5, setMd5] = useState('')
+  const [template, setTemplate] = useState('')
 
   // BT 文件选择
   const [torrentPreview, setTorrentPreview] = useState<TorrentPreview | null>(null)
@@ -169,6 +170,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
       expected_md5: md5 || undefined,
       selected_files: selectedFiles,
       custom_trackers: detectedType === 'bt' && trackerList.length > 0 ? trackerList : undefined,
+      template: template || undefined,
     }
   }
 
@@ -527,6 +529,26 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                       style={{ overflow: 'hidden' }}
                     >
                       <div style={{ paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        {/* 任务模板 */}
+                        {(config.task_templates ?? []).length > 0 && (
+                          <div>
+                            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>
+                              {t('addTask.template')}
+                            </label>
+                            <select
+                              value={template}
+                              onChange={(e) => setTemplate(e.target.value)}
+                              className="input-base"
+                              style={{ height: 38 }}
+                            >
+                              <option value="">{t('addTask.templateNone')}</option>
+                              {(config.task_templates ?? []).map((tpl) => (
+                                <option key={tpl.name} value={tpl.name}>{tpl.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+
                         {/* 代理 */}
                         <div>
                           <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>代理地址</label>

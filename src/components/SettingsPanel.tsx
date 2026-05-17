@@ -12,6 +12,8 @@ import {
 import { SpeedScheduleEditor } from './SpeedScheduleEditor'
 import { useThemeStore } from '../stores/themeStore'
 import { THEMES } from '../themes/themes'
+import type { Config, RSSFeed, TaskTemplate } from '../types'
+import type { TFunction } from 'i18next'
 
 export const SettingsPanel: React.FC = () => {
   const { t } = useTranslation()
@@ -453,6 +455,52 @@ export const SettingsPanel: React.FC = () => {
                   onChange={(v) => updateConfig({ bt_auto_utp_fallback: v })}
                 />
               </Section>
+
+              <Divider />
+
+              <Section title={t('settings.rss.title')} icon={
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M4 11a9 9 0 0 1 9 9" />
+                  <path d="M4 4a16 16 0 0 1 16 16" />
+                  <circle cx="5" cy="19" r="1" />
+                </svg>
+              }>
+                <RSSFeedsEditor config={config} updateConfig={updateConfig} t={t} />
+              </Section>
+
+              <Divider />
+
+              <Section title={t('settings.hooks.title')} icon={
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M5 12V7a5 5 0 0 1 10 0v5" />
+                  <path d="M19 12H5a2 2 0 0 0-2 2v7h18v-7a2 2 0 0 0-2-2z" />
+                </svg>
+              }>
+                <HooksEditor config={config} updateConfig={updateConfig} t={t} />
+              </Section>
+
+              <Divider />
+
+              <Section title={t('settings.templates.title')} icon={
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="4" y="3" width="16" height="18" rx="2" />
+                  <path d="M8 7h8M8 11h8M8 15h5" />
+                </svg>
+              }>
+                <TemplatesEditor config={config} updateConfig={updateConfig} t={t} />
+              </Section>
+
+              <Divider />
+
+              <Section title={t('settings.remote.title')} icon={
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="2" y="3" width="20" height="14" rx="2" />
+                  <line x1="8" y1="21" x2="16" y2="21" />
+                  <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+              }>
+                <RemoteEditor config={config} updateConfig={updateConfig} t={t} />
+              </Section>
             </div>
           </motion.div>
         </>
@@ -574,3 +622,321 @@ const ToggleRow: React.FC<{
     </button>
   </div>
 )
+
+// ============ A1 RSS 订阅源编辑器 ============
+interface EditorProps {
+  config: Config
+  updateConfig: (patch: Partial<Config>) => Promise<void>
+  t: TFunction
+}
+
+const RSSFeedsEditor: React.FC<EditorProps> = ({ config, updateConfig, t }) => {
+  const feeds = config.rss_feeds ?? []
+  const setFeeds = (next: RSSFeed[]) => updateConfig({ rss_feeds: next })
+  const update = (i: number, patch: Partial<RSSFeed>) =>
+    setFeeds(feeds.map((f, idx) => (idx === i ? { ...f, ...patch } : f)))
+  const remove = (i: number) => setFeeds(feeds.filter((_, idx) => idx !== i))
+  const add = () =>
+    setFeeds([
+      ...feeds,
+      { name: '', url: '', filter_regex: '', interval_min: 15, enabled: true, save_dir: '', tags: [] },
+    ])
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {feeds.length === 0 && (
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '4px 0' }}>
+          {t('settings.rss.empty')}
+        </div>
+      )}
+      {feeds.map((f, i) => (
+        <div
+          key={i}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 6,
+            padding: 10,
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: 8,
+          }}
+        >
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input
+              className="input-base"
+              placeholder={t('settings.rss.name')}
+              value={f.name}
+              onChange={(e) => update(i, { name: e.target.value })}
+              style={{ flex: 1 }}
+            />
+            <button
+              type="button"
+              onClick={() => remove(i)}
+              className="btn btn-danger"
+              style={{ flexShrink: 0, padding: '4px 10px', fontSize: 12 }}
+            >
+              {t('settings.rss.delete')}
+            </button>
+          </div>
+          <input
+            className="input-base"
+            placeholder={t('settings.rss.url')}
+            value={f.url}
+            onChange={(e) => update(i, { url: e.target.value })}
+          />
+          <input
+            className="input-base"
+            placeholder={t('settings.rss.regex')}
+            value={f.filter_regex ?? ''}
+            onChange={(e) => update(i, { filter_regex: e.target.value })}
+          />
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input
+              className="input-base"
+              type="number"
+              min={5}
+              placeholder={t('settings.rss.interval')}
+              value={f.interval_min || 15}
+              onChange={(e) => update(i, { interval_min: parseInt(e.target.value) || 15 })}
+              style={{ width: 110 }}
+            />
+            <input
+              className="input-base"
+              placeholder={t('settings.rss.saveDir')}
+              value={f.save_dir ?? ''}
+              onChange={(e) => update(i, { save_dir: e.target.value })}
+              style={{ flex: 1 }}
+            />
+          </div>
+          <input
+            className="input-base"
+            placeholder={t('settings.rss.tags')}
+            value={(f.tags ?? []).join(', ')}
+            onChange={(e) => update(i, { tags: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })}
+          />
+          <ToggleRow
+            label={t('settings.rss.enabled')}
+            checked={f.enabled}
+            onChange={(v) => update(i, { enabled: v })}
+          />
+        </div>
+      ))}
+      <button type="button" onClick={add} className="btn btn-ghost" style={{ alignSelf: 'flex-start' }}>
+        {t('settings.rss.add')}
+      </button>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('settings.rss.hint')}</div>
+    </div>
+  )
+}
+
+// ============ A2 完成钩子编辑器 ============
+const HooksEditor: React.FC<EditorProps> = ({ config, updateConfig, t }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div>
+      <div style={{ fontSize: 13, color: 'var(--text-primary)', marginBottom: 4 }}>
+        {t('settings.hooks.webhookLabel')}
+      </div>
+      <input
+        className="input-base"
+        placeholder="https://example.com/webhook"
+        value={config.on_complete_webhook ?? ''}
+        onChange={(e) => updateConfig({ on_complete_webhook: e.target.value })}
+      />
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('settings.hooks.webhookHint')}</div>
+    </div>
+    <div>
+      <div style={{ fontSize: 13, color: 'var(--text-primary)', marginBottom: 4 }}>
+        {t('settings.hooks.execLabel')}
+      </div>
+      <input
+        className="input-base"
+        placeholder='notify-send "Downloaded {filename}"'
+        value={config.on_complete_exec ?? ''}
+        onChange={(e) => updateConfig({ on_complete_exec: e.target.value })}
+      />
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('settings.hooks.execHint')}</div>
+    </div>
+  </div>
+)
+
+// ============ A3 任务模板编辑器 ============
+const TemplatesEditor: React.FC<EditorProps> = ({ config, updateConfig, t }) => {
+  const list = config.task_templates ?? []
+  const setList = (next: TaskTemplate[]) => updateConfig({ task_templates: next })
+  const update = (i: number, patch: Partial<TaskTemplate>) =>
+    setList(list.map((x, idx) => (idx === i ? { ...x, ...patch } : x)))
+  const remove = (i: number) => setList(list.filter((_, idx) => idx !== i))
+  const add = () => setList([...list, { name: '', cookies: '', user_agent: '', headers: {} }])
+
+  // headers <-> 多行字符串
+  const headersToText = (h?: Record<string, string>) =>
+    h ? Object.entries(h).map(([k, v]) => `${k}: ${v}`).join('\n') : ''
+  const textToHeaders = (s: string): Record<string, string> => {
+    const obj: Record<string, string> = {}
+    for (const line of s.split('\n')) {
+      const idx = line.indexOf(':')
+      if (idx > 0) {
+        const k = line.slice(0, idx).trim()
+        const v = line.slice(idx + 1).trim()
+        if (k) obj[k] = v
+      }
+    }
+    return obj
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {list.length === 0 && (
+        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('settings.templates.empty')}</div>
+      )}
+      {list.map((tpl, i) => (
+        <div
+          key={i}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 6,
+            padding: 10,
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: 8,
+          }}
+        >
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input
+              className="input-base"
+              placeholder={t('settings.templates.name')}
+              value={tpl.name}
+              onChange={(e) => update(i, { name: e.target.value })}
+              style={{ flex: 1 }}
+            />
+            <button type="button" onClick={() => remove(i)} className="btn btn-danger" style={{ padding: '4px 10px', fontSize: 12 }}>
+              {t('settings.templates.delete')}
+            </button>
+          </div>
+          <input
+            className="input-base"
+            placeholder={t('settings.templates.userAgent')}
+            value={tpl.user_agent ?? ''}
+            onChange={(e) => update(i, { user_agent: e.target.value })}
+          />
+          <textarea
+            className="input-base"
+            placeholder={t('settings.templates.cookies')}
+            value={tpl.cookies ?? ''}
+            onChange={(e) => update(i, { cookies: e.target.value })}
+            rows={3}
+            style={{ resize: 'vertical', fontFamily: 'monospace', fontSize: 11 }}
+          />
+          <textarea
+            className="input-base"
+            placeholder={t('settings.templates.headers')}
+            value={headersToText(tpl.headers)}
+            onChange={(e) => update(i, { headers: textToHeaders(e.target.value) })}
+            rows={3}
+            style={{ resize: 'vertical', fontFamily: 'monospace', fontSize: 11 }}
+          />
+        </div>
+      ))}
+      <button type="button" onClick={add} className="btn btn-ghost" style={{ alignSelf: 'flex-start' }}>
+        {t('settings.templates.add')}
+      </button>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('settings.templates.hint')}</div>
+    </div>
+  )
+}
+
+// ============ A4 远程 Web UI 编辑器 ============
+function generateToken(): string {
+  // 32 字节 base64url，去掉 padding
+  const arr = new Uint8Array(24)
+  crypto.getRandomValues(arr)
+  return btoa(String.fromCharCode(...arr))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
+}
+
+const RemoteEditor: React.FC<EditorProps> = ({ config, updateConfig, t }) => {
+  const [copied, setCopied] = useState(false)
+  const token = config.remote_token ?? ''
+  const enabled = !!config.remote_enabled
+  const accessUrl = `http://<lan-ip>:19543/ui${token ? `?token=${token}` : ''}`
+
+  const ensureToken = (newToken?: string) => {
+    const tk = newToken ?? token ?? generateToken()
+    updateConfig({ remote_token: tk })
+    return tk
+  }
+
+  const onToggle = (v: boolean) => {
+    const patch: Partial<Config> = { remote_enabled: v }
+    if (v && !token) patch.remote_token = generateToken()
+    updateConfig(patch)
+  }
+
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(accessUrl)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {}
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <ToggleRow
+        label={t('settings.remote.enable')}
+        description={t('settings.remote.enableHint')}
+        checked={enabled}
+        onChange={onToggle}
+      />
+      <div>
+        <div style={{ fontSize: 13, color: 'var(--text-primary)', marginBottom: 4 }}>
+          {t('settings.remote.token')}
+        </div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <input
+            className="input-base"
+            value={token}
+            onChange={(e) => updateConfig({ remote_token: e.target.value })}
+            style={{ flex: 1, fontFamily: 'monospace', fontSize: 11 }}
+            placeholder="(empty)"
+          />
+          <button
+            type="button"
+            onClick={() => ensureToken(generateToken())}
+            className="btn btn-ghost"
+            style={{ flexShrink: 0, fontSize: 12, padding: '4px 10px' }}
+          >
+            {t('settings.remote.tokenGen')}
+          </button>
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('settings.remote.tokenHint')}</div>
+      </div>
+      {enabled && (
+        <div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{t('settings.remote.urlHint')}</div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input
+              readOnly
+              className="input-base"
+              value={accessUrl}
+              style={{ flex: 1, fontFamily: 'monospace', fontSize: 11 }}
+            />
+            <button
+              type="button"
+              onClick={onCopy}
+              className="btn btn-ghost"
+              style={{ flexShrink: 0, fontSize: 12, padding: '4px 10px' }}
+            >
+              {copied ? '✓' : '⧉'}
+            </button>
+          </div>
+        </div>
+      )}
+      <div style={{ fontSize: 11, color: 'var(--warning)' }}>⚠ {t('settings.remote.restart')}</div>
+    </div>
+  )
+}

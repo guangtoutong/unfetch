@@ -102,7 +102,9 @@
     "submitting": "Lägger till...",
     "errorEmpty": "Ange en URL",
     "errorEmptyBatch": "Klistra in minst en URL (en per rad)",
-    "errorFail": "Misslyckades, kontrollera URL"
+    "errorFail": "Misslyckades, kontrollera URL",
+    "template": "Uppgiftsmall",
+    "templateNone": "Ingen (ingen mall)"
   },
   "urlType": {
     "http": "HTTP-nedladdning",
@@ -160,7 +162,49 @@
     "forceUTP": "Tvinga uTP (TCP av)",
     "forceUTPHint": "Vissa ISP:er blockerar BT-TCP-portar; byte till uTP (UDP) kan återställa anslutningar men begränsar vissa peer-källor.",
     "autoUtpFallback": "Automatisk uTP-växling",
-    "autoUtpFallbackHint": "Växlar till endast uTP efter 30 s om hastigheten stannar under 100 KB/s. Bra mot ISP-strypning av BT."
+    "autoUtpFallbackHint": "Växlar till endast uTP efter 30 s om hastigheten stannar under 100 KB/s. Bra mot ISP-strypning av BT.",
+    "rss": {
+      "title": "RSS-prenumerationer",
+      "empty": "Inga flöden",
+      "add": "+ Lägg till flöde",
+      "name": "Namn",
+      "url": "RSS-URL",
+      "regex": "Titel-regex (tom = alla)",
+      "interval": "Pollintervall (min)",
+      "saveDir": "Mapp (tom = standard)",
+      "tags": "Taggar (kommaseparerade)",
+      "enabled": "Aktiv",
+      "delete": "Ta bort",
+      "hint": "Nya objekt köas automatiskt; GUID-deduplicering sparas."
+    },
+    "hooks": {
+      "title": "Slutförda-hooks",
+      "webhookLabel": "Webhook-URL",
+      "webhookHint": "POSTar JSON vid slutförande",
+      "execLabel": "Skalkommando",
+      "execHint": "Platshållare: {id} {filename} {save_path} {full_path} {url}"
+    },
+    "templates": {
+      "title": "Uppgiftsmallar",
+      "empty": "Inga mallar",
+      "add": "+ Lägg till mall",
+      "name": "Namn",
+      "cookies": "Cookies (Netscape)",
+      "userAgent": "User-Agent",
+      "headers": "Extra rubriker (en per rad: Key: Value)",
+      "delete": "Ta bort",
+      "hint": "Förinställ inloggning & UA per webbplats; välj på namn vid tillägg."
+    },
+    "remote": {
+      "title": "Fjärr-Web-UI",
+      "enable": "Aktivera fjärråtkomst",
+      "enableHint": "Binder till 0.0.0.0:19543. Nås från enheter på samma LAN.",
+      "token": "Åtkomsttoken",
+      "tokenGen": "Generera om",
+      "tokenHint": "Håll hemlig — vem som helst med token har full kontroll.",
+      "urlHint": "Skanna QR eller öppna URL",
+      "restart": "Starta om daemon för att tillämpa"
+    }
   },
   "statusBar": {
     "connected": "Ansluten",

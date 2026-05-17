@@ -102,7 +102,9 @@
     "submitting": "Toevoegen...",
     "errorEmpty": "Voer een URL in",
     "errorEmptyBatch": "Plak minstens één URL (één per regel)",
-    "errorFail": "Toevoegen mislukt, controleer de URL"
+    "errorFail": "Toevoegen mislukt, controleer de URL",
+    "template": "Taaksjabloon",
+    "templateNone": "Geen (geen sjabloon)"
   },
   "urlType": {
     "http": "HTTP-download",
@@ -160,7 +162,49 @@
     "forceUTP": "uTP forceren (TCP uit)",
     "forceUTPHint": "Sommige ISP's blokkeren BT-TCP-poorten; overschakelen naar uTP (UDP) kan verbindingen herstellen maar beperkt sommige peerbronnen.",
     "autoUtpFallback": "Automatische uTP-fallback",
-    "autoUtpFallbackHint": "Schakelt na 30 s om naar uTP-only als de snelheid onder 100 KB/s blijft. Ideaal bij ISP-throttling."
+    "autoUtpFallbackHint": "Schakelt na 30 s om naar uTP-only als de snelheid onder 100 KB/s blijft. Ideaal bij ISP-throttling.",
+    "rss": {
+      "title": "RSS-abonnementen",
+      "empty": "Geen feeds",
+      "add": "+ Feed toevoegen",
+      "name": "Naam",
+      "url": "RSS-URL",
+      "regex": "Titel regex (leeg = alles)",
+      "interval": "Pollinterval (min)",
+      "saveDir": "Map (leeg = standaard)",
+      "tags": "Tags (kommagescheiden)",
+      "enabled": "Ingeschakeld",
+      "delete": "Verwijderen",
+      "hint": "Nieuwe items komen automatisch in de wachtrij; GUID-deduplicatie wordt opgeslagen."
+    },
+    "hooks": {
+      "title": "Voltooiing-hooks",
+      "webhookLabel": "Webhook-URL",
+      "webhookHint": "POSTt JSON bij voltooiing",
+      "execLabel": "Shell-commando",
+      "execHint": "Plaatshouders: {id} {filename} {save_path} {full_path} {url}"
+    },
+    "templates": {
+      "title": "Taaksjablonen",
+      "empty": "Geen sjablonen",
+      "add": "+ Sjabloon toevoegen",
+      "name": "Naam",
+      "cookies": "Cookies (Netscape)",
+      "userAgent": "User-Agent",
+      "headers": "Extra headers (één per regel: Key: Value)",
+      "delete": "Verwijderen",
+      "hint": "Vooraf login & UA per site; selecteer op naam bij toevoegen."
+    },
+    "remote": {
+      "title": "Externe Web-UI",
+      "enable": "Externe toegang inschakelen",
+      "enableHint": "Bindt aan 0.0.0.0:19543. Bereikbaar vanaf apparaten op hetzelfde LAN.",
+      "token": "Toegangstoken",
+      "tokenGen": "Opnieuw genereren",
+      "tokenHint": "Houd geheim — wie het heeft, heeft volledige controle.",
+      "urlHint": "Scan QR of open URL",
+      "restart": "Herstart daemon om wijzigingen toe te passen"
+    }
   },
   "statusBar": {
     "connected": "Verbonden",

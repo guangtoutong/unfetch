@@ -102,7 +102,9 @@
     "submitting": "Ekleniyor...",
     "errorEmpty": "Lütfen bir URL girin",
     "errorEmptyBatch": "Lütfen en az bir URL yapıştırın (her satıra bir tane)",
-    "errorFail": "Eklenemedi, URL'yi kontrol edin"
+    "errorFail": "Eklenemedi, URL'yi kontrol edin",
+    "template": "Görev şablonu",
+    "templateNone": "Yok (şablonsuz)"
   },
   "urlType": {
     "http": "HTTP indirme",
@@ -160,7 +162,49 @@
     "forceUTP": "uTP zorla (TCP kapalı)",
     "forceUTPHint": "Bazı ISS'ler BT TCP portlarını engeller; uTP (UDP)'ye geçmek bağlantıları geri getirebilir ancak bazı peer kaynaklarını kısıtlar.",
     "autoUtpFallback": "Otomatik uTP geçişi",
-    "autoUtpFallbackHint": "Hız 30 s boyunca 100 KB/s altında kalırsa otomatik uTP-only'ye geçer. ISP BT kısıtlamasına ideal."
+    "autoUtpFallbackHint": "Hız 30 s boyunca 100 KB/s altında kalırsa otomatik uTP-only'ye geçer. ISP BT kısıtlamasına ideal.",
+    "rss": {
+      "title": "RSS abonelikleri",
+      "empty": "Akış yok",
+      "add": "+ Akış ekle",
+      "name": "Ad",
+      "url": "RSS URL",
+      "regex": "Başlık regex (boş = tümü)",
+      "interval": "Yoklama aralığı (dk)",
+      "saveDir": "Klasör (boş = varsayılan)",
+      "tags": "Etiketler (virgülle ayrılmış)",
+      "enabled": "Etkin",
+      "delete": "Sil",
+      "hint": "Yeni öğeler otomatik kuyruğa alınır; GUID tekilleştirmesi kalıcıdır."
+    },
+    "hooks": {
+      "title": "Tamamlanma kancaları",
+      "webhookLabel": "Webhook URL",
+      "webhookHint": "Tamamlanınca JSON POST eder",
+      "execLabel": "Kabuk komutu",
+      "execHint": "Yer tutucular: {id} {filename} {save_path} {full_path} {url}"
+    },
+    "templates": {
+      "title": "Görev şablonları",
+      "empty": "Şablon yok",
+      "add": "+ Şablon ekle",
+      "name": "Ad",
+      "cookies": "Cookies (Netscape)",
+      "userAgent": "User-Agent",
+      "headers": "Ek başlıklar (her satır: Key: Value)",
+      "delete": "Sil",
+      "hint": "Site bazlı oturum ve UA önayar; görev eklerken adıyla seç."
+    },
+    "remote": {
+      "title": "Uzak Web UI",
+      "enable": "Uzak erişimi etkinleştir",
+      "enableHint": "0.0.0.0:19543'e bağlanır. Aynı LAN'daki cihazlardan erişilebilir.",
+      "token": "Erişim belirteci",
+      "tokenGen": "Yeniden oluştur",
+      "tokenHint": "Gizli tut — bu token tam kontrol verir.",
+      "urlHint": "QR'yi tara veya URL'yi aç",
+      "restart": "Değişikliklerin uygulanması için daemon'u yeniden başlat"
+    }
   },
   "statusBar": {
     "connected": "Bağlı",

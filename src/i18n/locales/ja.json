@@ -102,7 +102,9 @@
     "submitting": "追加中...",
     "errorEmpty": "ダウンロード URL を入力してください",
     "errorEmptyBatch": "少なくとも1つの URL を貼り付け（1行に1つ）",
-    "errorFail": "追加失敗、URL を確認してください"
+    "errorFail": "追加失敗、URL を確認してください",
+    "template": "タスクテンプレート",
+    "templateNone": "なし（テンプレート未使用）"
   },
   "urlType": {
     "http": "HTTP ダウンロード",
@@ -160,7 +162,49 @@
     "forceUTP": "uTP を強制（TCP 無効）",
     "forceUTPHint": "一部の ISP は BT の TCP ポートをブロックします。uTP (UDP) への切替で接続が回復することがありますが、ピアの一部は使えなくなります。",
     "autoUtpFallback": "uTP 自動フォールバック",
-    "autoUtpFallbackHint": "BT タスクの起動から 30 秒以内に速度が 100 KB/s 未満の場合、自動で uTP のみに切り替えて再接続します。ISP の BT ブロック対策に最適。"
+    "autoUtpFallbackHint": "BT タスクの起動から 30 秒以内に速度が 100 KB/s 未満の場合、自動で uTP のみに切り替えて再接続します。ISP の BT ブロック対策に最適。",
+    "rss": {
+      "title": "RSS 購読",
+      "empty": "フィードなし",
+      "add": "+ フィード追加",
+      "name": "名前",
+      "url": "RSS URL",
+      "regex": "タイトル正規表現（空 = すべて）",
+      "interval": "ポーリング間隔（分）",
+      "saveDir": "保存先（空 = 既定）",
+      "tags": "タグ（カンマ区切り）",
+      "enabled": "有効",
+      "delete": "削除",
+      "hint": "新規アイテムは自動的にキューに追加されます。GUID 重複除去は永続化されます。"
+    },
+    "hooks": {
+      "title": "完了フック",
+      "webhookLabel": "Webhook URL",
+      "webhookHint": "タスク完了時に JSON を POST します",
+      "execLabel": "シェルコマンド",
+      "execHint": "プレースホルダー：{id} {filename} {save_path} {full_path} {url}"
+    },
+    "templates": {
+      "title": "タスクテンプレート",
+      "empty": "テンプレートなし",
+      "add": "+ テンプレート追加",
+      "name": "名前",
+      "cookies": "Cookies (Netscape)",
+      "userAgent": "User-Agent",
+      "headers": "追加ヘッダー（1 行 1 ペア：Key: Value）",
+      "delete": "削除",
+      "hint": "サイト別にログイン状態と UA を事前設定。タスク追加時に名前で参照。"
+    },
+    "remote": {
+      "title": "リモート Web UI",
+      "enable": "リモートアクセスを有効化",
+      "enableHint": "有効化すると 0.0.0.0:19543 にバインド。同一 LAN 内のデバイスからアクセス可。",
+      "token": "アクセストークン",
+      "tokenGen": "再生成",
+      "tokenHint": "厳重に管理してください — このトークンで完全な制御が可能です",
+      "urlHint": "QR をスキャンまたはブラウザで開く",
+      "restart": "変更を反映するには daemon を再起動"
+    }
   },
   "statusBar": {
     "connected": "接続済み",

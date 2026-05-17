@@ -102,7 +102,9 @@
     "submitting": "Adding...",
     "errorEmpty": "Please enter a download URL",
     "errorEmptyBatch": "Please paste at least one URL (one per line)",
-    "errorFail": "Failed to add, please check the URL"
+    "errorFail": "Failed to add, please check the URL",
+    "template": "Task template",
+    "templateNone": "None (no template)"
   },
   "urlType": {
     "http": "HTTP download",
@@ -160,7 +162,49 @@
     "forceUTP": "Force uTP (disable TCP)",
     "forceUTPHint": "Some ISPs block BT TCP ports; switching to uTP (UDP) may restore connections but limits some peer sources.",
     "autoUtpFallback": "Auto uTP fallback",
-    "autoUtpFallbackHint": "Switch to uTP-only after 30s if speed stays below 100 KB/s. No user action required — best for ISPs that throttle BT."
+    "autoUtpFallbackHint": "Switch to uTP-only after 30s if speed stays below 100 KB/s. No user action required — best for ISPs that throttle BT.",
+    "rss": {
+      "title": "RSS subscriptions",
+      "empty": "No feeds yet",
+      "add": "+ Add feed",
+      "name": "Name",
+      "url": "RSS URL",
+      "regex": "Title regex (empty = accept all)",
+      "interval": "Poll interval (min)",
+      "saveDir": "Save folder (empty = default)",
+      "tags": "Tags (comma separated)",
+      "enabled": "Enabled",
+      "delete": "Delete",
+      "hint": "New items are queued automatically; GUIDs are deduped and persisted."
+    },
+    "hooks": {
+      "title": "On-completion hooks",
+      "webhookLabel": "Webhook URL",
+      "webhookHint": "POSTs JSON {id, filename, save_path, url, ...} when task completes",
+      "execLabel": "Shell command",
+      "execHint": "Placeholders: {id} {filename} {save_path} {full_path} {url}"
+    },
+    "templates": {
+      "title": "Task templates",
+      "empty": "No templates",
+      "add": "+ Add template",
+      "name": "Name",
+      "cookies": "Cookies (Netscape)",
+      "userAgent": "User-Agent",
+      "headers": "Extra headers (one per line: Key: Value)",
+      "delete": "Delete",
+      "hint": "Presets login & UA per site; pick by name when adding a task."
+    },
+    "remote": {
+      "title": "Remote Web UI",
+      "enable": "Enable remote access",
+      "enableHint": "Binds to 0.0.0.0:19543. Reachable from devices on the same LAN.",
+      "token": "Access token",
+      "tokenGen": "Regenerate",
+      "tokenHint": "Keep it secret — anyone with this token has full control.",
+      "urlHint": "Scan QR or open URL in browser",
+      "restart": "Restart daemon to apply changes"
+    }
   },
   "statusBar": {
     "connected": "Connected",

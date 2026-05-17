@@ -102,7 +102,9 @@
     "submitting": "Añadiendo...",
     "errorEmpty": "Por favor, introduce una URL",
     "errorEmptyBatch": "Pega al menos una URL (una por línea)",
-    "errorFail": "Error al añadir, comprueba la URL"
+    "errorFail": "Error al añadir, comprueba la URL",
+    "template": "Plantilla de tarea",
+    "templateNone": "Ninguna (sin plantilla)"
   },
   "urlType": {
     "http": "Descarga HTTP",
@@ -160,7 +162,49 @@
     "forceUTP": "Forzar uTP (TCP desactivado)",
     "forceUTPHint": "Algunos ISP bloquean los puertos TCP de BT; cambiar a uTP (UDP) puede restaurar las conexiones pero limita algunas fuentes de peers.",
     "autoUtpFallback": "Cambio automático a uTP",
-    "autoUtpFallbackHint": "Cambia a solo uTP tras 30 s si la velocidad se mantiene bajo 100 KB/s. Ideal cuando el ISP limita BT."
+    "autoUtpFallbackHint": "Cambia a solo uTP tras 30 s si la velocidad se mantiene bajo 100 KB/s. Ideal cuando el ISP limita BT.",
+    "rss": {
+      "title": "Suscripciones RSS",
+      "empty": "Sin feeds",
+      "add": "+ Añadir feed",
+      "name": "Nombre",
+      "url": "URL RSS",
+      "regex": "Regex de título (vacío = todos)",
+      "interval": "Intervalo (min)",
+      "saveDir": "Carpeta (vacío = predeterminada)",
+      "tags": "Etiquetas (separadas por coma)",
+      "enabled": "Activado",
+      "delete": "Eliminar",
+      "hint": "Los nuevos elementos se ponen en cola; deduplicación GUID persistente."
+    },
+    "hooks": {
+      "title": "Ganchos al terminar",
+      "webhookLabel": "URL del webhook",
+      "webhookHint": "POST de JSON al completar",
+      "execLabel": "Comando shell",
+      "execHint": "Marcadores: {id} {filename} {save_path} {full_path} {url}"
+    },
+    "templates": {
+      "title": "Plantillas de tarea",
+      "empty": "Sin plantillas",
+      "add": "+ Añadir plantilla",
+      "name": "Nombre",
+      "cookies": "Cookies (Netscape)",
+      "userAgent": "User-Agent",
+      "headers": "Cabeceras extra (una por línea: Key: Value)",
+      "delete": "Eliminar",
+      "hint": "Preconfigura sesión y UA por sitio; selecciona por nombre al añadir tarea."
+    },
+    "remote": {
+      "title": "UI Web remota",
+      "enable": "Habilitar acceso remoto",
+      "enableHint": "Se vincula a 0.0.0.0:19543. Accesible desde dispositivos en la misma LAN.",
+      "token": "Token de acceso",
+      "tokenGen": "Regenerar",
+      "tokenHint": "Mantén en secreto — quien lo tenga tiene control total.",
+      "urlHint": "Escanea QR o abre URL",
+      "restart": "Reinicia el daemon para aplicar"
+    }
   },
   "statusBar": {
     "connected": "Conectado",
