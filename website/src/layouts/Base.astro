@@ -48,10 +48,10 @@ const currentLang = LANGS.find((l) => l.code === lang) || LANGS[0]
     .lang-menu a:hover { background: rgba(99,102,241,0.15); }
     .lang-menu a.active { color: var(--primary); background: rgba(99,102,241,0.12); font-weight: 600; }
 
-    .stats-row { display: inline-flex; gap: 12px; margin-top: 16px; font-size: 13px; color: var(--muted); align-items: center; }
-    .stats-row a { color: var(--muted); display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 14px; transition: all 0.15s; }
-    .stats-row a:hover { color: var(--fg); border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.03); }
-    .stats-row .num { font-weight: 600; color: var(--fg); font-variant-numeric: tabular-nums; }
+    .stats-row { display: inline-flex; gap: 8px; margin-top: 18px; align-items: center; flex-wrap: wrap; justify-content: center; }
+    .stats-row a { display: inline-flex; align-items: center; opacity: 0.85; transition: opacity 0.15s; }
+    .stats-row a:hover { opacity: 1; }
+    .stats-row img { display: block; }
   </style>
 </head>
 <body>
@@ -133,86 +133,36 @@ const currentLang = LANGS.find((l) => l.code === lang) || LANGS[0]
       })
     })()
 
-    // 下载按钮 OS 探测：根据 navigator 信息把链接换成对应平台的最新 asset
+    // Hero "Download" 按钮：完全静态直链。根据 UA 探测 OS，把 href 换成
+    //   github.com/.../releases/download/v<VER>/<file>
+    // 这样 GitHub 一旦发布 release，链接就 302 到 CDN 实际文件 — 不依赖 GitHub
+    // API、也不会先跳到 release 页让用户自己挑。
+    //
+    // 版本号要和 src/components/Download.astro + scripts/release.sh 同步。
     (function () {
       const btn = document.getElementById('download-cta')
       const label = document.getElementById('download-cta-label')
       if (!btn) return
       const ua = navigator.userAgent || ''
       const platform = (navigator.platform || '').toLowerCase()
-      const REPO = 'guangtoutong/unfetch'
-      const LATEST = 'https://github.com/' + REPO + '/releases/latest/download/'
-      // 探测 OS / arch
+      const VERSION = '0.2.0'
+      const BASE = 'https://github.com/guangtoutong/unfetch/releases/download/v' + VERSION + '/'
+
       let osLabel = 'Windows'
-      let assetPattern = /x64-setup\.exe$/i
+      let assetFile = 'unfetch_' + VERSION + '_x64_en-US.msi'
       if (/Mac|iPhone|iPad/i.test(ua) || platform.includes('mac')) {
-        const isAS = /arm|aarch64/i.test(ua) || /AppleWebKit.*Macintosh.*arm/i.test(ua)
-        osLabel = isAS ? 'macOS (Apple Silicon)' : 'macOS (Intel)'
-        assetPattern = isAS ? /aarch64\.dmg$/i : /x64\.dmg$/i
+        // 只发 universal dmg，Apple Silicon 和 Intel 共用
+        osLabel = 'macOS'
+        assetFile = 'unfetch_' + VERSION + '_universal.dmg'
       } else if (/Linux|X11/i.test(ua)) {
         osLabel = 'Linux'
-        assetPattern = /\.AppImage$/i
+        assetFile = 'unfetch_' + VERSION + '_amd64.AppImage'
       }
-      // 把 OS 标签贴到按钮上
+      btn.href = BASE + assetFile
       if (label) {
         const base = (label.textContent || '').trim()
         label.textContent = base + ' · ' + osLabel
       }
-      // 查询最新 release 找具体 asset URL
-      fetch('https://api.github.com/repos/' + REPO + '/releases/latest')
-        .then((r) => r.json())
-        .then((data) => {
-          const assets = Array.isArray(data?.assets) ? data.assets : []
-          const match = assets.find((a) => assetPattern.test(a.name || ''))
-          if (match && match.browser_download_url) {
-            btn.href = match.browser_download_url
-          }
-        })
-        .catch(() => {})
-    })()
-
-    // GitHub stars + 总下载量，每页加载拉一次，localStorage 缓存 30 分钟
-    (function () {
-      const KEY = 'unfetch.gh.stats'
-      const TTL = 30 * 60 * 1000
-      const starEl = document.getElementById('gh-stars')
-      const dlEl = document.getElementById('gh-downloads')
-      if (!starEl || !dlEl) return
-
-      function render(stars, downloads) {
-        starEl.textContent = formatCount(stars)
-        dlEl.textContent = formatCount(downloads)
-      }
-      function formatCount(n) {
-        if (typeof n !== 'number') return '—'
-        if (n >= 10000) return (n / 1000).toFixed(1) + 'k'
-        if (n >= 1000) return (n / 1000).toFixed(1) + 'k'
-        return String(n)
-      }
-      try {
-        const cached = JSON.parse(localStorage.getItem(KEY) || 'null')
-        if (cached && Date.now() - cached.t < TTL) {
-          render(cached.stars, cached.downloads)
-          return
-        }
-      } catch {}
-
-      Promise.all([
-        fetch('https://api.github.com/repos/guangtoutong/unfetch').then(r => r.json()),
-        fetch('https://api.github.com/repos/guangtoutong/unfetch/releases').then(r => r.json()),
-      ]).then(([repo, releases]) => {
-        const stars = repo.stargazers_count || 0
-        let downloads = 0
-        if (Array.isArray(releases)) {
-          for (const rel of releases) {
-            for (const asset of rel.assets || []) {
-              downloads += asset.download_count || 0
-            }
-          }
-        }
-        render(stars, downloads)
-        try { localStorage.setItem(KEY, JSON.stringify({ stars, downloads, t: Date.now() })) } catch {}
-      }).catch(() => {})
     })()
   </script>
 </body>
