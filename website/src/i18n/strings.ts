@@ -24,7 +24,7 @@ export const LANGS: Array<{ code: Lang; native: string }> = [
 
 interface Strings {
   meta: { title: string; description: string }
-  nav: { home: string; mcp: string; github: string }
+  nav: { home: string; download: string; sponsor: string; mcp: string; github: string }
   hero: {
     tag: string
     title: string
@@ -37,6 +37,34 @@ interface Strings {
     title: string
     items: Array<{ title: string; desc: string }>
   }
+  download: {
+    heading: string
+    lead: string
+    platforms: {
+      macos: { name: string; note: string; primary: string }
+      windows: { name: string; note: string; primary: string; secondary: string }
+      linux: { name: string; note: string; primary: string; secondary: string; tertiary: string }
+    }
+    notes: { macos: string; windows: string; linux: string }
+    allReleases: string
+    allReleasesLink: string
+  }
+  sponsor: {
+    heading: string
+    lead: string
+    ghTitle: string
+    ghDesc: string
+    ghButton: string
+    paypalTitle: string
+    paypalDesc: string
+    paypalButton: string
+    alipayTitle: string
+    alipayDesc: string
+    wechatTitle: string
+    wechatDesc: string
+    scanQr: string
+    note: string
+  }
   cta: { title: string; desc: string; button: string }
   footer: { copy: string; license: string }
 }
@@ -46,9 +74,9 @@ const en: Strings = {
     title: 'unfetch — A modern download manager for humans and AI',
     description: 'Multi-threaded HTTP with mirror fan-out, BT / magnet, 1000+ video sites, RSS, remote Web UI, 5 themes, AI-ready via MCP. Open source.',
   },
-  nav: { home: 'Home', mcp: 'MCP', github: 'GitHub' },
+  nav: { home: 'Home', download: 'Download', sponsor: 'Sponsor', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.1.3 · Free · Open Source · No ads · No telemetry',
+    tag: 'v0.2.0 · Free · Open Source · No ads · No telemetry',
     title: 'Downloads built for humans and AI',
     subtitle: 'Fast multi-mirror HTTP, BT with selective file picker, 1000+ video sites, RSS auto-fetch, completion hooks, remote Web UI, 5 themes — driven by GUI, CLI or AI (MCP).',
     download: 'Download',
@@ -70,7 +98,39 @@ const en: Strings = {
       { title: 'Privacy first', desc: 'No ads. No telemetry. No login. No infohash uploads. Your downloads stay yours.' },
     ],
   },
-  cta: { title: 'Get unfetch v0.1.3', desc: 'No ads. No telemetry. No login.', button: 'Download installer' },
+  download: {
+    heading: 'Download unfetch',
+    lead: 'Free, open source, MIT-style license. No account, no telemetry, no ads.',
+    platforms: {
+      macos: { name: 'macOS', note: 'Universal · Apple Silicon + Intel · Notarized', primary: 'Download .dmg' },
+      windows: { name: 'Windows', note: 'x64 · Windows 10/11', primary: 'Download .msi', secondary: '.exe installer' },
+      linux: { name: 'Linux', note: 'x64 · .AppImage / .deb / .rpm', primary: 'Download .AppImage', secondary: '.deb (Debian/Ubuntu)', tertiary: '.rpm (Fedora/RHEL)' },
+    },
+    notes: {
+      macos: 'Drag unfetch.app to /Applications. Notarized by Apple — no Gatekeeper warning.',
+      windows: 'First launch may show "Windows protected your PC" → click More info → Run anyway (one-time, until reputation builds).',
+      linux: 'chmod +x unfetch_*.AppImage && ./unfetch_*.AppImage for the AppImage.',
+    },
+    allReleases: 'Looking for older versions?',
+    allReleasesLink: 'All releases →',
+  },
+  sponsor: {
+    heading: 'Support unfetch',
+    lead: 'unfetch is built and maintained by one developer in their spare time. If it saves you time, consider sponsoring — even a tiny tip keeps the project alive.',
+    ghTitle: 'GitHub Sponsors',
+    ghDesc: 'For international sponsors. Monthly or one-time, processed by Stripe.',
+    ghButton: 'Sponsor on GitHub →',
+    paypalTitle: 'PayPal',
+    paypalDesc: 'Worldwide one-time tip. Choose any amount in your currency.',
+    paypalButton: 'Tip via PayPal →',
+    alipayTitle: 'Alipay',
+    alipayDesc: 'Open the Alipay app and scan the QR code below.',
+    wechatTitle: 'WeChat Pay',
+    wechatDesc: 'Open WeChat → Scan, point at the QR code below.',
+    scanQr: 'Scan QR code',
+    note: 'Sponsors get listed in the README and the in-app About dialog (with permission).',
+  },
+  cta: { title: 'Get unfetch v0.2.0', desc: 'No ads. No telemetry. No login.', button: 'Download installer' },
   footer: { copy: '© 2026 unfetch · MIT-style license · Open contributor to anacrolix/torrent', license: 'License' },
 }
 
@@ -79,9 +139,9 @@ const zh: Strings = {
     title: 'unfetch — 为人和 AI 设计的下载管理器',
     description: '多线程 HTTP（多镜像并发）、BT 磁力、1000+ 视频网站、RSS、远程 Web UI、5 套皮肤、MCP AI 接入。开源免费。',
   },
-  nav: { home: '首页', mcp: 'MCP', github: 'GitHub' },
+  nav: { home: '首页', download: '下载', sponsor: '赞助', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.1.3 · 免费 · 开源 · 无广告 · 无遥测',
+    tag: 'v0.2.0 · 免费 · 开源 · 无广告 · 无遥测',
     title: '为人和 AI 设计的下载工具',
     subtitle: '多镜像 HTTP、BT 文件选择、1000+ 视频网站、RSS 订阅、完成钩子、远程 Web UI、5 套主题 — GUI / CLI / AI（MCP）都能驱动。',
     download: '立即下载',
@@ -103,7 +163,39 @@ const zh: Strings = {
       { title: '隐私至上', desc: '无广告、无遥测、无登录、不上传 infohash。你下了什么只有你知道。' },
     ],
   },
-  cta: { title: '立即获取 unfetch v0.1.3', desc: '无广告 · 无遥测 · 无登录', button: '下载安装包' },
+  download: {
+    heading: '下载 unfetch',
+    lead: '免费、开源，MIT 风格许可证。无需账号，无遥测，无广告。',
+    platforms: {
+      macos: { name: 'macOS', note: 'Universal · Apple Silicon + Intel · 已 Apple 公证', primary: '下载 .dmg' },
+      windows: { name: 'Windows', note: 'x64 · Windows 10 / 11', primary: '下载 .msi', secondary: '.exe 安装器' },
+      linux: { name: 'Linux', note: 'x64 · .AppImage / .deb / .rpm', primary: '下载 .AppImage', secondary: '.deb (Debian / Ubuntu)', tertiary: '.rpm (Fedora / RHEL)' },
+    },
+    notes: {
+      macos: '把 unfetch.app 拖入 /Applications。已经 Apple 公证，不会有 Gatekeeper 拦截。',
+      windows: '首次运行可能出现 "Windows 已保护你的电脑" → 更多信息 → 仍要运行（这是一次性的，等信誉积累上去就没了）。',
+      linux: 'AppImage：chmod +x unfetch_*.AppImage && ./unfetch_*.AppImage 即可。',
+    },
+    allReleases: '想找旧版本？',
+    allReleasesLink: '查看所有版本 →',
+  },
+  sponsor: {
+    heading: '赞助 unfetch',
+    lead: 'unfetch 由一位开发者在业余时间开发维护。如果它帮你省了时间，欢迎赞助一杯咖啡，让项目继续走下去。',
+    ghTitle: 'GitHub Sponsors',
+    ghDesc: '面向国际开发者，通过 Stripe 处理，可月付或一次性。',
+    ghButton: '前往 GitHub Sponsors →',
+    paypalTitle: 'PayPal',
+    paypalDesc: '面向海外用户的一次性打赏，金额自定，按当地币种支付。',
+    paypalButton: '通过 PayPal 打赏 →',
+    alipayTitle: '支付宝',
+    alipayDesc: '打开支付宝 App，扫描下方二维码即可赞助。',
+    wechatTitle: '微信支付',
+    wechatDesc: '打开微信「扫一扫」，对准下方二维码即可。',
+    scanQr: '扫码赞助',
+    note: '赞助者将被列入 README 和 app 内的"关于"对话框（需同意）。',
+  },
+  cta: { title: '立即获取 unfetch v0.2.0', desc: '无广告 · 无遥测 · 无登录', button: '下载安装包' },
   footer: { copy: '© 2026 unfetch · MIT 风格许可 · 为 anacrolix/torrent 持续贡献', license: '许可证' },
 }
 

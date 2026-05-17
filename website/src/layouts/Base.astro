@@ -76,7 +76,11 @@ const currentLang = LANGS.find((l) => l.code === lang) || LANGS[0]
       </a>
       <nav style="display: flex; align-items: center; gap: 16px; font-size: 14px;">
         <a href={lang === 'en' ? '/' : `/${lang}`} style="color: var(--muted);">{s.nav.home}</a>
+        <a href={(lang === 'en' ? '/' : `/${lang}/`) + '#download'} style="color: var(--muted);">{s.nav.download}</a>
         <a href={lang === 'en' ? '/mcp' : `/${lang}/mcp`} style="color: var(--muted);">{s.nav.mcp}</a>
+        <a href={(lang === 'en' ? '/' : `/${lang}/`) + '#sponsor'} style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 11px; border-radius: 999px; border: 1px solid rgba(244,114,182,0.35); background: rgba(244,114,182,0.10); color: #f472b6; font-weight: 600;">
+          <span style="color: #f472b6;">♥</span>{s.nav.sponsor}
+        </a>
         <a href="https://github.com/guangtoutong/unfetch" style="color: var(--muted);" target="_blank" rel="noreferrer">{s.nav.github}</a>
 
         <div id="lang-wrap" style="position: relative;">

@@ -1,0 +1,167 @@
+---
+import { getStrings } from '../i18n/strings'
+interface Props { lang: string }
+const { lang } = Astro.props
+const s = getStrings(lang)
+
+// 与 scripts/release.sh + scripts/build-mac.sh 保持一致：每次发版改这里一次
+const VERSION = '0.2.0'
+const REPO = 'guangtoutong/unfetch'
+const base = `https://github.com/${REPO}/releases/download/v${VERSION}`
+
+// 三个平台：macOS Universal（本地公证后上传）、Windows、Linux x64
+// 文件名约定参考 Tauri 2 默认产物名 + 我们 build-mac.sh 里 hdiutil 的命名
+const platforms = [
+  {
+    key: 'macos' as const,
+    icon: '🍎',
+    primary: `unfetch_${VERSION}_universal.dmg`,
+  },
+  {
+    key: 'windows' as const,
+    icon: '🪟',
+    primary: `unfetch_${VERSION}_x64_en-US.msi`,
+    secondary: `unfetch_${VERSION}_x64-setup.exe`,
+  },
+  {
+    key: 'linux' as const,
+    icon: '🐧',
+    primary: `unfetch_${VERSION}_amd64.AppImage`,
+    secondary: `unfetch_${VERSION}_amd64.deb`,
+    tertiary: `unfetch-${VERSION}-1.x86_64.rpm`,
+  },
+]
+---
+
+<section id="download" style="padding: 60px 0;">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: 40px;">
+      <h2 style="font-size: 32px; font-weight: 700; margin-bottom: 8px;">
+        {s.download.heading} <span style="color: var(--muted); font-family: monospace; font-size: 0.7em; font-weight: 500;">v{VERSION}</span>
+      </h2>
+      <p style="font-size: 15px; color: var(--muted); max-width: 640px; margin: 12px auto 0;">
+        {s.download.lead}
+      </p>
+    </div>
+
+    <div class="dl-grid">
+      {platforms.map((p) => {
+        const meta = s.download.platforms[p.key]
+        return (
+          <article class="dl-card">
+            <div class="dl-card__head">
+              <span class="dl-card__icon">{p.icon}</span>
+              <div>
+                <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 4px;">{meta.name}</h3>
+                <div style="font-size: 12px; color: var(--muted);">{meta.note}</div>
+              </div>
+            </div>
+            <a href={`${base}/${p.primary}`} class="dl-card__btn">
+              {meta.primary}
+            </a>
+            {p.secondary && 'secondary' in meta && (
+              <a href={`${base}/${p.secondary}`} class="dl-card__alt">— {meta.secondary}</a>
+            )}
+            {p.tertiary && 'tertiary' in meta && (
+              <a href={`${base}/${p.tertiary}`} class="dl-card__alt">— {meta.tertiary}</a>
+            )}
+          </article>
+        )
+      })}
+    </div>
+
+    <div class="dl-notes">
+      <div class="dl-note"><strong>macOS</strong>: {s.download.notes.macos}</div>
+      <div class="dl-note"><strong>Windows</strong>: {s.download.notes.windows}</div>
+      <div class="dl-note"><strong>Linux</strong>: {s.download.notes.linux}</div>
+    </div>
+
+    <p style="text-align: center; color: var(--muted); font-size: 13px; margin-top: 24px;">
+      {s.download.allReleases}
+      <a href={`https://github.com/${REPO}/releases`} target="_blank" rel="noreferrer" style="color: var(--primary); margin-left: 6px;">
+        {s.download.allReleasesLink}
+      </a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .dl-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+    margin-bottom: 32px;
+  }
+  .dl-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s;
+  }
+  .dl-card:hover {
+    border-color: rgba(139, 92, 246, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px -12px rgba(139, 92, 246, 0.3);
+  }
+  .dl-card__head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .dl-card__icon {
+    font-size: 34px;
+    line-height: 1;
+  }
+  .dl-card__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 11px 18px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff !important;
+    border-radius: 9px;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+    transition: all 0.18s;
+  }
+  .dl-card__btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(99, 102, 241, 0.45);
+  }
+  .dl-card__alt {
+    display: block;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+  }
+  .dl-card__alt:hover {
+    color: var(--primary);
+  }
+  .dl-notes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+    margin: 32px 0 0;
+  }
+  .dl-note {
+    padding: 12px 16px;
+    background: rgba(139, 92, 246, 0.06);
+    border-left: 3px solid var(--primary);
+    border-radius: 0 6px 6px 0;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .dl-note strong {
+    color: var(--fg);
+    margin-right: 4px;
+  }
+</style>

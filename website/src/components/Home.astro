@@ -1,5 +1,7 @@
 ---
 import { getStrings } from '../i18n/strings'
+import Download from './Download.astro'
+import Sponsor from './Sponsor.astro'
 interface Props { lang: string }
 const { lang } = Astro.props
 const s = getStrings(lang)
@@ -71,6 +73,10 @@ const mcpHref = lang === 'en' ? '/mcp' : `/${lang}/mcp`
     </div>
   </div>
 </section>
+
+<Download lang={lang} />
+
+<Sponsor lang={lang} />
 
 <section style="padding: 60px 0 80px;">
   <div class="container" style="text-align: center; padding: 56px 32px; background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1)); border: 1px solid rgba(139,92,246,0.2); border-radius: 20px;">
