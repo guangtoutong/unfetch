@@ -204,7 +204,9 @@
       "tokenHint": "Tienilo segreto — chi lo ha ottiene controllo totale.",
       "urlHint": "Scansiona QR o apri URL",
       "restart": "Riavvia il daemon per applicare"
-    }
+    },
+    "proxyDetected": "Rilevato: {{proxy}}",
+    "proxyNotDetected": "Nessun proxy di sistema rilevato"
   },
   "statusBar": {
     "connected": "Connesso",

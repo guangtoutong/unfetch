@@ -204,7 +204,9 @@
       "tokenHint": "妥善保管，等同于完整控制权",
       "urlHint": "扫码或浏览器访问",
       "restart": "修改后需重启 daemon 生效"
-    }
+    },
+    "proxyDetected": "检测到：{{proxy}}",
+    "proxyNotDetected": "未检测到系统代理设置"
   },
   "statusBar": {
     "connected": "已连接",

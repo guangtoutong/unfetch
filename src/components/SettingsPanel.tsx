@@ -132,7 +132,7 @@ export const SettingsPanel: React.FC = () => {
                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
                   </svg>
                 </div>
-                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>偏好设置</span>
+                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{t('settings.title')}</span>
               </div>
               <button
                 onClick={() => setOpen(false)}
@@ -173,7 +173,7 @@ export const SettingsPanel: React.FC = () => {
               </Section>
 
               {/* 下载目录 */}
-              <Section title="下载目录" icon={
+              <Section title={t('settings.downloadDir')} icon={
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
                 </svg>
@@ -188,7 +188,7 @@ export const SettingsPanel: React.FC = () => {
                     style={{ flex: 1 }}
                   />
                   <button className="btn btn-ghost" onClick={handleSelectDir} style={{ flexShrink: 0, height: 38 }}>
-                    浏览
+                    {t('addTask.browse')}
                   </button>
                 </div>
               </Section>
@@ -196,7 +196,7 @@ export const SettingsPanel: React.FC = () => {
               <Divider />
 
               {/* 并发与线程 */}
-              <Section title="下载并发" icon={
+              <Section title={t('settings.concurrency')} icon={
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="8" y1="6" x2="21" y2="6" />
                   <line x1="8" y1="12" x2="21" y2="12" />
@@ -209,7 +209,7 @@ export const SettingsPanel: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>最大并发任务数</span>
+                      <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{t('settings.maxConcurrent')}</span>
                       <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--primary)' }}>{config.max_concurrent}</span>
                     </div>
                     <input
@@ -220,14 +220,14 @@ export const SettingsPanel: React.FC = () => {
                       onChange={(e) => updateConfig({ max_concurrent: Number(e.target.value) })}
                     />
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>
-                      <span>1 个</span>
-                      <span>20 个</span>
+                      <span>1</span>
+                      <span>20</span>
                     </div>
                   </div>
 
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>HTTP 下载线程数</span>
+                      <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{t('settings.httpThreads')}</span>
                       <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--primary)' }}>{config.http_threads}</span>
                     </div>
                     <input
@@ -248,7 +248,7 @@ export const SettingsPanel: React.FC = () => {
               <Divider />
 
               {/* 速度限制 */}
-              <Section title="速度限制" icon={
+              <Section title={t('settings.speedLimit')} icon={
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
@@ -257,10 +257,10 @@ export const SettingsPanel: React.FC = () => {
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                     <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                      全局速度限制
+                      {t('settings.globalSpeedLimit')}
                     </span>
                     <span style={{ fontSize: 13, fontWeight: 700, color: config.speed_limit > 0 ? 'var(--warning)' : 'var(--text-muted)' }}>
-                      {config.speed_limit > 0 ? `${(config.speed_limit / 1024).toFixed(0)} KB/s` : '不限速'}
+                      {config.speed_limit > 0 ? `${(config.speed_limit / 1024).toFixed(0)} KB/s` : t('settings.noLimit')}
                     </span>
                   </div>
                   <input
@@ -272,14 +272,14 @@ export const SettingsPanel: React.FC = () => {
                     onChange={(e) => updateConfig({ speed_limit: Number(e.target.value) })}
                   />
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>
-                    <span>不限速</span>
+                    <span>{t('settings.noLimit')}</span>
                     <span>10 MB/s</span>
                   </div>
                 </div>
 
                 <div>
                   <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6 }}>
-                    分时段限速
+                    {t('settings.speedSchedule')}
                   </div>
                   <SpeedScheduleEditor
                     value={config.speed_schedule || []}
@@ -291,7 +291,7 @@ export const SettingsPanel: React.FC = () => {
               <Divider />
 
               {/* 代理 */}
-              <Section title="网络代理" icon={
+              <Section title={t('settings.proxy')} icon={
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="2" y1="12" x2="22" y2="12" />
@@ -300,11 +300,11 @@ export const SettingsPanel: React.FC = () => {
               }>
                 {/* 系统代理开关 */}
                 <ToggleRow
-                  label="使用系统代理"
+                  label={t('settings.systemProxy')}
                   description={
                     detectedProxy
-                      ? `检测到：${detectedProxy}`
-                      : '未检测到系统代理设置'
+                      ? t('settings.proxyDetected', { proxy: detectedProxy })
+                      : t('settings.proxyNotDetected')
                   }
                   checked={config.use_system_proxy}
                   onChange={(v) => updateConfig({ use_system_proxy: v })}
@@ -332,7 +332,7 @@ export const SettingsPanel: React.FC = () => {
                 {/* 手动代理（优先级更高） */}
                 <div style={{ marginTop: 12 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>
-                    手动指定（覆盖系统代理）
+                    {t('settings.proxyOverride')}
                   </div>
                   <input
                     type="text"
@@ -347,14 +347,14 @@ export const SettingsPanel: React.FC = () => {
               <Divider />
 
               {/* 自动播放 */}
-              <Section title="播放器集成" icon={
+              <Section title={t('settings.player')} icon={
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polygon points="5 3 19 12 5 21 5 3" />
                 </svg>
               }>
                 <ToggleRow
-                  label="下载完成后自动用 Unflick 播放"
-                  description="仅对视频/音频类任务生效"
+                  label={t('settings.autoPlayUnflick')}
+                  description={t('settings.autoPlayHint')}
                   checked={config.auto_play_unflick}
                   onChange={(v) => updateConfig({ auto_play_unflick: v })}
                 />
@@ -363,20 +363,20 @@ export const SettingsPanel: React.FC = () => {
               <Divider />
 
               {/* 重试 & 完成动作 */}
-              <Section title="自动重试 & 完成后" icon={
+              <Section title={t('settings.retryAndDone')} icon={
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21 12a9 9 0 1 1-3-6.7L21 8" />
                   <path d="M21 3v5h-5" />
                 </svg>
               }>
                 <ToggleRow
-                  label="任务失败自动重试"
-                  description="按 1m / 3m / 10m 间隔重试，最多 3 次"
+                  label={t('settings.autoRetry')}
+                  description={t('settings.autoRetryHint')}
                   checked={!!config.auto_retry}
                   onChange={(v) => updateConfig({ auto_retry: v })}
                 />
                 <div style={{ paddingTop: 8 }}>
-                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6 }}>所有任务完成后动作</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6 }}>{t('settings.onAllDone')}</div>
                   <select
                     value={config.on_all_done || ''}
                     onChange={(e) => updateConfig({ on_all_done: e.target.value as any })}
@@ -391,14 +391,14 @@ export const SettingsPanel: React.FC = () => {
                       padding: '0 8px',
                     }}
                   >
-                    <option value="">不做任何事</option>
-                    <option value="notify">弹通知</option>
-                    <option value="open_dir">打开下载目录</option>
-                    <option value="sleep">休眠</option>
-                    <option value="shutdown">关机（30 秒后执行）</option>
+                    <option value="">{t('settings.onAllDoneOptions.none')}</option>
+                    <option value="notify">{t('settings.onAllDoneOptions.notify')}</option>
+                    <option value="open_dir">{t('settings.onAllDoneOptions.open_dir')}</option>
+                    <option value="sleep">{t('settings.onAllDoneOptions.sleep')}</option>
+                    <option value="shutdown">{t('settings.onAllDoneOptions.shutdown')}</option>
                   </select>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
-                    执行一次后自动重置为"不做任何事"
+                    {t('settings.onAllDoneHint')}
                   </div>
                 </div>
               </Section>
@@ -406,7 +406,7 @@ export const SettingsPanel: React.FC = () => {
               <Divider />
 
               {/* 系统集成 */}
-              <Section title="启动 & 系统集成" icon={
+              <Section title={t('settings.system')} icon={
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="3" y="11" width="18" height="10" rx="2" />
                   <circle cx="12" cy="16" r="1" />
@@ -414,20 +414,20 @@ export const SettingsPanel: React.FC = () => {
                 </svg>
               }>
                 <ToggleRow
-                  label="开机自动启动"
-                  description="登录系统后在后台静默启动"
+                  label={t('settings.autostart')}
+                  description={t('settings.autostartHint')}
                   checked={autostart}
                   onChange={onToggleAutostart}
                 />
                 <ToggleRow
-                  label="关闭窗口时最小化到托盘"
-                  description="关闭主窗口后任务继续在后台下载"
+                  label={t('settings.minimizeToTray')}
+                  description={t('settings.minimizeToTrayHint')}
                   checked={minToTray}
                   onChange={onToggleMinTray}
                 />
                 <ToggleRow
-                  label="剪贴板嗅探"
-                  description="复制 URL/magnet 链接后弹出快速下载提示"
+                  label={t('settings.clipboardSniff')}
+                  description={t('settings.clipboardSniffHint')}
                   checked={clipSniff}
                   onChange={onToggleClipSniff}
                 />

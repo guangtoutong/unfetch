@@ -204,7 +204,9 @@
       "tokenHint": "Gizli tut — bu token tam kontrol verir.",
       "urlHint": "QR'yi tara veya URL'yi aç",
       "restart": "Değişikliklerin uygulanması için daemon'u yeniden başlat"
-    }
+    },
+    "proxyDetected": "Algılandı: {{proxy}}",
+    "proxyNotDetected": "Sistem proxy'si algılanmadı"
   },
   "statusBar": {
     "connected": "Bağlı",

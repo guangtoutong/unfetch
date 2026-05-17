@@ -204,7 +204,9 @@
       "tokenHint": "厳重に管理してください — このトークンで完全な制御が可能です",
       "urlHint": "QR をスキャンまたはブラウザで開く",
       "restart": "変更を反映するには daemon を再起動"
-    }
+    },
+    "proxyDetected": "検出：{{proxy}}",
+    "proxyNotDetected": "システムプロキシは検出されません"
   },
   "statusBar": {
     "connected": "接続済み",

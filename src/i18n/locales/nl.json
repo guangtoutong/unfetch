@@ -204,7 +204,9 @@
       "tokenHint": "Houd geheim — wie het heeft, heeft volledige controle.",
       "urlHint": "Scan QR of open URL",
       "restart": "Herstart daemon om wijzigingen toe te passen"
-    }
+    },
+    "proxyDetected": "Gedetecteerd: {{proxy}}",
+    "proxyNotDetected": "Geen systeem-proxy gedetecteerd"
   },
   "statusBar": {
     "connected": "Verbonden",

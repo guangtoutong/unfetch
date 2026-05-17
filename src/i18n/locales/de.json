@@ -204,7 +204,9 @@
       "tokenHint": "Geheim halten — wer den Token hat, hat volle Kontrolle.",
       "urlHint": "QR scannen oder URL im Browser öffnen",
       "restart": "Daemon neu starten, um Änderungen zu übernehmen"
-    }
+    },
+    "proxyDetected": "Erkannt: {{proxy}}",
+    "proxyNotDetected": "Kein System-Proxy erkannt"
   },
   "statusBar": {
     "connected": "Verbunden",

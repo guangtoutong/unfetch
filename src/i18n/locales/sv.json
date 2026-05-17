@@ -204,7 +204,9 @@
       "tokenHint": "Håll hemlig — vem som helst med token har full kontroll.",
       "urlHint": "Skanna QR eller öppna URL",
       "restart": "Starta om daemon för att tillämpa"
-    }
+    },
+    "proxyDetected": "Upptäckt: {{proxy}}",
+    "proxyNotDetected": "Ingen system-proxy upptäckt"
   },
   "statusBar": {
     "connected": "Ansluten",
