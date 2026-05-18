@@ -14,15 +14,15 @@ const dlMac = `${baseUrl}/unfetch_${VERSION}_universal.dmg`
 const dlWin = `${baseUrl}/unfetch_${VERSION}_x64-setup.exe`
 const dlLinux = `${baseUrl}/unfetch_${VERSION}_amd64.AppImage`
 ---
-<section style="padding: 80px 0 60px;">
+<section style="padding: 100px 0 80px;">
   <div class="container" style="text-align: center;">
-    <span style="display: inline-block; padding: 6px 14px; border-radius: 20px; background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: #22c55e; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 24px;">
+    <span style="display: inline-block; padding: 6px 14px; border-radius: 999px; background: var(--primary-bg); border: 1px solid #c4b5fd; color: var(--primary-strong); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 28px;">
       {s.hero.tag}
     </span>
-    <h1 style="font-size: 56px; font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; margin-bottom: 20px; background: linear-gradient(135deg, #fff 0%, #a78bfa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+    <h1 style="font-size: 60px; font-weight: 800; line-height: 1.05; letter-spacing: -2px; margin-bottom: 24px; color: var(--fg); max-width: 16ch; margin-left: auto; margin-right: auto;">
       {s.hero.title}
     </h1>
-    <p style="font-size: 19px; color: var(--muted-strong); max-width: 720px; margin: 0 auto 40px; line-height: 1.65;">
+    <p style="font-size: 20px; color: var(--muted); max-width: 680px; margin: 0 auto 40px; line-height: 1.6;">
       {s.hero.subtitle}
     </p>
     <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
@@ -35,7 +35,7 @@ const dlLinux = `${baseUrl}/unfetch_${VERSION}_amd64.AppImage`
          data-mac-href={dlMac}
          data-win-href={dlWin}
          data-linux-href={dlLinux}
-         style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border-radius: 10px; font-weight: 600; font-size: 15px; box-shadow: 0 8px 24px rgba(99,102,241,0.4);">
+         style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: var(--fg); color: var(--bg); border-radius: 999px; font-weight: 600; font-size: 15px; box-shadow: var(--shadow-md);">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
           <polyline points="8 17 12 21 16 17" />
           <line x1="12" y1="12" x2="12" y2="21" />
@@ -44,7 +44,7 @@ const dlLinux = `${baseUrl}/unfetch_${VERSION}_amd64.AppImage`
         <span id="download-cta-label">{s.hero.download}</span>
       </a>
       <a href={mcpHref}
-         style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.15); color: white; border-radius: 10px; font-weight: 600; font-size: 15px;">
+         style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: var(--bg-2); border: 1px solid var(--border-strong); color: var(--fg); border-radius: 999px; font-weight: 600; font-size: 15px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z" />
           <path d="M12 8v8M8 12h8" />
@@ -52,45 +52,48 @@ const dlLinux = `${baseUrl}/unfetch_${VERSION}_amd64.AppImage`
         {s.hero.mcp}
       </a>
     </div>
-    <p style="margin-top: 16px; font-size: 13px; color: var(--muted-strong); letter-spacing: 0.01em;">{s.hero.requirements}</p>
+    <p style="margin-top: 18px; font-size: 13px; color: var(--muted); letter-spacing: 0.01em;">{s.hero.requirements}</p>
 
-    <div style="margin-top: 18px;">
+    <div style="margin-top: 22px;">
       <a href={(lang === 'en' ? '/' : `/${lang}/`) + '#download'}
-         style="display: inline-block; color: var(--primary-strong); font-size: 14px; font-weight: 500; border-bottom: 1px dashed var(--primary); padding-bottom: 2px;">
+         style="display: inline-block; color: var(--primary); font-size: 14px; font-weight: 500; border-bottom: 1px dashed var(--primary); padding-bottom: 2px;">
         {s.hero.allPlatforms}
       </a>
     </div>
 
     <div class="stats-row">
       <a href="https://github.com/guangtoutong/unfetch/stargazers" target="_blank" rel="noreferrer">
-        <img src="https://img.shields.io/github/stars/guangtoutong/unfetch?label=stars&color=6366f1&labelColor=1f1f40&style=for-the-badge" alt="GitHub stars" height="28" />
+        <img src="https://img.shields.io/github/stars/guangtoutong/unfetch?label=stars&color=7c3aed&labelColor=ede9fe&style=for-the-badge" alt="GitHub stars" height="28" />
       </a>
       <a href="https://github.com/guangtoutong/unfetch/releases" target="_blank" rel="noreferrer">
-        <img src="https://img.shields.io/github/downloads/guangtoutong/unfetch/total?label=downloads&color=8b5cf6&labelColor=1f1f40&style=for-the-badge" alt="GitHub downloads" height="28" />
+        <img src="https://img.shields.io/github/downloads/guangtoutong/unfetch/total?label=downloads&color=8b5cf6&labelColor=ede9fe&style=for-the-badge" alt="GitHub downloads" height="28" />
       </a>
       <a href="https://github.com/guangtoutong/unfetch/releases/latest" target="_blank" rel="noreferrer">
-        <img src="https://img.shields.io/github/v/release/guangtoutong/unfetch?label=latest&color=a78bfa&labelColor=1f1f40&style=for-the-badge" alt="latest release" height="28" />
+        <img src="https://img.shields.io/github/v/release/guangtoutong/unfetch?label=latest&color=a78bfa&labelColor=ede9fe&style=for-the-badge" alt="latest release" height="28" />
       </a>
     </div>
 
-    <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+    <div style="margin-top: 34px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
       {s.hero.chips.map((c) => (
-        <span style="display: inline-block; padding: 8px 14px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--border-strong); font-size: 13px; font-weight: 500; color: var(--muted-strong);">{c}</span>
+        <span style="display: inline-block; padding: 8px 14px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--border); font-size: 13px; font-weight: 500; color: var(--muted-strong); box-shadow: var(--shadow-sm);">{c}</span>
       ))}
     </div>
   </div>
 </section>
 
-<section style="padding: 60px 0;">
+<section style="padding: 80px 0; background: var(--bg-3);">
   <div class="container">
-    <h2 style="text-align: center; font-size: 34px; font-weight: 700; margin-bottom: 48px; letter-spacing: -0.5px;">
+    <h2 style="text-align: center; font-size: 36px; font-weight: 800; margin-bottom: 16px; letter-spacing: -1px;">
       {s.features.title}
     </h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+    <p style="text-align: center; color: var(--muted); font-size: 16px; margin-bottom: 56px;">
+      {s.hero.requirements}
+    </p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px;">
       {s.features.items.map((f) => (
-        <div style="padding: 26px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 14px; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;">
+        <div class="feature-card" style="padding: 26px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-sm); transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;">
           <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 10px; color: var(--fg);">{f.title}</h3>
-          <p style="font-size: 13.5px; color: var(--muted-strong); line-height: 1.7; margin: 0;">{f.desc}</p>
+          <p style="font-size: 14px; color: var(--muted); line-height: 1.65; margin: 0;">{f.desc}</p>
         </div>
       ))}
     </div>
@@ -101,13 +104,21 @@ const dlLinux = `${baseUrl}/unfetch_${VERSION}_amd64.AppImage`
 
 <Sponsor lang={lang} />
 
-<section style="padding: 60px 0 80px;">
-  <div class="container" style="text-align: center; padding: 60px 32px; background: linear-gradient(135deg, rgba(99,102,241,0.18), rgba(139,92,246,0.18)); border: 1px solid rgba(167,139,250,0.4); border-radius: 20px; box-shadow: 0 12px 40px -16px rgba(139,92,246,0.4);">
-    <h2 style="font-size: 32px; font-weight: 700; margin-bottom: 14px; color: var(--fg);">{s.cta.title}</h2>
-    <p style="font-size: 16px; color: var(--muted-strong); margin-bottom: 30px;">{s.cta.desc}</p>
+<section style="padding: 80px 0;">
+  <div class="container" style="text-align: center; padding: 64px 32px; background: var(--fg); border-radius: 24px; box-shadow: var(--shadow-lg);">
+    <h2 style="font-size: 34px; font-weight: 800; margin-bottom: 14px; color: var(--bg); letter-spacing: -0.7px;">{s.cta.title}</h2>
+    <p style="font-size: 17px; color: #d4d4d4; margin-bottom: 30px;">{s.cta.desc}</p>
     <a href={dlMac}
-       style="display: inline-flex; align-items: center; gap: 8px; padding: 15px 34px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border-radius: 10px; font-weight: 600; box-shadow: 0 10px 28px rgba(139,92,246,0.45);">
+       style="display: inline-flex; align-items: center; gap: 8px; padding: 15px 34px; background: var(--bg); color: var(--fg); border-radius: 999px; font-weight: 700; font-size: 15px;">
       {s.cta.button}
     </a>
   </div>
 </section>
+
+<style>
+  .feature-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+  }
+</style>

@@ -93,18 +93,18 @@ const platforms = [
   }
   .dl-card {
     background: var(--bg-2);
-    border: 1px solid var(--border-strong);
+    border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 26px;
+    padding: 28px;
     display: flex;
     flex-direction: column;
     transition: all 0.2s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-sm);
   }
   .dl-card:hover {
     border-color: var(--primary);
-    transform: translateY(-2px);
-    box-shadow: 0 14px 36px -12px rgba(167, 139, 250, 0.4);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
   }
   .dl-card__head {
     display: flex;
@@ -121,24 +121,23 @@ const platforms = [
     align-items: center;
     justify-content: center;
     width: 100%;
-    padding: 11px 18px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    padding: 12px 18px;
+    background: var(--primary);
     color: #fff !important;
     border-radius: 9px;
     font-weight: 600;
     font-size: 14px;
     text-align: center;
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
     transition: all 0.18s;
   }
   .dl-card__btn:hover {
+    background: var(--primary-strong);
     transform: translateY(-1px);
-    box-shadow: 0 10px 22px rgba(99, 102, 241, 0.45);
   }
   .dl-card__alt {
     display: block;
     margin-top: 10px;
-    font-size: 12px;
+    font-size: 13px;
     color: var(--muted);
     text-align: center;
   }
@@ -152,11 +151,11 @@ const platforms = [
     margin: 32px 0 0;
   }
   .dl-note {
-    padding: 14px 18px;
-    background: rgba(139, 92, 246, 0.12);
+    padding: 16px 18px;
+    background: var(--primary-bg);
     border-left: 3px solid var(--primary);
     border-radius: 0 8px 8px 0;
-    font-size: 13px;
+    font-size: 13.5px;
     color: var(--muted-strong);
     line-height: 1.65;
   }
