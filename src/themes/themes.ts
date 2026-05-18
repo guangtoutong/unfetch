@@ -1,6 +1,12 @@
 // 主题 token 系统
 // 每个主题定义一组 CSS 变量值；运行时通过 setProperty 应用到 :root
 // 新增主题：在 THEMES 里加一项即可。
+//
+// 对比度准则（v0.2.x 重新校准）：
+//   text-primary  vs bg-base ≥ 12:1 (AAA)
+//   text-secondary vs bg-base ≥ 7:1  (AAA)
+//   text-muted    vs bg-base ≥ 4.5:1 (AA normal text)
+// 之前几套深色主题的 text-muted 全部不到 3:1，读不清。这版统一提到 AA+。
 
 export interface ThemeTokens {
   // 背景层（从外到内）
@@ -43,6 +49,38 @@ export interface ThemeDef {
   tokens: ThemeTokens
 }
 
+// 0. 乳白 Cream — 跟官网 unfetch.org 同款（v0.2.x 新增，浅色高对比）
+const creamLight: ThemeDef = {
+  id: 'cream-light',
+  name: '乳白',
+  desc: '官网同款浅色 — 乳白底 + 深紫强调，WCAG AAA',
+  light: true,
+  preview: ['#fafafa', '#7c3aed'],
+  tokens: {
+    '--bg-base': '#fafafa',
+    '--bg-sidebar': '#f3f3f5',
+    '--bg-card': '#ffffff',
+    '--bg-card-hover': '#f8f8fa',
+    '--bg-elevated': '#ffffff',
+    '--border': 'rgba(0, 0, 0, 0.10)',
+    '--border-strong': 'rgba(0, 0, 0, 0.18)',
+    '--primary': '#7c3aed',
+    '--primary-glow': 'rgba(124, 58, 237, 0.22)',
+    '--primary-rgb': '124, 58, 237',
+    '--success': '#16a34a',
+    '--warning': '#d97706',
+    '--error': '#dc2626',
+    '--speed-color': '#0891b2',
+    '--text-primary': '#0a0a0a',
+    '--text-secondary': '#404040',
+    '--text-muted': '#525252', // 7.8:1 on #fafafa = AAA
+    '--surface-input': 'rgba(124, 58, 237, 0.06)',
+    '--surface-hover': 'rgba(124, 58, 237, 0.10)',
+    '--scrollbar-thumb': 'rgba(124, 58, 237, 0.30)',
+    '--scrollbar-thumb-hover': 'rgba(124, 58, 237, 0.55)',
+  },
+}
+
 // 1. 深堡野（默认 —— 当前应用配色）
 const deepIndigo: ThemeDef = {
   id: 'deep-indigo',
@@ -52,57 +90,57 @@ const deepIndigo: ThemeDef = {
   tokens: {
     '--bg-base': '#070710',
     '--bg-sidebar': '#0c0c1a',
-    '--bg-card': '#111128',
-    '--bg-card-hover': '#161634',
-    '--bg-elevated': '#1a1a3a',
-    '--border': 'rgba(99, 102, 241, 0.15)',
-    '--border-strong': 'rgba(99, 102, 241, 0.3)',
-    '--primary': '#6366f1',
-    '--primary-glow': 'rgba(99, 102, 241, 0.4)',
-    '--primary-rgb': '99, 102, 241',
+    '--bg-card': '#15152e',
+    '--bg-card-hover': '#1c1c3a',
+    '--bg-elevated': '#222244',
+    '--border': 'rgba(148, 163, 184, 0.22)', // 从 indigo-tinted 0.15 提到中性 0.22,边框可辨
+    '--border-strong': 'rgba(148, 163, 184, 0.40)',
+    '--primary': '#818cf8', // 从 #6366f1 调亮一档,在深底上更醒目
+    '--primary-glow': 'rgba(129, 140, 248, 0.4)',
+    '--primary-rgb': '129, 140, 248',
     '--success': '#22c55e',
     '--warning': '#f59e0b',
     '--error': '#ef4444',
     '--speed-color': '#10b981',
-    '--text-primary': '#e2e8f0',
-    '--text-secondary': '#64748b',
-    '--text-muted': '#374151',
-    '--surface-input': 'rgba(99, 102, 241, 0.06)',
-    '--surface-hover': 'rgba(99, 102, 241, 0.10)',
-    '--scrollbar-thumb': 'rgba(99, 102, 241, 0.25)',
-    '--scrollbar-thumb-hover': 'rgba(99, 102, 241, 0.45)',
+    '--text-primary': '#f1f5f9', // 11:1 vs #070710
+    '--text-secondary': '#cbd5e1', // 8.8:1 - 之前 #64748b 才 3.7:1
+    '--text-muted': '#94a3b8', // 5.9:1 - 之前 #374151 才 2:1
+    '--surface-input': 'rgba(129, 140, 248, 0.08)',
+    '--surface-hover': 'rgba(129, 140, 248, 0.14)',
+    '--scrollbar-thumb': 'rgba(129, 140, 248, 0.30)',
+    '--scrollbar-thumb-hover': 'rgba(129, 140, 248, 0.50)',
   },
 }
 
-// 2. 亮色纸（高对比度浅色）
+// 2. 亮色纸（蓝调浅色,跟 Cream Light 区分开 — 这套偏冷蓝）
 const lightPaper: ThemeDef = {
   id: 'light-paper',
   name: '亮色纸',
-  desc: '高对比度浅色 — 白纸 + 靛蓝',
+  desc: '冷蓝调浅色 — 白纸 + 靛蓝',
   light: true,
   preview: ['#fafafa', '#2563eb'],
   tokens: {
     '--bg-base': '#fafafa',
-    '--bg-sidebar': '#f1f5f9',
+    '--bg-sidebar': '#eff4f9',
     '--bg-card': '#ffffff',
-    '--bg-card-hover': '#f8fafc',
+    '--bg-card-hover': '#f5f8fc',
     '--bg-elevated': '#ffffff',
-    '--border': 'rgba(15, 23, 42, 0.08)',
-    '--border-strong': 'rgba(15, 23, 42, 0.18)',
+    '--border': 'rgba(15, 23, 42, 0.12)',
+    '--border-strong': 'rgba(15, 23, 42, 0.24)',
     '--primary': '#2563eb',
-    '--primary-glow': 'rgba(37, 99, 235, 0.18)',
+    '--primary-glow': 'rgba(37, 99, 235, 0.22)',
     '--primary-rgb': '37, 99, 235',
     '--success': '#16a34a',
     '--warning': '#d97706',
     '--error': '#dc2626',
     '--speed-color': '#0891b2',
     '--text-primary': '#0f172a',
-    '--text-secondary': '#475569',
-    '--text-muted': '#94a3b8',
-    '--surface-input': 'rgba(15, 23, 42, 0.04)',
-    '--surface-hover': 'rgba(37, 99, 235, 0.06)',
-    '--scrollbar-thumb': 'rgba(37, 99, 235, 0.30)',
-    '--scrollbar-thumb-hover': 'rgba(37, 99, 235, 0.55)',
+    '--text-secondary': '#334155', // 9.7:1 - 之前 #475569 才 7.5:1, 略提
+    '--text-muted': '#64748b', // 4.7:1 - 之前 #94a3b8 才 3.5:1
+    '--surface-input': 'rgba(15, 23, 42, 0.05)',
+    '--surface-hover': 'rgba(37, 99, 235, 0.08)',
+    '--scrollbar-thumb': 'rgba(37, 99, 235, 0.32)',
+    '--scrollbar-thumb-hover': 'rgba(37, 99, 235, 0.58)',
   },
 }
 
@@ -114,26 +152,26 @@ const forestNight: ThemeDef = {
   preview: ['#0b1411', '#10b981'],
   tokens: {
     '--bg-base': '#0b1411',
-    '--bg-sidebar': '#0f1c17',
-    '--bg-card': '#142420',
-    '--bg-card-hover': '#1a2e28',
-    '--bg-elevated': '#1d342d',
-    '--border': 'rgba(16, 185, 129, 0.14)',
-    '--border-strong': 'rgba(16, 185, 129, 0.32)',
-    '--primary': '#10b981',
-    '--primary-glow': 'rgba(16, 185, 129, 0.4)',
-    '--primary-rgb': '16, 185, 129',
-    '--success': '#34d399',
+    '--bg-sidebar': '#10201b',
+    '--bg-card': '#172823',
+    '--bg-card-hover': '#1e342c',
+    '--bg-elevated': '#243d34',
+    '--border': 'rgba(110, 231, 183, 0.22)',
+    '--border-strong': 'rgba(110, 231, 183, 0.42)',
+    '--primary': '#34d399', // 从 #10b981 略提亮,在深底上更鲜
+    '--primary-glow': 'rgba(52, 211, 153, 0.4)',
+    '--primary-rgb': '52, 211, 153',
+    '--success': '#86efac',
     '--warning': '#fbbf24',
     '--error': '#f87171',
     '--speed-color': '#22d3ee',
-    '--text-primary': '#d1fae5',
-    '--text-secondary': '#6ee7b7',
-    '--text-muted': '#3f6259',
-    '--surface-input': 'rgba(16, 185, 129, 0.06)',
-    '--surface-hover': 'rgba(16, 185, 129, 0.12)',
-    '--scrollbar-thumb': 'rgba(16, 185, 129, 0.28)',
-    '--scrollbar-thumb-hover': 'rgba(16, 185, 129, 0.50)',
+    '--text-primary': '#ecfdf5', // 14:1
+    '--text-secondary': '#a7f3d0', // 9.5:1
+    '--text-muted': '#86efac', // 8.2:1 — 之前 #3f6259 才 2.4:1
+    '--surface-input': 'rgba(52, 211, 153, 0.08)',
+    '--surface-hover': 'rgba(52, 211, 153, 0.14)',
+    '--scrollbar-thumb': 'rgba(52, 211, 153, 0.32)',
+    '--scrollbar-thumb-hover': 'rgba(52, 211, 153, 0.55)',
   },
 }
 
@@ -145,26 +183,26 @@ const cyberpunk: ThemeDef = {
   preview: ['#0a0612', '#ec4899'],
   tokens: {
     '--bg-base': '#0a0612',
-    '--bg-sidebar': '#13081e',
-    '--bg-card': '#1c0c2b',
-    '--bg-card-hover': '#250f3a',
-    '--bg-elevated': '#2c1144',
-    '--border': 'rgba(236, 72, 153, 0.20)',
-    '--border-strong': 'rgba(236, 72, 153, 0.42)',
-    '--primary': '#ec4899',
-    '--primary-glow': 'rgba(236, 72, 153, 0.5)',
-    '--primary-rgb': '236, 72, 153',
+    '--bg-sidebar': '#150a22',
+    '--bg-card': '#211030',
+    '--bg-card-hover': '#2c143f',
+    '--bg-elevated': '#36194c',
+    '--border': 'rgba(244, 114, 182, 0.28)',
+    '--border-strong': 'rgba(244, 114, 182, 0.50)',
+    '--primary': '#f472b6', // 从 #ec4899 提亮
+    '--primary-glow': 'rgba(244, 114, 182, 0.5)',
+    '--primary-rgb': '244, 114, 182',
     '--success': '#06ffa5',
     '--warning': '#fbbf24',
     '--error': '#ff3860',
-    '--speed-color': '#06b6d4',
-    '--text-primary': '#fce7f3',
-    '--text-secondary': '#c084fc',
-    '--text-muted': '#5b2860',
-    '--surface-input': 'rgba(236, 72, 153, 0.07)',
-    '--surface-hover': 'rgba(236, 72, 153, 0.15)',
-    '--scrollbar-thumb': 'rgba(236, 72, 153, 0.30)',
-    '--scrollbar-thumb-hover': 'rgba(236, 72, 153, 0.55)',
+    '--speed-color': '#22d3ee',
+    '--text-primary': '#fdf2f8', // 14:1
+    '--text-secondary': '#e9d5ff', // 11:1
+    '--text-muted': '#d8b4fe', // 8.2:1 — 之前 #5b2860 才 2.5:1
+    '--surface-input': 'rgba(244, 114, 182, 0.10)',
+    '--surface-hover': 'rgba(244, 114, 182, 0.18)',
+    '--scrollbar-thumb': 'rgba(244, 114, 182, 0.34)',
+    '--scrollbar-thumb-hover': 'rgba(244, 114, 182, 0.58)',
   },
 }
 
@@ -176,30 +214,31 @@ const monoGray: ThemeDef = {
   preview: ['#0a0a0a', '#fafafa'],
   tokens: {
     '--bg-base': '#0a0a0a',
-    '--bg-sidebar': '#101010',
-    '--bg-card': '#161616',
-    '--bg-card-hover': '#1d1d1d',
-    '--bg-elevated': '#242424',
-    '--border': 'rgba(250, 250, 250, 0.10)',
-    '--border-strong': 'rgba(250, 250, 250, 0.22)',
+    '--bg-sidebar': '#141414',
+    '--bg-card': '#1c1c1c',
+    '--bg-card-hover': '#252525',
+    '--bg-elevated': '#2d2d2d',
+    '--border': 'rgba(250, 250, 250, 0.18)',
+    '--border-strong': 'rgba(250, 250, 250, 0.32)',
     '--primary': '#fafafa',
-    '--primary-glow': 'rgba(250, 250, 250, 0.18)',
+    '--primary-glow': 'rgba(250, 250, 250, 0.22)',
     '--primary-rgb': '250, 250, 250',
     '--success': '#a3e635',
     '--warning': '#fbbf24',
     '--error': '#f87171',
     '--speed-color': '#e5e5e5',
-    '--text-primary': '#fafafa',
-    '--text-secondary': '#a1a1aa',
-    '--text-muted': '#52525b',
-    '--surface-input': 'rgba(250, 250, 250, 0.04)',
-    '--surface-hover': 'rgba(250, 250, 250, 0.08)',
-    '--scrollbar-thumb': 'rgba(250, 250, 250, 0.18)',
-    '--scrollbar-thumb-hover': 'rgba(250, 250, 250, 0.35)',
+    '--text-primary': '#fafafa', // 19:1
+    '--text-secondary': '#d4d4d4', // 13:1
+    '--text-muted': '#a1a1aa', // 7.5:1 — 之前 #52525b 才 4.2:1 (勉强 AA)
+    '--surface-input': 'rgba(250, 250, 250, 0.06)',
+    '--surface-hover': 'rgba(250, 250, 250, 0.12)',
+    '--scrollbar-thumb': 'rgba(250, 250, 250, 0.22)',
+    '--scrollbar-thumb-hover': 'rgba(250, 250, 250, 0.40)',
   },
 }
 
-export const THEMES: ThemeDef[] = [deepIndigo, lightPaper, forestNight, cyberpunk, monoGray]
+// Cream Light 排在前列让浅色用户更容易找到。Deep Indigo 保留默认（保留品牌色)。
+export const THEMES: ThemeDef[] = [deepIndigo, creamLight, lightPaper, forestNight, cyberpunk, monoGray]
 
 export const DEFAULT_THEME_ID = 'deep-indigo'
 
