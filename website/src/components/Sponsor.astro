@@ -4,9 +4,11 @@ interface Props { lang: string }
 const { lang } = Astro.props
 const s = getStrings(lang)
 
-// TODO: 待 GitHub Sponsors 审核通过后替换为正式链接
-const githubSponsorUrl = 'https://github.com/sponsors/guangtoutong'
-const paypalUrl = 'https://paypal.me/guangtoutong'
+// 沿用 SoloMD 同作者的赞助账户(github.com/sponsors/zhitongblog 已开通,
+// paypal.me/solomdapp 实际可收款)。若以后 unfetch 单独申请 GitHub Sponsors,
+// 在这里改成 unfetch 自己的 slug。
+const githubSponsorUrl = 'https://github.com/sponsors/zhitongblog'
+const paypalUrl = 'https://paypal.me/solomdapp'
 const alipayQr = '/sponsor/alipay-qr.jpg'
 const wechatQr = '/sponsor/wechat-qr.jpg'
 ---
