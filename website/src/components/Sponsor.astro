@@ -98,17 +98,18 @@ const wechatQr = '/sponsor/wechat-qr.jpg'
   }
   .sp-card {
     background: var(--bg-2);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-strong);
     border-radius: 14px;
-    padding: 22px;
+    padding: 24px;
     display: flex;
     flex-direction: column;
     transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
   .sp-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px -12px rgba(139, 92, 246, 0.25);
-    border-color: rgba(139, 92, 246, 0.4);
+    box-shadow: 0 14px 36px -12px rgba(167, 139, 250, 0.4);
+    border-color: var(--primary);
   }
   .sp-card__head {
     display: flex;
@@ -131,10 +132,10 @@ const wechatQr = '/sponsor/wechat-qr.jpg'
     font-weight: 700;
   }
   .sp-card__desc {
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.6;
-    margin: 0 0 16px;
+    color: var(--muted-strong);
+    font-size: 13.5px;
+    line-height: 1.7;
+    margin: 0 0 18px;
     flex: 1;
   }
   .sp-card__btn {
