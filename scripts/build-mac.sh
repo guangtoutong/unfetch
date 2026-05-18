@@ -76,17 +76,33 @@ popd >/dev/null
 
 # ---------- 2. Tauri build --bundles app（先不打 dmg，后面手动 hdiutil 做）----------
 echo "==> Building .app (universal, no dmg yet)"
-# 故意不导出 APPLE_ID/APPLE_PASSWORD，让 Tauri 跳过公证（我们手动公证）
-unset APPLE_ID_FOR_TAURI APPLE_PASSWORD_FOR_TAURI 2>/dev/null || true
-APPLE_SIGNING_IDENTITY="$APPLE_SIGNING_IDENTITY" \
+# 用 env -u 显式 unset APPLE_ID/APPLE_PASSWORD/APPLE_TEAM_ID,这样 Tauri 内置的
+# notarize 步骤就被跳过 — 我们手动控制后面的签 sidecar + notarize 流程,因为
+# Tauri 的默认签法不会给 sidecar 二进制加 hardened runtime + secure timestamp,
+# 直接送公证会被拒。
+env -u APPLE_ID -u APPLE_PASSWORD -u APPLE_TEAM_ID \
+  APPLE_SIGNING_IDENTITY="$APPLE_SIGNING_IDENTITY" \
   pnpm tauri build --target universal-apple-darwin --bundles app
 
 APP="src-tauri/target/universal-apple-darwin/release/bundle/macos/${PRODUCT}.app"
 [ -d "$APP" ] || { echo "ERROR: .app not found at $APP" >&2; exit 1; }
 
-# ---------- 3. 再签一次确保 sidecar 包含在签名内 ----------
-echo "==> Re-signing .app with hardened runtime"
-codesign --force --deep --options runtime --timestamp \
+# ---------- 3. 重签：先签 sidecar 二进制（必须 hardened + timestamp），再签 .app ----------
+# --deep 在 macOS 13+ 已弃用，推荐 inside-out 单独签每一层。Tauri 默认对
+# sidecar 只做轻量签名，没加 --options runtime 也没加 --timestamp，公证必拒。
+echo "==> Signing sidecar binaries individually"
+SIDECAR_DIR="$APP/Contents/Resources/binaries"
+if [ -d "$SIDECAR_DIR" ]; then
+  for f in "$SIDECAR_DIR"/*; do
+    [ -f "$f" ] || continue
+    echo "    sign $(basename "$f")"
+    codesign --force --options runtime --timestamp \
+      --sign "$APPLE_SIGNING_IDENTITY" "$f"
+  done
+fi
+
+echo "==> Re-signing .app outer bundle (hardened runtime + timestamp)"
+codesign --force --options runtime --timestamp \
   --sign "$APPLE_SIGNING_IDENTITY" "$APP"
 codesign --verify --deep --strict --verbose=2 "$APP"
 
