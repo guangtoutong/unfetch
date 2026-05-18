@@ -26,20 +26,20 @@ const currentLang = LANGS.find((l) => l.code === lang) || LANGS[0]
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <style is:global>
     :root {
-      /* 浅色皮肤(参考 SoloMD)。WCAG AAA 对比度:
-         - bg #fafafa vs fg #0a0a0a = 19:1
-         - bg #fafafa vs muted #525252 = 7.8:1
-         - primary #7c3aed vs bg = 4.6:1
-         紫色仍是品牌色,只是反过来——浅底深字深紫强调,而不是深底浅字。*/
-      --bg: #fafafa;
+      /* 浅色皮肤 v2 — 用户反馈 #fafafa 在他屏幕上看着灰,改成纯白:
+         - bg #ffffff 真正的白(顶部/下载/赞助区)
+         - bg-soft #fafafa 仅 Features section 的微微衬底,跟主底有可辨的微差
+         - bg-card #ffffff 卡片也是纯白(配上 border 描边区分)
+         紫色仍是品牌色,WCAG AAA 对比度。*/
+      --bg: #ffffff;
       --bg-2: #ffffff;
-      --bg-3: #f3f3f5;
+      --bg-3: #fafafa;
       --fg: #0a0a0a;
       --muted: #525252;
       --muted-strong: #262626;
       --primary: #7c3aed;
       --primary-strong: #5b21b6;
-      --primary-bg: #ede9fe;
+      --primary-bg: #f3efff;
       --accent: #ea580c;
       --border: #e5e5e5;
       --border-strong: #d4d4d4;

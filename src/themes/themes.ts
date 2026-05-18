@@ -53,14 +53,14 @@ export interface ThemeDef {
 const creamLight: ThemeDef = {
   id: 'cream-light',
   name: '乳白',
-  desc: '官网同款浅色 — 乳白底 + 深紫强调，WCAG AAA',
+  desc: '官网同款浅色 — 纯白底 + 深紫强调，WCAG AAA',
   light: true,
-  preview: ['#fafafa', '#7c3aed'],
+  preview: ['#ffffff', '#7c3aed'],
   tokens: {
-    '--bg-base': '#fafafa',
-    '--bg-sidebar': '#f3f3f5',
+    '--bg-base': '#ffffff',        // 主底纯白(原 #fafafa 用户反馈偏灰)
+    '--bg-sidebar': '#fafafa',     // 侧栏极淡 off-white 衬底
     '--bg-card': '#ffffff',
-    '--bg-card-hover': '#f8f8fa',
+    '--bg-card-hover': '#f7f7f9',
     '--bg-elevated': '#ffffff',
     '--border': 'rgba(0, 0, 0, 0.10)',
     '--border-strong': 'rgba(0, 0, 0, 0.18)',
@@ -73,7 +73,7 @@ const creamLight: ThemeDef = {
     '--speed-color': '#0891b2',
     '--text-primary': '#0a0a0a',
     '--text-secondary': '#404040',
-    '--text-muted': '#525252', // 7.8:1 on #fafafa = AAA
+    '--text-muted': '#525252', // 7.8:1 on #ffffff = AAA
     '--surface-input': 'rgba(124, 58, 237, 0.06)',
     '--surface-hover': 'rgba(124, 58, 237, 0.10)',
     '--scrollbar-thumb': 'rgba(124, 58, 237, 0.30)',
