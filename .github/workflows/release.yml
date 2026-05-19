@@ -46,7 +46,13 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Cache cargo
+        # Post-step (cache save) sometimes fails on Windows runners with
+        # "tar: cache.tzst: Cannot open" or chunked upload errors. That
+        # post-step failure used to mark the whole job as failed and
+        # skip the release job (seen on v0.2.2). 加 continue-on-error 后
+        # cache 保存失败只是少了下次的缓存,不影响产物上传。
         uses: Swatinem/rust-cache@v2
+        continue-on-error: true
         with:
           workspaces: src-tauri
 
@@ -133,7 +139,10 @@ jobs:
   release:
     name: Publish GitHub Release
     needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
+    # always() + !cancelled() = 即使 build job 部分失败(比如 Win 的 post-cache
+    # 挂了但产物已上传)也跑 release,把成功的 artifact 发出去 — 避免 cache
+    # 这种 post-step 错误拖垮整次发版。
+    if: ${{ always() && !cancelled() && startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
