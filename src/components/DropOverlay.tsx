@@ -77,7 +77,7 @@ export const DropOverlay: React.FC = () => {
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
             style={{
-              background: 'rgba(7,7,16,0.85)',
+              background: 'color-mix(in srgb, var(--bg-base) 88%, transparent)',
               border: '1px solid rgba(139,92,246,0.5)',
               borderRadius: 16,
               padding: '24px 36px',

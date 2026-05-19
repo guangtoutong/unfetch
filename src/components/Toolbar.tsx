@@ -49,7 +49,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onAdd }) => {
         justifyContent: 'space-between',
         padding: '0 16px',
         borderBottom: '1px solid var(--border)',
-        background: 'rgba(7,7,16,0.6)',
+        background: 'var(--bg-sidebar)',
         flexShrink: 0,
         gap: 12,
       }}

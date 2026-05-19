@@ -17,7 +17,7 @@ export const AdBanner: React.FC = () => {
         gap: 8,
         padding: '8px 16px',
         borderTop: '1px solid var(--border)',
-        background: 'rgba(7,7,16,0.6)',
+        background: 'var(--bg-sidebar)',
         flexShrink: 0,
       }}
     >
