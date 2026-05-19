@@ -52,7 +52,8 @@ export const TitleBar: React.FC = () => {
       data-tauri-drag-region
       style={{
         height: 40,
-        background: 'rgba(7, 7, 16, 0.95)',
+        // 跟随主题:深色主题用 sidebar(比 base 略浅或略深,看主题定义),浅色用纯白侧栏 token
+        background: 'var(--bg-sidebar)',
         borderBottom: '1px solid var(--border)',
         display: 'flex',
         alignItems: 'center',
@@ -141,14 +142,14 @@ export const TitleBar: React.FC = () => {
         </TitleBarBtn>
 
         {/* 最小化 */}
-        <TitleBarBtn onClick={tauriMinimize} title={t('titlebar.minimize')} hoverColor="rgba(255,255,255,0.08)">
+        <TitleBarBtn onClick={tauriMinimize} title={t('titlebar.minimize')} hoverColor="var(--surface-hover)">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
             <rect x="1" y="5.5" width="10" height="1" fill="currentColor" rx="0.5" />
           </svg>
         </TitleBarBtn>
 
         {/* 最大化 */}
-        <TitleBarBtn onClick={tauriToggleMaximize} title={t('titlebar.maximize')} hoverColor="rgba(255,255,255,0.08)">
+        <TitleBarBtn onClick={tauriToggleMaximize} title={t('titlebar.maximize')} hoverColor="var(--surface-hover)">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
             <rect x="1.5" y="1.5" width="9" height="9" stroke="currentColor" strokeWidth="1.2" rx="1" />
           </svg>
@@ -177,7 +178,7 @@ const TitleBarBtn: React.FC<TitleBarBtnProps> = ({
   onClick,
   title,
   children,
-  hoverColor = 'rgba(99,102,241,0.15)',
+  hoverColor = 'var(--surface-hover)',
   hoverTextColor,
 }) => {
   const [hovered, setHovered] = React.useState(false)

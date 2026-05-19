@@ -49,7 +49,8 @@ export const StatusBar: React.FC = () => {
     <div
       style={{
         height: 32,
-        background: 'rgba(7,7,16,0.9)',
+        // 跟主题走,同 TitleBar
+        background: 'var(--bg-sidebar)',
         borderTop: '1px solid var(--border)',
         display: 'flex',
         alignItems: 'center',

@@ -77,7 +77,7 @@ const currentLang = LANGS.find((l) => l.code === lang) || LANGS[0]
   </style>
 </head>
 <body>
-  <header style="border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 50; backdrop-filter: saturate(180%) blur(10px);">
+  <header id="site-header" style="background: var(--bg); position: sticky; top: 0; z-index: 50; transition: box-shadow 0.2s, border-color 0.2s; border-bottom: 1px solid transparent;">
     <div class="container" style="display: flex; align-items: center; justify-content: space-between; padding-top: 16px; padding-bottom: 16px;">
       <a href={lang === 'en' ? '/' : `/${lang}`} style="display: flex; align-items: center; gap: 10px; color: var(--fg);">
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
@@ -153,6 +153,23 @@ const currentLang = LANGS.find((l) => l.code === lang) || LANGS[0]
           menu.classList.remove('open')
         }
       })
+    })()
+
+    // Header 滚动时才显示阴影 + 边框,顶部静止时纯白无线(避免远看像"灰顶")
+    ;(function () {
+      const hdr = document.getElementById('site-header')
+      if (!hdr) return
+      const onScroll = () => {
+        if (window.scrollY > 6) {
+          hdr.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)'
+          hdr.style.borderBottomColor = 'var(--border)'
+        } else {
+          hdr.style.boxShadow = 'none'
+          hdr.style.borderBottomColor = 'transparent'
+        }
+      }
+      onScroll()
+      window.addEventListener('scroll', onScroll, { passive: true })
     })()
 
     // Hero "Download" 按钮：默认 href 已是 macOS universal dmg。JS 探测 OS
