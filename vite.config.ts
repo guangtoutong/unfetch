@@ -8,6 +8,9 @@ export default defineConfig(async () => ({
 
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
+    // MAS / Mac App Store 构建标志。build-mas.sh 跑前设 VITE_APP_STORE_BUILD=1
+    // 用来切第三方广告显示(MAS 版只显示自家官网链接,不挂任何第三方)。
+    __APP_STORE_BUILD__: JSON.stringify(process.env.VITE_APP_STORE_BUILD === '1'),
   },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`

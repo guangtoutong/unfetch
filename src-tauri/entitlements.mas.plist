@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Mac App Store sandbox 强制必须 -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+
+	<!-- TestFlight + App Store Connect 要求 bundle 签名声明 app/team identifier。
+	     6NQM3XP5RF = xiangdong li 的 Apple Developer team ID (跟 SoloMD 同) -->
+	<key>com.apple.application-identifier</key>
+	<string>6NQM3XP5RF.app.unfetch.client</string>
+	<key>com.apple.developer.team-identifier</key>
+	<string>6NQM3XP5RF</string>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>6NQM3XP5RF.*</string>
+	</array>
+
+	<!-- Tauri 内嵌 WKWebView 通过 JavaScriptCore JIT 运行 React/Vite 打包的 JS。
+	     缺这两个 entitlement,WebKit 拒绝 JIT,React app 静默白屏 -->
+	<key>com.apple.security.cs.allow-jit</key>
+	<true/>
+	<key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+	<true/>
+
+	<!-- 网络客户端:
+	       * GitHub stars/downloads 统计
+	       * shields.io badge
+	       * yt-dlp 视频抓取(若 MAS 版保留)
+	       * HTTP 多线程下载
+	       * MCP / Remote Web UI (本地 0.0.0.0 但仍需 client cap)
+	       * 更新检查(可关) -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+
+	<!-- 远程 Web UI 监听本地端口 — 用 server 入站。MAS 沙盒下监听必须有这个 -->
+	<key>com.apple.security.network.server</key>
+	<true/>
+
+	<!-- 用户主动选择的下载保存目录(NSOpenPanel/NSSavePanel)。
+	     bookmark 让我们记住跨重启的目录,不必每次重新询问 -->
+	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+	<key>com.apple.security.files.bookmarks.app-scope</key>
+	<true/>
+
+	<!-- 通常的下载目录(~/Downloads)需要单独入口 -->
+	<key>com.apple.security.files.downloads.read-write</key>
+	<true/>
+
+	<!-- 内嵌 Go daemon (unfetch-daemon) 作为子进程启动。
+	     不开 library validation 豁免,Gatekeeper 会因 sidecar 是我们自签
+	     (不是 Apple 签)而拒绝加载子进程 -->
+	<key>com.apple.security.cs.disable-library-validation</key>
+	<true/>
+</dict>
+</plist>

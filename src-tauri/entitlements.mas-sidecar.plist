@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Sidecar(unfetch-daemon)的 entitlements。仅声明 sandbox + inherit,
+	     不要带 application-identifier,否则 TestFlight 报 ITMS-90885
+	     ("nested executable... has application identifier in its signature") -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.inherit</key>
+	<true/>
+</dict>
+</plist>

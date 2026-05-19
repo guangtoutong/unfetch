@@ -200,12 +200,41 @@ export const Sidebar: React.FC = () => {
       {/* 中间撑开 */}
       <div style={{ flex: 1 }} />
 
-      {/* 紧凑广告条(原底部 AdBanner 移到这里,小一点不抢屏) */}
-      <SidebarAds />
+      {/* 紧凑广告条(原底部 AdBanner 移到这里,小一点不抢屏)
+          MAS 构建跳过这一节,避免 Apple 政策摩擦 — 仅留下方官网链接 */}
+      {!__APP_STORE_BUILD__ && <SidebarAds />}
 
-      {/* 底部版本信息 */}
-      <div style={{ padding: '10px 10px 4px' }}>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>
+      {/* 底部版本信息 + 官网链接(两个构建版本都显示,作为"About"入口) */}
+      <div style={{ padding: '10px 10px 4px', textAlign: 'center' }}>
+        <a
+          href="https://unfetch.org"
+          target="_blank"
+          rel="noopener"
+          onClick={(e) => {
+            e.preventDefault()
+            openExternal('https://unfetch.org').catch(console.error)
+          }}
+          style={{
+            display: 'inline-block',
+            fontSize: 11,
+            fontWeight: 500,
+            color: 'var(--primary)',
+            textDecoration: 'none',
+            padding: '2px 6px',
+            borderRadius: 4,
+            marginBottom: 6,
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLAnchorElement).style.background = 'var(--surface-hover)'
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLAnchorElement).style.background = 'transparent'
+          }}
+        >
+          → unfetch.org
+        </a>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>
           unfetch v{__APP_VERSION__}
           <br />
           <span style={{ fontSize: 10, color: 'var(--text-muted)', opacity: 0.7 }}>MIT License</span>
