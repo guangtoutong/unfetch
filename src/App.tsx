@@ -8,7 +8,8 @@ import { AddTaskDialog } from './components/AddTaskDialog'
 import { SettingsPanel } from './components/SettingsPanel'
 import { ClipboardPrompt } from './components/ClipboardPrompt'
 import { DropOverlay } from './components/DropOverlay'
-import { AdBanner } from './components/AdBanner'
+// AdBanner 现在挪到 Sidebar 底部紧凑展示,这里不再 import
+// import { AdBanner } from './components/AdBanner'
 import { useTaskStore } from './stores/taskStore'
 import { useSettingsStore } from './stores/settingsStore'
 
@@ -59,8 +60,8 @@ const App: React.FC = () => {
           {/* 任务列表 */}
           <TaskList />
 
-          {/* 推荐位（可远程配置） */}
-          <AdBanner />
+          {/* 推荐位现在挪到侧栏底部(更紧凑、不抢屏);AdBanner 组件留着以备
+              未来需要恢复大横幅。Sidebar.tsx 里的 SidebarAds 用同一份 ads.json。*/}
         </div>
       </div>
 

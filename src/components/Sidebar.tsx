@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useTaskStore } from '../stores/taskStore'
 import type { FilterType } from '../types'
+import { loadAds, openExternal, type AdItem } from '../lib/ads'
 
 interface FilterItem {
   key: FilterType
@@ -196,13 +197,141 @@ export const Sidebar: React.FC = () => {
         )
       })}
 
+      {/* 中间撑开 */}
+      <div style={{ flex: 1 }} />
+
+      {/* 紧凑广告条(原底部 AdBanner 移到这里,小一点不抢屏) */}
+      <SidebarAds />
+
       {/* 底部版本信息 */}
-      <div style={{ marginTop: 'auto', padding: '8px 10px' }}>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center' }}>
-          unfetch v0.1
+      <div style={{ padding: '10px 10px 4px' }}>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>
+          unfetch v{__APP_VERSION__}
+          <br />
+          <span style={{ fontSize: 10, color: 'var(--text-muted)', opacity: 0.7 }}>MIT License</span>
         </div>
       </div>
     </div>
+  )
+}
+
+// 侧栏底部的紧凑广告组件 — 替代之前抢屏的底部 AdBanner。
+// 单次会话可点 ✕ 隐藏(localStorage 不持久,关闭再开还会显示)。
+const SidebarAds: React.FC = () => {
+  const [ads, setAds] = useState<AdItem[]>([])
+  const [dismissed, setDismissed] = useState(() => sessionStorage.getItem('unfetch.ads.hide') === '1')
+
+  useEffect(() => {
+    if (dismissed) return
+    loadAds().then(setAds).catch(() => {})
+  }, [dismissed])
+
+  if (dismissed || ads.length === 0) return null
+
+  const dismiss = () => {
+    sessionStorage.setItem('unfetch.ads.hide', '1')
+    setDismissed(true)
+  }
+
+  return (
+    <div style={{ padding: '8px 6px 0', display: 'flex', flexDirection: 'column', gap: 6, position: 'relative' }}>
+      <button
+        onClick={dismiss}
+        title="隐藏(本次会话)"
+        style={{
+          position: 'absolute',
+          top: 4,
+          right: 4,
+          width: 18,
+          height: 18,
+          border: 'none',
+          background: 'transparent',
+          color: 'var(--text-muted)',
+          cursor: 'pointer',
+          borderRadius: 4,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 12,
+          opacity: 0.6,
+          transition: 'opacity 0.15s, background 0.15s',
+          zIndex: 1,
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.opacity = '1'
+          ;(e.currentTarget as HTMLButtonElement).style.background = 'var(--surface-hover)'
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.opacity = '0.6'
+          ;(e.currentTarget as HTMLButtonElement).style.background = 'transparent'
+        }}
+      >
+        ✕
+      </button>
+      {ads.map((ad) => (
+        <CompactAdCard key={ad.url} ad={ad} />
+      ))}
+    </div>
+  )
+}
+
+const CompactAdCard: React.FC<{ ad: AdItem }> = ({ ad }) => {
+  const [hovered, setHovered] = useState(false)
+  const [imgFailed, setImgFailed] = useState(false)
+  const showImg = !!ad.logoUrl && !imgFailed
+  return (
+    <button
+      onClick={() => openExternal(ad.url).catch(console.error)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      title={`${ad.name} — ${ad.description}`}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 7,
+        padding: '6px 8px',
+        background: hovered ? 'var(--surface-hover)' : 'transparent',
+        border: `1px solid ${hovered ? 'var(--border-strong)' : 'var(--border)'}`,
+        borderRadius: 6,
+        cursor: 'pointer',
+        transition: 'all 0.15s',
+        textAlign: 'left',
+        font: 'inherit',
+        color: 'inherit',
+      }}
+    >
+      <div
+        style={{
+          width: 22,
+          height: 22,
+          borderRadius: 5,
+          background: showImg ? 'transparent' : (ad.logoColor || 'var(--primary)'),
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontWeight: 800,
+          fontSize: 11,
+          flexShrink: 0,
+          overflow: 'hidden',
+        }}
+      >
+        {showImg ? (
+          <img src={ad.logoUrl} alt={ad.name} onError={() => setImgFailed(true)} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        ) : (
+          ad.logoLetter || ad.name[0]
+        )}
+      </div>
+      <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {ad.name}
+        </div>
+      </div>
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2.5" style={{ flexShrink: 0, opacity: 0.6 }}>
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
+      </svg>
+    </button>
   )
 }
 
