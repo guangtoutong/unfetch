@@ -81,7 +81,7 @@ const en: Strings = {
   },
   nav: { home: 'Home', download: 'Download', sponsor: 'Sponsor', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.2.1 · Free · Open Source · No ads · No telemetry',
+    tag: 'v0.2.2 · Free · Open Source · No ads · No telemetry',
     title: 'Downloads built for humans and AI',
     subtitle: 'Fast multi-mirror HTTP, BT with selective file picker, 1000+ video sites, RSS auto-fetch, completion hooks, remote Web UI, 5 themes — driven by GUI, CLI or AI (MCP).',
     download: 'Download unfetch',
@@ -140,7 +140,7 @@ const en: Strings = {
     scanQr: 'Scan QR code',
     note: 'Sponsors get listed in the README and the in-app About dialog (with permission).',
   },
-  cta: { title: 'Get unfetch v0.2.1', desc: 'No ads. No telemetry. No login.', button: 'Download installer' },
+  cta: { title: 'Get unfetch v0.2.2', desc: 'No ads. No telemetry. No login.', button: 'Download installer' },
   footer: { copy: '© 2026 unfetch · MIT-style license · Open contributor to anacrolix/torrent', license: 'License' },
 }
 
@@ -151,7 +151,7 @@ const zh: Strings = {
   },
   nav: { home: '首页', download: '下载', sponsor: '赞助', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.2.1 · 免费 · 开源 · 无广告 · 无遥测',
+    tag: 'v0.2.2 · 免费 · 开源 · 无广告 · 无遥测',
     title: '为人和 AI 设计的下载工具',
     subtitle: '多镜像 HTTP、BT 文件选择、1000+ 视频网站、RSS 订阅、完成钩子、远程 Web UI、5 套主题 — GUI / CLI / AI（MCP）都能驱动。',
     download: '下载 unfetch',
@@ -210,7 +210,7 @@ const zh: Strings = {
     scanQr: '扫码赞助',
     note: '赞助者将被列入 README 和 app 内的"关于"对话框（需同意）。',
   },
-  cta: { title: '立即获取 unfetch v0.2.1', desc: '无广告 · 无遥测 · 无登录', button: '下载安装包' },
+  cta: { title: '立即获取 unfetch v0.2.2', desc: '无广告 · 无遥测 · 无登录', button: '下载安装包' },
   footer: { copy: '© 2026 unfetch · MIT 风格许可 · 为 anacrolix/torrent 持续贡献', license: '许可证' },
 }
 
