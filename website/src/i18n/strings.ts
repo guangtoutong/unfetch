@@ -81,7 +81,7 @@ const en: Strings = {
   },
   nav: { home: 'Home', download: 'Download', sponsor: 'Sponsor', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.2.2 · Free · Open Source · No ads · No telemetry',
+    tag: 'v0.2.3 · Free · Open Source · No ads · No telemetry',
     title: 'Downloads built for humans and AI',
     subtitle: 'Fast multi-mirror HTTP, BT with selective file picker, 1000+ video sites, RSS auto-fetch, completion hooks, remote Web UI, 5 themes — driven by GUI, CLI or AI (MCP).',
     download: 'Download unfetch',
@@ -140,7 +140,7 @@ const en: Strings = {
     scanQr: 'Scan QR code',
     note: 'Sponsors get listed in the README and the in-app About dialog (with permission).',
   },
-  cta: { title: 'Get unfetch v0.2.2', desc: 'No ads. No telemetry. No login.', button: 'Download installer' },
+  cta: { title: 'Get unfetch v0.2.3', desc: 'No ads. No telemetry. No login.', button: 'Download installer' },
   footer: { copy: '© 2026 unfetch · MIT-style license · Open contributor to anacrolix/torrent', license: 'License' },
 }
 
@@ -151,7 +151,7 @@ const zh: Strings = {
   },
   nav: { home: '首页', download: '下载', sponsor: '赞助', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.2.2 · 免费 · 开源 · 无广告 · 无遥测',
+    tag: 'v0.2.3 · 免费 · 开源 · 无广告 · 无遥测',
     title: '为人和 AI 设计的下载工具',
     subtitle: '多镜像 HTTP、BT 文件选择、1000+ 视频网站、RSS 订阅、完成钩子、远程 Web UI、5 套主题 — GUI / CLI / AI（MCP）都能驱动。',
     download: '下载 unfetch',
@@ -210,7 +210,7 @@ const zh: Strings = {
     scanQr: '扫码赞助',
     note: '赞助者将被列入 README 和 app 内的"关于"对话框（需同意）。',
   },
-  cta: { title: '立即获取 unfetch v0.2.2', desc: '无广告 · 无遥测 · 无登录', button: '下载安装包' },
+  cta: { title: '立即获取 unfetch v0.2.3', desc: '无广告 · 无遥测 · 无登录', button: '下载安装包' },
   footer: { copy: '© 2026 unfetch · MIT 风格许可 · 为 anacrolix/torrent 持续贡献', license: '许可证' },
 }
 
@@ -222,7 +222,7 @@ const ja: Strings = {
   },
   nav: { home: 'ホーム', download: 'ダウンロード', sponsor: 'スポンサー', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.2.2 · 無料 · オープンソース · 広告なし · テレメトリーなし',
+    tag: 'v0.2.3 · 無料 · オープンソース · 広告なし · テレメトリーなし',
     title: '人とAIのために設計されたダウンロード',
     subtitle: '高速マルチミラー HTTP、ファイル選択付き BT、1000+ 動画サイト、RSS 自動取得、完了フック、リモート Web UI、5 つのテーマ — GUI / CLI / AI (MCP) のいずれからも操作可能。',
     download: 'unfetch をダウンロード',
@@ -281,7 +281,7 @@ const ja: Strings = {
     scanQr: 'QR コードをスキャン',
     note: 'スポンサーは README と app 内「About」ダイアログに掲載されます（同意の上）。',
   },
-  cta: { title: 'unfetch v0.2.2 を入手', desc: '広告なし · テレメトリーなし · ログインなし', button: 'インストーラーをダウンロード' },
+  cta: { title: 'unfetch v0.2.3 を入手', desc: '広告なし · テレメトリーなし · ログインなし', button: 'インストーラーをダウンロード' },
   footer: { copy: '© 2026 unfetch · MIT 風ライセンス · anacrolix/torrent の活発なコントリビューター', license: 'ライセンス' },
 }
 
@@ -293,7 +293,7 @@ const ko: Strings = {
   },
   nav: { home: '홈', download: '다운로드', sponsor: '후원', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.2.2 · 무료 · 오픈소스 · 광고 없음 · 텔레메트리 없음',
+    tag: 'v0.2.3 · 무료 · 오픈소스 · 광고 없음 · 텔레메트리 없음',
     title: '사람과 AI를 위한 다운로드',
     subtitle: '빠른 멀티 미러 HTTP, 파일 선택 가능한 BT, 1000+ 동영상 사이트, RSS 자동 수집, 완료 훅, 원격 Web UI, 5 가지 테마 — GUI / CLI / AI(MCP) 모두 지원.',
     download: 'unfetch 다운로드',
@@ -352,7 +352,7 @@ const ko: Strings = {
     scanQr: 'QR 코드 스캔',
     note: '후원자는 README 와 앱 내 "정보" 대화상자에 등재됩니다 (동의 시).',
   },
-  cta: { title: 'unfetch v0.2.2 받기', desc: '광고 없음 · 텔레메트리 없음 · 로그인 없음', button: '설치 프로그램 다운로드' },
+  cta: { title: 'unfetch v0.2.3 받기', desc: '광고 없음 · 텔레메트리 없음 · 로그인 없음', button: '설치 프로그램 다운로드' },
   footer: { copy: '© 2026 unfetch · MIT 스타일 라이선스 · anacrolix/torrent 의 활발한 기여자', license: '라이선스' },
 }
 
@@ -364,7 +364,7 @@ const de: Strings = {
   },
   nav: { home: 'Start', download: 'Download', sponsor: 'Sponsern', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.2.2 · Kostenlos · Open Source · Keine Werbung · Keine Telemetrie',
+    tag: 'v0.2.3 · Kostenlos · Open Source · Keine Werbung · Keine Telemetrie',
     title: 'Downloads für Menschen und KI',
     subtitle: 'Schnelles Multi-Mirror HTTP, BT mit Dateiauswahl, 1000+ Videoseiten, RSS-Abruf, Completion-Hooks, Remote Web-UI, 5 Themes — gesteuert per GUI, CLI oder KI (MCP).',
     download: 'unfetch herunterladen',
@@ -423,7 +423,7 @@ const de: Strings = {
     scanQr: 'QR-Code scannen',
     note: 'Sponsoren werden in der README und im In-App "Über"-Dialog gelistet (mit Einverständnis).',
   },
-  cta: { title: 'unfetch v0.2.2 holen', desc: 'Keine Werbung · Keine Telemetrie · Kein Login', button: 'Installer herunterladen' },
+  cta: { title: 'unfetch v0.2.3 holen', desc: 'Keine Werbung · Keine Telemetrie · Kein Login', button: 'Installer herunterladen' },
   footer: { copy: '© 2026 unfetch · MIT-artige Lizenz · Aktiver Contributor zu anacrolix/torrent', license: 'Lizenz' },
 }
 
@@ -435,7 +435,7 @@ const fr: Strings = {
   },
   nav: { home: 'Accueil', download: 'Télécharger', sponsor: 'Soutenir', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.2.2 · Gratuit · Open source · Sans pub · Sans télémétrie',
+    tag: 'v0.2.3 · Gratuit · Open source · Sans pub · Sans télémétrie',
     title: 'Des téléchargements pour humains et IA',
     subtitle: 'HTTP multi-miroir rapide, BT avec sélection de fichiers, 1000+ sites vidéo, RSS automatique, hooks de fin, UI Web distante, 5 thèmes — piloté par GUI, CLI ou IA (MCP).',
     download: 'Télécharger unfetch',
@@ -494,7 +494,7 @@ const fr: Strings = {
     scanQr: 'Scanner le QR',
     note: 'Les sponsors sont listés dans le README et la boîte de dialogue « À propos » de l\'application (avec accord).',
   },
-  cta: { title: 'Obtenir unfetch v0.2.2', desc: 'Sans pub · Sans télémétrie · Sans connexion', button: 'Télécharger l\'installeur' },
+  cta: { title: 'Obtenir unfetch v0.2.3', desc: 'Sans pub · Sans télémétrie · Sans connexion', button: 'Télécharger l\'installeur' },
   footer: { copy: '© 2026 unfetch · Licence MIT · Contributeur actif à anacrolix/torrent', license: 'Licence' },
 }
 
@@ -506,7 +506,7 @@ const es: Strings = {
   },
   nav: { home: 'Inicio', download: 'Descargar', sponsor: 'Patrocinar', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.2.2 · Gratis · Código abierto · Sin anuncios · Sin telemetría',
+    tag: 'v0.2.3 · Gratis · Código abierto · Sin anuncios · Sin telemetría',
     title: 'Descargas pensadas para humanos e IA',
     subtitle: 'HTTP multi-espejo rápido, BT con selector de archivos, 1000+ sitios de vídeo, RSS automático, hooks al terminar, UI Web remota, 5 temas — controlado por GUI, CLI o IA (MCP).',
     download: 'Descargar unfetch',
@@ -565,7 +565,7 @@ const es: Strings = {
     scanQr: 'Escanear QR',
     note: 'Los patrocinadores aparecen en el README y en el diálogo "Acerca de" de la app (con permiso).',
   },
-  cta: { title: 'Consigue unfetch v0.2.2', desc: 'Sin anuncios · Sin telemetría · Sin login', button: 'Descargar instalador' },
+  cta: { title: 'Consigue unfetch v0.2.3', desc: 'Sin anuncios · Sin telemetría · Sin login', button: 'Descargar instalador' },
   footer: { copy: '© 2026 unfetch · Licencia tipo MIT · Contribuidor activo a anacrolix/torrent', license: 'Licencia' },
 }
 
@@ -577,7 +577,7 @@ const pt: Strings = {
   },
   nav: { home: 'Início', download: 'Baixar', sponsor: 'Apoiar', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.2.2 · Gratuito · Open source · Sem anúncios · Sem telemetria',
+    tag: 'v0.2.3 · Gratuito · Open source · Sem anúncios · Sem telemetria',
     title: 'Downloads pensados para humanos e IA',
     subtitle: 'HTTP multi-mirror rápido, BT com seletor de arquivos, 1000+ sites de vídeo, RSS automático, hooks ao concluir, UI Web remota, 5 temas — controlado por GUI, CLI ou IA (MCP).',
     download: 'Baixar unfetch',
@@ -636,7 +636,7 @@ const pt: Strings = {
     scanQr: 'Escanear QR',
     note: 'Apoiadores são listados no README e no diálogo "Sobre" do app (com permissão).',
   },
-  cta: { title: 'Obtenha o unfetch v0.2.2', desc: 'Sem anúncios · Sem telemetria · Sem login', button: 'Baixar instalador' },
+  cta: { title: 'Obtenha o unfetch v0.2.3', desc: 'Sem anúncios · Sem telemetria · Sem login', button: 'Baixar instalador' },
   footer: { copy: '© 2026 unfetch · Licença estilo MIT · Contribuidor ativo do anacrolix/torrent', license: 'Licença' },
 }
 
@@ -648,7 +648,7 @@ const it: Strings = {
   },
   nav: { home: 'Home', download: 'Download', sponsor: 'Sostieni', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.2.2 · Gratuito · Open source · Senza pubblicità · Senza telemetria',
+    tag: 'v0.2.3 · Gratuito · Open source · Senza pubblicità · Senza telemetria',
     title: 'Download pensati per umani e IA',
     subtitle: 'HTTP multi-mirror veloce, BT con selettore file, 1000+ siti video, RSS automatico, hook al completamento, UI Web remota, 5 temi — guidato da GUI, CLI o IA (MCP).',
     download: 'Scarica unfetch',
@@ -707,7 +707,7 @@ const it: Strings = {
     scanQr: 'Scansiona QR',
     note: 'I sostenitori vengono elencati nel README e nella finestra "Informazioni" dell\'app (con consenso).',
   },
-  cta: { title: 'Ottieni unfetch v0.2.2', desc: 'Senza pubblicità · Senza telemetria · Senza login', button: 'Scarica installer' },
+  cta: { title: 'Ottieni unfetch v0.2.3', desc: 'Senza pubblicità · Senza telemetria · Senza login', button: 'Scarica installer' },
   footer: { copy: '© 2026 unfetch · Licenza in stile MIT · Contributore attivo di anacrolix/torrent', license: 'Licenza' },
 }
 
@@ -719,7 +719,7 @@ const pl: Strings = {
   },
   nav: { home: 'Główna', download: 'Pobierz', sponsor: 'Wesprzyj', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.2.2 · Darmowe · Open source · Bez reklam · Bez telemetrii',
+    tag: 'v0.2.3 · Darmowe · Open source · Bez reklam · Bez telemetrii',
     title: 'Pobierania zbudowane dla ludzi i AI',
     subtitle: 'Szybkie wielo-mirror HTTP, BT z selektorem plików, 1000+ stron wideo, automatyczne RSS, haki po zakończeniu, zdalny Web UI, 5 motywów — sterowane z GUI, CLI lub AI (MCP).',
     download: 'Pobierz unfetch',
@@ -778,7 +778,7 @@ const pl: Strings = {
     scanQr: 'Zeskanuj QR',
     note: 'Sponsorzy są wymieniani w README i oknie "O programie" (za zgodą).',
   },
-  cta: { title: 'Pobierz unfetch v0.2.2', desc: 'Bez reklam · Bez telemetrii · Bez logowania', button: 'Pobierz instalator' },
+  cta: { title: 'Pobierz unfetch v0.2.3', desc: 'Bez reklam · Bez telemetrii · Bez logowania', button: 'Pobierz instalator' },
   footer: { copy: '© 2026 unfetch · Licencja w stylu MIT · Aktywny współtwórca anacrolix/torrent', license: 'Licencja' },
 }
 
@@ -790,7 +790,7 @@ const nl: Strings = {
   },
   nav: { home: 'Home', download: 'Downloaden', sponsor: 'Steun', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.2.2 · Gratis · Open source · Geen reclame · Geen telemetrie',
+    tag: 'v0.2.3 · Gratis · Open source · Geen reclame · Geen telemetrie',
     title: 'Downloads gebouwd voor mensen en AI',
     subtitle: 'Snelle multi-mirror HTTP, BT met bestandsselectie, 1000+ videosites, automatische RSS, completion hooks, externe Web-UI, 5 thema\'s — bedienbaar via GUI, CLI of AI (MCP).',
     download: 'Download unfetch',
@@ -849,7 +849,7 @@ const nl: Strings = {
     scanQr: 'QR-code scannen',
     note: 'Sponsors worden vermeld in de README en het "Over"-dialoogvenster van de app (met toestemming).',
   },
-  cta: { title: 'Haal unfetch v0.2.2', desc: 'Geen reclame · Geen telemetrie · Geen login', button: 'Installer downloaden' },
+  cta: { title: 'Haal unfetch v0.2.3', desc: 'Geen reclame · Geen telemetrie · Geen login', button: 'Installer downloaden' },
   footer: { copy: '© 2026 unfetch · MIT-stijl licentie · Actieve contributor aan anacrolix/torrent', license: 'Licentie' },
 }
 
@@ -861,7 +861,7 @@ const tr: Strings = {
   },
   nav: { home: 'Ana sayfa', download: 'İndir', sponsor: 'Destek ol', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.2.2 · Ücretsiz · Açık kaynak · Reklamsız · Telemetrisiz',
+    tag: 'v0.2.3 · Ücretsiz · Açık kaynak · Reklamsız · Telemetrisiz',
     title: 'İnsanlar ve YZ için tasarlanmış indirme',
     subtitle: 'Hızlı çoklu ayna HTTP, dosya seçimli BT, 1000+ video sitesi, otomatik RSS, tamamlanma kancaları, uzaktan Web arayüzü, 5 tema — GUI, CLI veya YZ (MCP) ile kontrol.',
     download: 'unfetch indir',
@@ -920,7 +920,7 @@ const tr: Strings = {
     scanQr: 'QR kodu tara',
     note: 'Sponsorlar README\'de ve uygulama içi "Hakkında" iletişim kutusunda listelenir (izin ile).',
   },
-  cta: { title: 'unfetch v0.2.2\'yi edinin', desc: 'Reklam yok · Telemetri yok · Giriş yok', button: 'Yükleyiciyi indir' },
+  cta: { title: 'unfetch v0.2.3\'yi edinin', desc: 'Reklam yok · Telemetri yok · Giriş yok', button: 'Yükleyiciyi indir' },
   footer: { copy: '© 2026 unfetch · MIT tarzı lisans · anacrolix/torrent\'ın aktif katılımcısı', license: 'Lisans' },
 }
 
@@ -932,7 +932,7 @@ const sv: Strings = {
   },
   nav: { home: 'Hem', download: 'Ladda ner', sponsor: 'Stöd', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.2.2 · Gratis · Öppen källkod · Reklamfri · Ingen telemetri',
+    tag: 'v0.2.3 · Gratis · Öppen källkod · Reklamfri · Ingen telemetri',
     title: 'Nedladdningar byggda för människor och AI',
     subtitle: 'Snabb multi-spegel HTTP, BT med filval, 1000+ videosajter, automatisk RSS, completion hooks, fjärr-webb-UI, 5 teman — styrt via GUI, CLI eller AI (MCP).',
     download: 'Ladda ner unfetch',
@@ -991,7 +991,7 @@ const sv: Strings = {
     scanQr: 'Skanna QR',
     note: 'Sponsorer listas i README och appens "Om"-dialog (med samtycke).',
   },
-  cta: { title: 'Hämta unfetch v0.2.2', desc: 'Ingen reklam · Ingen telemetri · Ingen inloggning', button: 'Ladda ner installerare' },
+  cta: { title: 'Hämta unfetch v0.2.3', desc: 'Ingen reklam · Ingen telemetri · Ingen inloggning', button: 'Ladda ner installerare' },
   footer: { copy: '© 2026 unfetch · MIT-liknande licens · Aktiv bidragsgivare till anacrolix/torrent', license: 'Licens' },
 }
 
@@ -1003,7 +1003,7 @@ const uk: Strings = {
   },
   nav: { home: 'Головна', download: 'Завантажити', sponsor: 'Підтримати', mcp: 'MCP', github: 'GitHub' },
   hero: {
-    tag: 'v0.2.2 · Безкоштовно · Open source · Без реклами · Без телеметрії',
+    tag: 'v0.2.3 · Безкоштовно · Open source · Без реклами · Без телеметрії',
     title: 'Завантаження, створені для людей і ШІ',
     subtitle: 'Швидкий багатодзеркальний HTTP, BT з вибором файлів, 1000+ відеосайтів, автоматичний RSS, хуки після завершення, віддалений Web UI, 5 тем — керується GUI, CLI або ШІ (MCP).',
     download: 'Завантажити unfetch',
@@ -1062,7 +1062,7 @@ const uk: Strings = {
     scanQr: 'Сканувати QR',
     note: 'Спонсорів вказано в README і вікні "Про програму" (за згодою).',
   },
-  cta: { title: 'Отримати unfetch v0.2.2', desc: 'Без реклами · Без телеметрії · Без логіну', button: 'Завантажити інсталятор' },
+  cta: { title: 'Отримати unfetch v0.2.3', desc: 'Без реклами · Без телеметрії · Без логіну', button: 'Завантажити інсталятор' },
   footer: { copy: '© 2026 unfetch · Ліцензія в стилі MIT · Активний контриб\'ютор anacrolix/torrent', license: 'Ліцензія' },
 }
 
