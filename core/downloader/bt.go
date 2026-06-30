@@ -1,3 +1,10 @@
+//go:build !masbuild
+
+// 完整版（官网 / GitHub Release，Developer ID 公证分发）才编译 BT / 磁力链接支持。
+// Mac App Store 版用 -tags masbuild 构建，本文件被排除，由 edition_stub.go 顶替，
+// 以符合 App Store Review Guideline 5.2.3（音视频下载 / 文件共享类）。
+// 这样 MAS 二进制根本不链接 anacrolix/torrent，体积更小，审核面更干净。
+
 package downloader
 
 import (

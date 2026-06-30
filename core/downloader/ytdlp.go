@@ -1,3 +1,9 @@
+//go:build !masbuild
+
+// 完整版（官网 / GitHub Release，Developer ID 公证分发）才编译 yt-dlp 集成。
+// Mac App Store 版用 -tags masbuild 构建，本文件被排除，由 edition_stub.go 顶替，
+// 以符合 App Store Review Guideline 5.2.3（音视频下载类）。
+
 package downloader
 
 import (
@@ -6,7 +12,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
-	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,8 +20,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-
-	"golang.org/x/net/proxy"
 
 	"unfetch/core/types"
 )
@@ -369,32 +372,8 @@ func parseSize(value, unit string) int64 {
 	return 0
 }
 
-// resolveProxy returns the effective proxy for a task: task-level > config-level > system proxy.
-func resolveProxy(taskProxy string, cfg *types.Config) string {
-	if taskProxy != "" {
-		return taskProxy
-	}
-	if cfg.Proxy != "" {
-		return cfg.Proxy
-	}
-	if cfg.UseSystemProxy {
-		return ReadSystemProxy()
-	}
-	return ""
-}
-
-// buildSOCKS5Dialer 从 socks5:// URL 构建代理拨号器
-func buildSOCKS5Dialer(proxyURL *url.URL) (proxy.Dialer, error) {
-	var auth *proxy.Auth
-	if proxyURL.User != nil {
-		password, _ := proxyURL.User.Password()
-		auth = &proxy.Auth{
-			User:     proxyURL.User.Username(),
-			Password: password,
-		}
-	}
-	return proxy.SOCKS5("tcp", proxyURL.Host, auth, proxy.Direct)
-}
+// resolveProxy / buildSOCKS5Dialer 已移到 proxyutil.go（不带 build tag），
+// 因为 http.go 也要用，而本文件在 MAS 版（masbuild）会被整体排除。
 
 // sanitizeFilename 去除文件名中不合法的字符
 func sanitizeFilename(name string) string {

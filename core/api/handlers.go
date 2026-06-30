@@ -123,8 +123,9 @@ func writeError(w http.ResponseWriter, status int, msg string) {
 // Health GET /health
 func (h *Handlers) Health(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{
-		"status": "ok",
-		"time":   time.Now().Format(time.RFC3339),
+		"status":  "ok",
+		"time":    time.Now().Format(time.RFC3339),
+		"edition": types.EditionName,
 	})
 }
 
@@ -173,6 +174,13 @@ func (h *Handlers) AddTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	taskType := detectURLType(req.URL)
+
+	// App Store 版（masbuild）只允许 HTTP/HTTPS 直链下载。magnet / .torrent /
+	// 视频网站一律拒绝，符合 App Store Review Guideline 5.2.3。
+	if types.AppStoreEdition && taskType != types.TaskTypeHTTP {
+		writeError(w, http.StatusForbidden, "此版本仅支持 HTTP/HTTPS 直链下载；BT、磁力链接和视频网站下载请使用 unfetch.org 的完整版")
+		return
+	}
 
 	saveDir := req.SaveDir
 	if saveDir == "" {
@@ -497,6 +505,11 @@ func (h *Handlers) PreviewTorrent(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.URL == "" {
 		writeError(w, http.StatusBadRequest, "url is required")
+		return
+	}
+
+	if types.AppStoreEdition {
+		writeError(w, http.StatusForbidden, "此版本不支持 BT / 磁力链接；请使用 unfetch.org 的完整版")
 		return
 	}
 

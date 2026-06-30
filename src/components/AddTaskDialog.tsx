@@ -5,6 +5,7 @@ import { useTaskStore } from '../stores/taskStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { detectUrlType } from '../lib/format'
 import { api } from '../lib/api'
+import { openExternal } from '../lib/ads'
 import { TorrentFilePicker } from './TorrentFilePicker'
 import type { AddTaskRequest, TorrentPreview } from '../types'
 
@@ -269,6 +270,11 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
   // 批量解析预览
   const parsedBatch = batchMode ? parseUrls(url) : []
 
+  // Mac App Store 版（masbuild）只支持 HTTP/HTTPS 直链。检测到 BT/磁力/视频站
+  // URL 时给出引导到官网完整版的提示并禁止提交（后端也会以 403 兜底）。
+  const isAppStore = __APP_STORE_BUILD__
+  const blockedByAppStore = isAppStore && !batchMode && url.trim().length > 0 && urlType !== 'http'
+
   return (
     <AnimatePresence>
       {open && (
@@ -351,7 +357,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                   </div>
                   <div>
                     <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>添加下载任务</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>支持 HTTP、BT/磁力、1000+ 视频网站</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{isAppStore ? '多线程 HTTP / HTTPS 直链下载' : '支持 HTTP、BT/磁力、1000+ 视频网站'}</div>
                   </div>
                 </div>
 
@@ -431,6 +437,18 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                     检测到类型：<span style={{ color: 'var(--primary)', fontWeight: 600 }}>{urlTypeLabels[urlType]}</span>
                   </div>
                 )}
+                {blockedByAppStore && (
+                  <div style={{ marginTop: 8, padding: '10px 12px', background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)', borderRadius: 8, fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    此版本仅支持 HTTP / HTTPS 直链下载。
+                    {urlType === 'bt' ? ' BT / 磁力链接' : ' 视频网站'}下载请使用完整版：
+                    <a
+                      onClick={() => openExternal('https://unfetch.org').catch(console.error)}
+                      style={{ color: '#a855f7', fontWeight: 700, cursor: 'pointer', marginLeft: 2 }}
+                    >
+                      unfetch.org →
+                    </a>
+                  </div>
+                )}
                 {batchMode && parsedBatch.length > 0 && (
                   <div style={{ marginTop: 5, fontSize: 11, color: 'var(--text-muted)' }}>
                     将创建 <span style={{ color: 'var(--primary)', fontWeight: 700 }}>{parsedBatch.length}</span> 个任务
@@ -438,8 +456,8 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                 )}
               </div>
 
-              {/* 质量（仅 ytdlp 单 URL 模式显示） */}
-              {urlType === 'ytdlp' && !batchMode && (
+              {/* 质量（仅 ytdlp 单 URL 模式显示；App Store 版无视频下载，隐藏） */}
+              {urlType === 'ytdlp' && !batchMode && !isAppStore && (
                 <div style={{ marginBottom: 14 }}>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
                     画质选择
@@ -571,8 +589,8 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                           <input type="text" placeholder="http://127.0.0.1:7890" value={proxy} onChange={(e) => setProxy(e.target.value)} className="input-base" />
                         </div>
 
-                        {/* BT 自定义 tracker */}
-                        {urlType === 'bt' && (
+                        {/* BT 自定义 tracker（App Store 版无 BT，隐藏） */}
+                        {urlType === 'bt' && !isAppStore && (
                           <div>
                             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>
                               {t('addTask.customTrackers')}
@@ -649,8 +667,8 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                           <input type="text" placeholder={t('addTask.md5Placeholder')} value={md5} onChange={(e) => setMd5(e.target.value)} className="input-base" style={{ fontFamily: 'monospace', fontSize: 11 }} />
                         </div>
 
-                        {/* Cookie */}
-                        {urlType === 'ytdlp' && (
+                        {/* Cookie（App Store 版无视频下载，隐藏） */}
+                        {urlType === 'ytdlp' && !isAppStore && (
                           <div>
                             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>Cookie（Netscape 格式）</label>
                             <textarea placeholder={t('addTask.cookiesPlaceholder')} value={cookies} onChange={(e) => setCookies(e.target.value)} className="input-base" style={{ height: 72, resize: 'vertical', fontFamily: 'monospace', fontSize: 11 }} />
@@ -686,7 +704,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                 <button
                   className="btn btn-primary"
                   onClick={handleSubmit}
-                  disabled={submitting || previewing || !url.trim()}
+                  disabled={submitting || previewing || !url.trim() || blockedByAppStore}
                   style={{ minWidth: 100, position: 'relative', boxShadow: '0 0 16px rgba(99,102,241,0.35)' }}
                 >
                   {previewing ? (

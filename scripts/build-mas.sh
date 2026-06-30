@@ -9,8 +9,9 @@
 #     unfetch.app/Contents/embedded.provisionprofile
 #   - 用 productbuild 包成签名 .pkg(不是 hdiutil dmg)
 #   - 不做公证(MAS 提交后 Apple 审核流程自己 notarize)
-#   - 不带 BT/yt-dlp(政策原因) — 用 VITE_APP_STORE_BUILD=1 触发前端
-#     条件隐藏第三方广告;Go daemon 端理想做 build tag,留待后续
+#   - 不带 BT/yt-dlp(政策原因 5.2.3) — 前端 VITE_APP_STORE_BUILD=1 隐藏第三方
+#     广告并阉割 BT/视频 UI;Go daemon 用 -tags masbuild 排除 bt.go/ytdlp.go,
+#     二进制不链接 anacrolix/torrent,api 层拒绝一切非 HTTP 任务
 #
 # 必需的 env(放 .env.local):
 #   MAS_SIGNING_IDENTITY      e.g. "Apple Distribution: xiangdong li (6NQM3XP5RF)"
@@ -63,14 +64,16 @@ echo "==> Building frontend (VITE_APP_STORE_BUILD=1)"
 pnpm install --frozen-lockfile
 VITE_APP_STORE_BUILD=1 pnpm build
 
-echo "==> Building Go daemon (universal binary)"
+echo "==> Building Go daemon (universal binary, -tags masbuild → 无 BT/yt-dlp)"
+# masbuild tag 排除 bt.go / ytdlp.go，二进制不链接 anacrolix/torrent，也不内置
+# yt-dlp 调用逻辑；api 层拒绝一切非 HTTP 任务。符合 App Store Guideline 5.2.3。
 mkdir -p src-tauri/binaries
 pushd core >/dev/null
 for ARCH in x86_64 aarch64; do
   GO_ARCH="amd64"
   [ "$ARCH" = "aarch64" ] && GO_ARCH="arm64"
   GOOS=darwin GOARCH="${GO_ARCH}" CGO_ENABLED=0 \
-    go build -ldflags="-s -w" \
+    go build -tags masbuild -ldflags="-s -w" \
     -o "../src-tauri/binaries/unfetch-daemon-${ARCH}-apple-darwin" .
 done
 lipo -create \
@@ -93,6 +96,13 @@ PLIST="$APP/Contents/Info.plist"
 echo "==> Patching Info.plist with MAS version fields"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $MAS_VERSION" "$PLIST"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $MAS_BUILD_NUMBER" "$PLIST"
+
+# 出口合规：unfetch 只用 HTTPS/TLS 这类标准、豁免类加密,声明 false 即
+# "仅使用豁免加密"。不加这个 key,ASC 每个 build 都会弹"App 加密文稿"对话框,
+# 而选"在法国分发=是"还会强制要求上传法国出口合规文档。HTTPS-only App 的
+# 标准做法就是在 Info.plist 里声明此 key,ASC 便不再追问。
+/usr/libexec/PlistBuddy -c "Set :ITSAppUsesNonExemptEncryption false" "$PLIST" 2>/dev/null \
+  || /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$PLIST"
 
 # ---------- 4. 嵌入 provisioning profile + privacy manifest ----------
 echo "==> Embedding provisioning profile"
