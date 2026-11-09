@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "unfetch — a download manager for humans and AI. MCP server + skills.",
-    "version": "0.2.4"
+    "version": "0.2.5"
   },
   "plugins": [
     {
       "name": "unfetch",
       "source": ".",
       "description": "Download manager exposed over MCP, with skills for single grabs, batch queues, media (video/audio) downloads, and queue management. Requires the unfetch desktop app installed (https://unfetch.org/#download) with `unfetch` on PATH.",
-      "version": "0.2.4",
+      "version": "0.2.5",
       "category": "utilities",
       "keywords": ["download", "torrent", "yt-dlp", "video", "mcp"],
       "strict": false
