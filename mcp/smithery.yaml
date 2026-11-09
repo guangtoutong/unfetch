@@ -1,0 +1,30 @@
+# Smithery configuration for the unfetch MCP server.
+# Docs: https://smithery.ai/docs
+#
+# unfetch is a LOCAL stdio server: it is the unfetch desktop app binary launched
+# with `--mcp`. The app must already be installed (https://unfetch.org/#download).
+# The server auto-starts the bundled download daemon on localhost:19543.
+
+startCommand:
+  type: stdio
+  # No required config — everything is managed by the local daemon / app settings.
+  configSchema:
+    type: object
+    properties:
+      binaryPath:
+        type: string
+        description: >-
+          Absolute path to the installed unfetch binary. Leave empty to use
+          `unfetch` from PATH. macOS default:
+          /Applications/unfetch.app/Contents/MacOS/unfetch
+        default: ""
+    required: []
+  commandFunction: |-
+    (config) => ({
+      command: config.binaryPath && config.binaryPath.length > 0
+        ? config.binaryPath
+        : "unfetch",
+      args: ["--mcp"]
+    })
+  exampleConfig:
+    binaryPath: "/Applications/unfetch.app/Contents/MacOS/unfetch"

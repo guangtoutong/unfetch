@@ -83,6 +83,17 @@ Drop this into your Claude Desktop / Cursor config (`~/Library/Application Suppo
 
 Then your AI can `add_task`, `list_tasks`, `wait_for_task`, etc. See [docs/mcp.md](docs/mcp.md) for the full tool schema, or visit <https://unfetch.org/mcp>.
 
+**17 MCP tools** (full schemas, resources, and per-marketplace publishing materials live in [`mcp/`](mcp/)): `add_task`, `wait_for_task`, `wait_for_all`, `list_tasks`, `get_task`, `pause_task`, `resume_task`, `remove_task`, `trash_task`, `restore_task`, `empty_trash`, `restore_all_trashed`, `get_config`, `set_config`, `play_in_unflick`.
+
+### Skills & one-command install
+
+A set of [Claude skills](skills/) ships alongside the MCP server — `unfetch-grab` (single download), `unfetch-batch` (bulk), `unfetch-media` (video/audio + quality), and `unfetch-watch` (queue management). Install everything (MCP server + skills) as a Claude Code plugin:
+
+```
+/plugin marketplace add guangtoutong/unfetch
+/plugin install unfetch@unfetch
+```
+
 ## Build from source
 
 Prerequisites: **pnpm**, **Rust** toolchain, **Go 1.23+**, **Node 20+**.

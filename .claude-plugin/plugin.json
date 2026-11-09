@@ -1,0 +1,19 @@
+{
+  "name": "unfetch",
+  "description": "AI-native download manager: add HTTP / BT-magnet / 1000+ video-site downloads, wait for completion with live progress, and manage the queue. Bundles the unfetch MCP server plus skills for grabbing, batching, media, and queue management.",
+  "version": "0.2.4",
+  "author": {
+    "name": "unfetch contributors",
+    "url": "https://github.com/guangtoutong/unfetch"
+  },
+  "homepage": "https://unfetch.org",
+  "repository": "https://github.com/guangtoutong/unfetch",
+  "license": "MIT",
+  "keywords": ["download", "downloader", "torrent", "magnet", "yt-dlp", "video", "mcp"],
+  "mcpServers": {
+    "unfetch": {
+      "command": "unfetch",
+      "args": ["--mcp"]
+    }
+  }
+}
