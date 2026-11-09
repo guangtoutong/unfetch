@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -338,8 +339,11 @@ func (m *Manager) startDownload(task *types.Task) {
 		maxR := m.cfg.MaxRetries
 		m.cfgMu.RUnlock()
 		if maxR <= 0 {
-			maxR = 3
+			maxR = 5
 		}
+		// 默认开启：用户不需要手动打开就该有重试。如果用户显式关闭
+		// （在 config 里设了 auto_retry=false），保留用户选择 —— 那条信息
+		// 在 cfg 反序列化时就已经写到 m.cfg 上了。
 		if auto && current.RetryCount < maxR {
 			shouldAutoRetry = true
 			current.RetryCount++
@@ -370,9 +374,19 @@ func (m *Manager) startDownload(task *types.Task) {
 	m.notify(current)
 
 	// 自动重试：按退避策略延迟后重新入队
+	//
+	// 之前第一次重试要等 60s，对网络抖动这种瞬时问题来说太慢，用户体感是"卡死了"。
+	// 现在改成 5s/15s/30s/2min/5min，前两档足够覆盖大部分瞬时错误。
+	// 每档 ±20% 抖动避免多任务同时撞。
 	if shouldAutoRetry {
 		go func(t *types.Task) {
-			backoff := []time.Duration{60 * time.Second, 3 * time.Minute, 10 * time.Minute}
+			backoff := []time.Duration{
+				5 * time.Second,
+				15 * time.Second,
+				30 * time.Second,
+				2 * time.Minute,
+				5 * time.Minute,
+			}
 			idx := t.RetryCount - 1
 			if idx >= len(backoff) {
 				idx = len(backoff) - 1
@@ -380,8 +394,11 @@ func (m *Manager) startDownload(task *types.Task) {
 			if idx < 0 {
 				idx = 0
 			}
-			slog.Info("auto retry scheduled", "id", t.ID, "in", backoff[idx], "attempt", t.RetryCount)
-			time.Sleep(backoff[idx])
+			base := backoff[idx]
+			jitter := time.Duration(rand.Int63n(int64(base) / 3))
+			wait := base + jitter - base/6
+			slog.Info("auto retry scheduled", "id", t.ID, "in", wait, "attempt", t.RetryCount)
+			time.Sleep(wait)
 			m.mu.Lock()
 			c, ok := m.tasks[t.ID]
 			if !ok || c.Trashed {

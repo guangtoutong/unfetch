@@ -7,9 +7,11 @@ import (
 	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
+	"math/rand"
 	"net"
 	"net/http"
 	"net/url"
@@ -27,7 +29,76 @@ import (
 
 const (
 	minChunkSize = 4 * 1024 * 1024 // 4 MB
+
+	// 单次请求级别的最大重试次数（HEAD / chunk 内连接失败时）
+	maxRequestRetries = 5
 )
+
+// requestBackoff 单次请求级别的重试退避（带抖动）：1s, 2s, 4s, 8s, 15s
+func requestBackoff(attempt int) time.Duration {
+	base := []time.Duration{
+		1 * time.Second,
+		2 * time.Second,
+		4 * time.Second,
+		8 * time.Second,
+		15 * time.Second,
+	}
+	if attempt >= len(base) {
+		attempt = len(base) - 1
+	}
+	d := base[attempt]
+	// ±25% 抖动，避免雪崩
+	jitter := time.Duration(rand.Int63n(int64(d) / 2))
+	return d/4*3 + jitter
+}
+
+// isTransientErr 判断一个错误是否值得重试（网络/超时类错误）
+func isTransientErr(err error) bool {
+	if err == nil {
+		return false
+	}
+	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+		// DeadlineExceeded 走重试；Canceled 不重试（是 pause/remove）
+		return errors.Is(err, context.DeadlineExceeded)
+	}
+	if errors.Is(err, io.ErrUnexpectedEOF) || errors.Is(err, io.EOF) {
+		return true
+	}
+	var netErr net.Error
+	if errors.As(err, &netErr) {
+		return netErr.Timeout() || strings.Contains(err.Error(), "connection reset") ||
+			strings.Contains(err.Error(), "broken pipe") || strings.Contains(err.Error(), "EOF")
+	}
+	msg := err.Error()
+	// 兜底：常见的瞬时网络错误关键字
+	// 注意 HTTP/2 stream error / PROTOCOL_ERROR 也算瞬时 —— GitHub 通过 release
+	// 重定向到 Azure Blob 时，HTTP/2 流偶尔会被服务端 RST_STREAM。
+	return strings.Contains(msg, "connection reset") ||
+		strings.Contains(msg, "broken pipe") ||
+		strings.Contains(msg, "no route to host") ||
+		strings.Contains(msg, "i/o timeout") ||
+		strings.Contains(msg, "operation timed out") ||
+		strings.Contains(msg, "TLS handshake") ||
+		strings.Contains(msg, "unexpected EOF") ||
+		strings.Contains(msg, "EOF") ||
+		strings.Contains(msg, "stream error") ||
+		strings.Contains(msg, "PROTOCOL_ERROR") ||
+		strings.Contains(msg, "INTERNAL_ERROR") ||
+		strings.Contains(msg, "REFUSED_STREAM") ||
+		strings.Contains(msg, "ENHANCE_YOUR_CALM") ||
+		strings.Contains(msg, "GOAWAY") ||
+		strings.Contains(msg, "use of closed network connection")
+}
+
+// retryableStatus 服务端临时不可用的状态码
+func retryableStatus(code int) bool {
+	return code == http.StatusRequestTimeout || // 408
+		code == http.StatusTooManyRequests || // 429
+		code == http.StatusInternalServerError || // 500
+		code == http.StatusBadGateway || // 502
+		code == http.StatusServiceUnavailable || // 503
+		code == http.StatusGatewayTimeout // 504
+}
 
 // chunkState 记录单个 chunk 的下载进度（用于断点续传）
 type chunkState struct {
@@ -66,12 +137,25 @@ func (d *HTTPDownloader) getConfig() *types.Config {
 }
 
 // buildHTTPClient 根据配置创建 HTTP client
+//
+// 关键点：所有阶段（DNS、TLS、首字节、读 body）必须有独立超时，避免单点卡死。
+// 之前没设 DialContext/TLSHandshakeTimeout/ResponseHeaderTimeout，导致 GitHub
+// 偶发慢/丢包时 HEAD 一卡就是 100+ 秒，最后才被 OS 的 TCP 默认超时打断。
 func (d *HTTPDownloader) buildHTTPClient(proxy string) *http.Client {
+	dialer := &net.Dialer{
+		Timeout:   15 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}
 	transport := &http.Transport{
-		MaxIdleConns:       100,
-		IdleConnTimeout:    90 * time.Second,
-		DisableCompression: false,
-		TLSClientConfig:    &tls.Config{InsecureSkipVerify: true}, //nolint:gosec — 下载工具需支持自签名证书
+		DialContext:           dialer.DialContext,
+		TLSHandshakeTimeout:   15 * time.Second,
+		ResponseHeaderTimeout: 30 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		ForceAttemptHTTP2:     true,
+		DisableCompression:    false,
+		TLSClientConfig:       &tls.Config{InsecureSkipVerify: true}, //nolint:gosec — 下载工具需支持自签名证书
 	}
 
 	effectiveProxy := proxy
@@ -87,9 +171,16 @@ func (d *HTTPDownloader) buildHTTPClient(proxy string) *http.Client {
 		if proxyURL, err := url.Parse(effectiveProxy); err == nil {
 			switch proxyURL.Scheme {
 			case "socks5", "socks5h":
-				if dialer, err := buildSOCKS5Dialer(proxyURL); err == nil {
+				if socksDialer, err := buildSOCKS5Dialer(proxyURL); err == nil {
 					transport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
-						return dialer.Dial(network, addr)
+						// 仍受 15s 超时限制
+						type contextDialer interface {
+							DialContext(ctx context.Context, network, addr string) (net.Conn, error)
+						}
+						if cd, ok := socksDialer.(contextDialer); ok {
+							return cd.DialContext(ctx, network, addr)
+						}
+						return socksDialer.Dial(network, addr)
 					}
 				}
 			default:
@@ -100,8 +191,51 @@ func (d *HTTPDownloader) buildHTTPClient(proxy string) *http.Client {
 
 	return &http.Client{
 		Transport: transport,
-		Timeout:   0, // 下载大文件不设超时
+		Timeout:   0, // 单个 chunk 可能要下很久；超时在 transport 层控制
 	}
+}
+
+// doRequestWithRetry 对一个请求构造函数做重试，处理瞬时网络错误和 5xx/429
+//
+// makeReq 应每次返回一个新的 *http.Request（不能复用，因为 body 可能被消费）。
+// 返回值：调用方负责关闭 resp.Body。
+func doRequestWithRetry(ctx context.Context, client *http.Client, makeReq func() (*http.Request, error), label string) (*http.Response, error) {
+	var lastErr error
+	for attempt := 0; attempt <= maxRequestRetries; attempt++ {
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+		req, err := makeReq()
+		if err != nil {
+			return nil, err
+		}
+		resp, err := client.Do(req)
+		if err == nil {
+			if !retryableStatus(resp.StatusCode) {
+				return resp, nil
+			}
+			// 服务端瞬时错误：丢弃 body 后重试
+			io.Copy(io.Discard, resp.Body)
+			resp.Body.Close()
+			lastErr = fmt.Errorf("%s: status %d", label, resp.StatusCode)
+		} else {
+			if !isTransientErr(err) {
+				return nil, fmt.Errorf("%s: %w", label, err)
+			}
+			lastErr = err
+		}
+		if attempt == maxRequestRetries {
+			break
+		}
+		wait := requestBackoff(attempt)
+		slog.Warn("request failed, retrying", "label", label, "attempt", attempt+1, "wait", wait, "err", lastErr)
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-time.After(wait):
+		}
+	}
+	return nil, fmt.Errorf("%s: gave up after %d retries: %w", label, maxRequestRetries, lastErr)
 }
 
 // Download 执行下载，支持断点续传 + 多线程 + 多镜像源
@@ -118,33 +252,44 @@ func (d *HTTPDownloader) Download(ctx context.Context, task *types.Task, onProgr
 		}
 	}
 
-	// HEAD 请求主 URL 获取文件信息
-	req, err := http.NewRequestWithContext(ctx, http.MethodHead, task.URL, nil)
+	// HEAD 请求主 URL 获取文件信息（带重试，处理 GitHub 偶发的 reset/timeout）
+	resp, err := doRequestWithRetry(ctx, client, func() (*http.Request, error) {
+		req, err := http.NewRequestWithContext(ctx, http.MethodHead, task.URL, nil)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("User-Agent", "unfetch/1.0")
+		return req, nil
+	}, "HEAD "+task.URL)
 	if err != nil {
-		return fmt.Errorf("create HEAD request: %w", err)
-	}
-	req.Header.Set("User-Agent", "unfetch/1.0")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("HEAD request failed: %w", err)
+		return err
 	}
 	resp.Body.Close()
 
 	totalSize := resp.ContentLength
 	acceptRanges := resp.Header.Get("Accept-Ranges") == "bytes"
 
+	// 部分 CDN（GitHub release 重定向后的 Azure Blob）HEAD 不返回 Content-Length
+	// 但返回 Accept-Ranges: bytes。这种情况下用 Range 探测真实大小。
+	if totalSize <= 0 && acceptRanges {
+		if size, ok := probeSizeViaRange(ctx, client, task.URL); ok {
+			totalSize = size
+			slog.Info("size probed via Range", "url", task.URL, "size", size)
+		}
+	}
+
 	// 探活：剩余镜像必须 size 一致且支持 Range，否则剔除
 	validURLs := []string{task.URL}
 	if len(allURLs) > 1 && totalSize > 0 && acceptRanges {
 		for _, u := range allURLs[1:] {
-			mReq, mErr := http.NewRequestWithContext(ctx, http.MethodHead, u, nil)
-			if mErr != nil {
-				slog.Warn("mirror HEAD build failed, skip", "url", u, "err", mErr)
-				continue
-			}
-			mReq.Header.Set("User-Agent", "unfetch/1.0")
-			mResp, mErr := client.Do(mReq)
+			mResp, mErr := doRequestWithRetry(ctx, client, func() (*http.Request, error) {
+				mReq, err := http.NewRequestWithContext(ctx, http.MethodHead, u, nil)
+				if err != nil {
+					return nil, err
+				}
+				mReq.Header.Set("User-Agent", "unfetch/1.0")
+				return mReq, nil
+			}, "HEAD "+u)
 			if mErr != nil {
 				slog.Warn("mirror HEAD failed, skip", "url", u, "err", mErr)
 				continue
@@ -363,6 +508,9 @@ func (d *HTTPDownloader) downloadChunkMulti(
 	return lastErr
 }
 
+// downloadChunk 拉取一个 chunk 的数据。
+// 如果 body 读到一半网络中断（GitHub/CDN 常见），会自动重连并从 chunk.Downloaded 续传，
+// 最多重试 maxRequestRetries 次，每次重试都从已落盘的位置继续。
 func (d *HTTPDownloader) downloadChunk(
 	ctx context.Context,
 	client *http.Client,
@@ -373,13 +521,56 @@ func (d *HTTPDownloader) downloadChunk(
 	tb *tokenBucket,
 	onSave func(),
 ) error {
-	// 已完成的 chunk 跳过
-	remaining := (chunk.End - chunk.Start + 1) - chunk.Downloaded
-	if remaining <= 0 {
-		return nil
-	}
+	for attempt := 0; ; attempt++ {
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
 
-	rangeStart := chunk.Start + chunk.Downloaded
+		// 已完成的 chunk 跳过
+		remaining := (chunk.End - chunk.Start + 1) - atomic.LoadInt64(&chunk.Downloaded)
+		if remaining <= 0 {
+			return nil
+		}
+
+		err := d.downloadChunkOnce(ctx, client, rawURL, file, chunk, doneBytes, tb, onSave)
+		if err == nil {
+			return nil
+		}
+		if ctx.Err() != nil {
+			return err
+		}
+		if !isTransientErr(err) || attempt >= maxRequestRetries {
+			return err
+		}
+		wait := requestBackoff(attempt)
+		slog.Warn("chunk read failed, will resume",
+			"url", rawURL,
+			"attempt", attempt+1,
+			"wait", wait,
+			"downloaded", atomic.LoadInt64(&chunk.Downloaded),
+			"chunk_size", chunk.End-chunk.Start+1,
+			"err", err,
+		)
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(wait):
+		}
+	}
+}
+
+// downloadChunkOnce 执行一次 chunk 拉取尝试；失败会带原始 error 返回，由 downloadChunk 决定是否重试
+func (d *HTTPDownloader) downloadChunkOnce(
+	ctx context.Context,
+	client *http.Client,
+	rawURL string,
+	file *os.File,
+	chunk *chunkState,
+	doneBytes *int64,
+	tb *tokenBucket,
+	onSave func(),
+) error {
+	rangeStart := chunk.Start + atomic.LoadInt64(&chunk.Downloaded)
 	rangeEnd := chunk.End
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
@@ -398,6 +589,10 @@ func (d *HTTPDownloader) downloadChunk(
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusPartialContent {
+		if retryableStatus(resp.StatusCode) {
+			// 包装成可重试的错误
+			return fmt.Errorf("server transient status: %d (i/o timeout)", resp.StatusCode)
+		}
 		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
@@ -441,6 +636,42 @@ func (d *HTTPDownloader) downloadChunk(
 
 	onSave()
 	return nil
+}
+
+// probeSizeViaRange 用 Range: bytes=0-0 探测文件大小（适用于 HEAD 不返回 Content-Length 的 CDN）
+func probeSizeViaRange(ctx context.Context, client *http.Client, rawURL string) (int64, bool) {
+	resp, err := doRequestWithRetry(ctx, client, func() (*http.Request, error) {
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("User-Agent", "unfetch/1.0")
+		req.Header.Set("Range", "bytes=0-0")
+		return req, nil
+	}, "probe-range "+rawURL)
+	if err != nil {
+		return 0, false
+	}
+	defer resp.Body.Close()
+	io.Copy(io.Discard, resp.Body)
+	// Content-Range: bytes 0-0/12345
+	cr := resp.Header.Get("Content-Range")
+	if cr == "" {
+		return 0, false
+	}
+	slashIdx := strings.LastIndex(cr, "/")
+	if slashIdx < 0 || slashIdx == len(cr)-1 {
+		return 0, false
+	}
+	sizeStr := cr[slashIdx+1:]
+	if sizeStr == "*" {
+		return 0, false
+	}
+	var size int64
+	if _, err := fmt.Sscanf(sizeStr, "%d", &size); err != nil || size <= 0 {
+		return 0, false
+	}
+	return size, true
 }
 
 func (d *HTTPDownloader) loadOrCreateState(statePath, rawURL string, totalSize int64, threads int) (*downloadState, error) {

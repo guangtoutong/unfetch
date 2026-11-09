@@ -54,6 +54,8 @@ func loadConfig() (*types.Config, error) {
 			MaxConcurrent: 5,
 			HTTPThreads:   16,
 			SpeedLimit:    0,
+			AutoRetry:     true,
+			MaxRetries:    5,
 		}
 		if err := saveConfig(cfg); err != nil {
 			slog.Warn("failed to save default config", "err", err)
@@ -78,6 +80,22 @@ func loadConfig() (*types.Config, error) {
 	if cfg.DownloadDir == "" {
 		home, _ := os.UserHomeDir()
 		cfg.DownloadDir = filepath.Join(home, "Downloads")
+	}
+	if cfg.MaxRetries <= 0 {
+		cfg.MaxRetries = 5
+	}
+	// 旧配置升级：auto_retry 缺省字段（false）视为未设置 → 默认打开。
+	// 这里没法区分"用户显式设了 false"还是"字段不存在"，但默认开重试对绝大多数
+	// 用户都更友好；不想要重试可以在设置里关掉。
+	if !cfg.AutoRetry {
+		// 仅在初次升级时翻转：用一个 sentinel 文件标记已升级过
+		marker := filepath.Join(dir, ".retry-default-upgraded")
+		if _, err := os.Stat(marker); os.IsNotExist(err) {
+			cfg.AutoRetry = true
+			_ = saveConfig(&cfg)
+			_ = os.WriteFile(marker, []byte("1"), 0644)
+			slog.Info("auto_retry defaulted to true for existing config")
+		}
 	}
 	return &cfg, nil
 }
