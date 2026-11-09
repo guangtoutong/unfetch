@@ -1,0 +1,117 @@
+---
+interface Props { lang: string }
+const { lang } = Astro.props
+const isZh = lang === 'zh'
+---
+<section style="padding: 80px 0;">
+  <div class="container" style="max-width: 760px;">
+    <h1 style="font-size: 44px; font-weight: 800; margin-bottom: 12px; letter-spacing: -1px; color: var(--fg);">
+      {isZh ? '隐私政策' : 'Privacy Policy'}
+    </h1>
+    <p style="font-size: 14px; color: var(--muted); margin-bottom: 44px;">
+      {isZh ? '最后更新:2026 年 5 月 20 日' : 'Last updated: May 20, 2026'}
+    </p>
+
+    {isZh ? (
+      <div style="font-size: 16px; color: var(--muted); line-height: 1.75;">
+        <p style="font-size: 18px; color: var(--fg); margin-bottom: 28px; font-weight: 500;">
+          <strong>简而言之:unfetch 不收集你的任何数据。</strong>
+        </p>
+
+        <h2 style="font-size: 22px; color: var(--fg); margin: 36px 0 14px;">不收集 = 真的不收集</h2>
+        <p style="margin-bottom: 16px;">unfetch 是一个本地运行的桌面下载工具,采用 MIT 风格开源。具体来说:</p>
+        <ul style="padding-left: 22px; margin-bottom: 16px;">
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">无账号系统</strong>:不需要注册、不需要登录。</li>
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">无遥测</strong>:不上传任何使用数据、崩溃日志、设备信息。</li>
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">无分析工具</strong>:不嵌入任何第三方 SDK(Google Analytics、Sentry 等)。</li>
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">无 infohash 上传</strong>:即使你使用 BT 下载,我们也不记录或上传任何种子哈希到我们的服务器(我们没有服务器)。</li>
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">无广告网络</strong>:不嵌入广告 SDK。MAS 版本完全没有广告。</li>
+        </ul>
+
+        <h2 style="font-size: 22px; color: var(--fg); margin: 36px 0 14px;">unfetch 会做什么网络访问?</h2>
+        <p style="margin-bottom: 16px;">unfetch 会在以下情况发起网络请求,但仅传输完成功能所必需的内容:</p>
+        <ul style="padding-left: 22px; margin-bottom: 16px;">
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">你主动添加的下载任务</strong>:连接到你粘贴的 URL 拉取文件,数据流仅在你的设备和源服务器之间。</li>
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">BT 网络(可选)</strong>:磁力链接通过 anacrolix/torrent 引擎与公共 tracker 和 peer 通信。这是 BT 协议本身的工作方式,跟 unfetch 无关。</li>
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">yt-dlp(可选)</strong>:对支持的视频网站发起请求拉视频元数据和流地址,行为完全由开源 yt-dlp 决定。</li>
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">GitHub API(可选,默认关闭)</strong>:用于版本更新检查,可在设置里关闭。</li>
+        </ul>
+
+        <h2 style="font-size: 22px; color: var(--fg); margin: 36px 0 14px;">本地存储的内容</h2>
+        <p style="margin-bottom: 16px;">unfetch 在你的设备本地存储:</p>
+        <ul style="padding-left: 22px; margin-bottom: 16px;">
+          <li style="margin-bottom: 8px;">下载任务清单(SQLite,放在 <code style="background: var(--bg-3); padding: 1px 5px; border-radius: 4px; color: var(--primary); font-family: ui-monospace, monospace; font-size: 13px;">~/Library/Application Support/unfetch/</code>)</li>
+          <li style="margin-bottom: 8px;">用户偏好设置(主题、并发数、下载目录等)</li>
+          <li style="margin-bottom: 8px;">下载完成的文件(默认 ~/Downloads,或者你自定义的目录)</li>
+        </ul>
+        <p style="margin-bottom: 16px;">这些数据不会离开你的设备。卸载 unfetch 时可手动删除上面的目录。</p>
+
+        <h2 style="font-size: 22px; color: var(--fg); margin: 36px 0 14px;">第三方</h2>
+        <p style="margin-bottom: 16px;">unfetch 完整使用以下开源库:<a href="https://github.com/anacrolix/torrent" target="_blank" rel="noreferrer" style="color: var(--primary);">anacrolix/torrent</a>(BT 引擎)、<a href="https://github.com/yt-dlp/yt-dlp" target="_blank" rel="noreferrer" style="color: var(--primary);">yt-dlp</a>(视频站点抓取)、<a href="https://tauri.app" target="_blank" rel="noreferrer" style="color: var(--primary);">Tauri 2</a>(应用框架)。它们的隐私政策由各自的项目维护。unfetch 本身不向任何第三方传输用户数据。</p>
+
+        <h2 style="font-size: 22px; color: var(--fg); margin: 36px 0 14px;">儿童隐私</h2>
+        <p style="margin-bottom: 16px;">unfetch 不针对 13 岁以下儿童,也不主动收集任何儿童信息。</p>
+
+        <h2 style="font-size: 22px; color: var(--fg); margin: 36px 0 14px;">联系方式</h2>
+        <p style="margin-bottom: 16px;">如有疑问、反馈或要求查看 / 删除 your local 数据的帮助,请通过以下方式联系:</p>
+        <ul style="padding-left: 22px; margin-bottom: 16px;">
+          <li>邮箱:<a href="mailto:lixd220@gmail.com" style="color: var(--primary);">lixd220@gmail.com</a></li>
+          <li>GitHub Issues:<a href="https://github.com/guangtoutong/unfetch/issues" target="_blank" rel="noreferrer" style="color: var(--primary);">github.com/guangtoutong/unfetch/issues</a></li>
+        </ul>
+
+        <h2 style="font-size: 22px; color: var(--fg); margin: 36px 0 14px;">变更</h2>
+        <p style="margin-bottom: 16px;">本政策可能随产品迭代修订。重大变更会在 unfetch 官网首页和应用内通知。修订日期会更新在本页顶部。</p>
+      </div>
+    ) : (
+      <div style="font-size: 16px; color: var(--muted); line-height: 1.75;">
+        <p style="font-size: 18px; color: var(--fg); margin-bottom: 28px; font-weight: 500;">
+          <strong>TL;DR — unfetch collects no data from you. None.</strong>
+        </p>
+
+        <h2 style="font-size: 22px; color: var(--fg); margin: 36px 0 14px;">No collection means no collection</h2>
+        <p style="margin-bottom: 16px;">unfetch is a locally-run desktop download manager, open-source under an MIT-style license. Specifically:</p>
+        <ul style="padding-left: 22px; margin-bottom: 16px;">
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">No accounts.</strong> No signup, no login.</li>
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">No telemetry.</strong> We don't upload usage data, crash reports, or device info.</li>
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">No analytics SDKs.</strong> No Google Analytics, no Sentry, no Mixpanel, nothing.</li>
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">No infohash uploads.</strong> Even when you use BT, we don't log or upload torrent hashes anywhere (we don't run any server to upload them to).</li>
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">No ad networks.</strong> The Mac App Store build ships with zero ads.</li>
+        </ul>
+
+        <h2 style="font-size: 22px; color: var(--fg); margin: 36px 0 14px;">What network connections does unfetch make?</h2>
+        <p style="margin-bottom: 16px;">unfetch will reach the network in these cases, transmitting only what's needed for the requested function:</p>
+        <ul style="padding-left: 22px; margin-bottom: 16px;">
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">Downloads you start.</strong> Connects to URLs you paste; data flows between your device and the source server, nothing else.</li>
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">BT network (opt-in).</strong> Magnet links use the anacrolix/torrent engine to talk to public trackers and peers. That's the BitTorrent protocol's nature, not unfetch's.</li>
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">yt-dlp (opt-in).</strong> For supported video sites, fetches video metadata and streams as the bundled yt-dlp library decides.</li>
+          <li style="margin-bottom: 8px;"><strong style="color: var(--fg);">GitHub API (off by default).</strong> Optional update check, can be disabled in Settings.</li>
+        </ul>
+
+        <h2 style="font-size: 22px; color: var(--fg); margin: 36px 0 14px;">What's stored locally</h2>
+        <p style="margin-bottom: 16px;">unfetch stores the following on your device only:</p>
+        <ul style="padding-left: 22px; margin-bottom: 16px;">
+          <li style="margin-bottom: 8px;">Your download task list (SQLite at <code style="background: var(--bg-3); padding: 1px 5px; border-radius: 4px; color: var(--primary); font-family: ui-monospace, monospace; font-size: 13px;">~/Library/Application Support/unfetch/</code>)</li>
+          <li style="margin-bottom: 8px;">Your preferences (theme, concurrency, download folder, etc.)</li>
+          <li style="margin-bottom: 8px;">The downloaded files themselves (default: ~/Downloads, or wherever you point unfetch at)</li>
+        </ul>
+        <p style="margin-bottom: 16px;">None of this leaves your device. When you uninstall, the folders above can be removed manually.</p>
+
+        <h2 style="font-size: 22px; color: var(--fg); margin: 36px 0 14px;">Third parties</h2>
+        <p style="margin-bottom: 16px;">unfetch builds on these open-source libraries: <a href="https://github.com/anacrolix/torrent" target="_blank" rel="noreferrer" style="color: var(--primary);">anacrolix/torrent</a> (BT engine), <a href="https://github.com/yt-dlp/yt-dlp" target="_blank" rel="noreferrer" style="color: var(--primary);">yt-dlp</a> (video site extraction), <a href="https://tauri.app" target="_blank" rel="noreferrer" style="color: var(--primary);">Tauri 2</a> (app framework). Their privacy practices are governed by their respective upstream projects. unfetch itself does not transmit your data to any third party.</p>
+
+        <h2 style="font-size: 22px; color: var(--fg); margin: 36px 0 14px;">Children</h2>
+        <p style="margin-bottom: 16px;">unfetch is not directed to children under 13 and does not knowingly collect any data from anyone.</p>
+
+        <h2 style="font-size: 22px; color: var(--fg); margin: 36px 0 14px;">Contact</h2>
+        <p style="margin-bottom: 16px;">Questions, feedback, or requests to view / delete your local data — reach out via:</p>
+        <ul style="padding-left: 22px; margin-bottom: 16px;">
+          <li>Email: <a href="mailto:lixd220@gmail.com" style="color: var(--primary);">lixd220@gmail.com</a></li>
+          <li>GitHub Issues: <a href="https://github.com/guangtoutong/unfetch/issues" target="_blank" rel="noreferrer" style="color: var(--primary);">github.com/guangtoutong/unfetch/issues</a></li>
+        </ul>
+
+        <h2 style="font-size: 22px; color: var(--fg); margin: 36px 0 14px;">Changes</h2>
+        <p style="margin-bottom: 16px;">This policy may be revised as the product evolves. Material changes will be announced on the unfetch website front page and in the application. The revision date is shown at the top.</p>
+      </div>
+    )}
+  </div>
+</section>

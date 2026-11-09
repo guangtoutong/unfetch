@@ -81,7 +81,8 @@
     "macOS": {
       "minimumSystemVersion": "11.0",
       "signingIdentity": "-"
-    }
+    },
+    "category": "Utility"
   },
   "plugins": {
     "shell": {

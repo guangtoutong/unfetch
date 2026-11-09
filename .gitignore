@@ -43,3 +43,7 @@ Thumbs.db
 *.tasks.db
 daemon.log
 unfetch.log
+
+# MAS provisioning profile & build artifacts (keep out of git)
+src-tauri/*.provisionprofile
+dist-mas/
