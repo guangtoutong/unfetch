@@ -62,6 +62,13 @@ rm src-tauri/tauri.conf.json.bak
 sed -i.bak -E "0,/^version = \"[^\"]+\"/ s//version = \"$VERSION\"/" src-tauri/Cargo.toml
 rm src-tauri/Cargo.toml.bak
 
+# .claude-plugin & mcp manifests
+for f in .claude-plugin/marketplace.json .claude-plugin/plugin.json mcp/server.json; do
+  if [ -f "$f" ]; then
+    sed -i.bak -E "s/\"version\": \"[^\"]+\"/\"version\": \"$VERSION\"/g" "$f" && rm -f "${f}.bak"
+  fi
+done
+
 # website 的 i18n（hero tag 文案 v0.x.x），先用 sed 批量替换旧版本号
 OLD_VERSION=$(grep -oE 'v0\.[0-9]+\.[0-9]+' website/src/i18n/strings.ts | head -1 || true)
 if [ -n "$OLD_VERSION" ] && [ "$OLD_VERSION" != "v${VERSION}" ]; then
