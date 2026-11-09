@@ -58,8 +58,8 @@ rm package.json.bak
 sed -i.bak -E "s/\"version\": \"[^\"]+\"/\"version\": \"$VERSION\"/" src-tauri/tauri.conf.json
 rm src-tauri/tauri.conf.json.bak
 
-# src-tauri/Cargo.toml（只改第一处，避免误改 dependencies）
-sed -i.bak -E "0,/^version = \"[^\"]+\"/ s//version = \"$VERSION\"/" src-tauri/Cargo.toml
+# src-tauri/Cargo.toml（只改第一处，避免误改 dependencies；兼容 macOS BSD sed）
+sed -i.bak -E "1,/^version = \"[^\"]+\"/s/^version = \"[^\"]+\"/version = \"$VERSION\"/" src-tauri/Cargo.toml
 rm src-tauri/Cargo.toml.bak
 
 # .claude-plugin & mcp manifests
