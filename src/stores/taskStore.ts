@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { api, subscribeToTaskEvents } from '../lib/api'
 import { notify, notifyTaskTransition } from '../lib/notify'
+import i18n from '../i18n'
 import type { Task, FilterType, TaskCounts } from '../types'
 
 let allDoneFired = false
@@ -15,7 +16,11 @@ async function triggerAllDoneAction() {
     }
     allDoneFired = true
     if (action === 'notify') {
-      await notify('全部下载完成', '所有任务已完成')
+      const isZh = i18n.language?.startsWith('zh')
+      await notify(
+        isZh ? '全部下载完成' : 'All Downloads Complete',
+        isZh ? '所有任务已完成' : 'All tasks have finished downloading'
+      )
     } else if (action === 'open_dir') {
       const { invoke } = await import('@tauri-apps/api/core')
       await invoke('open_folder', { path: cfg.download_dir })

@@ -13,7 +13,7 @@ export interface AdItem {
   badge?: string
 }
 
-const REMOTE_ADS_URL = 'https://unfetch.app/ads.json'
+const REMOTE_ADS_URL = 'https://unfetch.org/ads.json'
 
 /** Google favicon 服务，所有公开域名都能拿到一个尺寸合适的图标 */
 function favicon(domain: string): string {
@@ -22,13 +22,13 @@ function favicon(domain: string): string {
 
 export const LOCAL_ADS: AdItem[] = [
   {
-    name: 'Unflick',
-    url: 'https://unflick.app',
-    description: '极简播放器 · 配合 unfetch 即开即播',
-    logoUrl: favicon('unflick.app'),
-    logoLetter: 'U',
-    logoColor: '#3b82f6',
-    badge: '免费 · 无广告',
+    name: 'DO AI PM',
+    url: 'https://doaipm.com',
+    description: '成为 AI 时代的产品经理 · 用 AI 从想法到上线做出真实产品',
+    logoUrl: 'https://doaipm.com/favicon.svg',
+    logoLetter: 'D',
+    logoColor: '#8b5cf6',
+    badge: 'AI 产品方法论',
   },
   {
     name: 'Solomd',

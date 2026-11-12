@@ -1,10 +1,13 @@
 import React, { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useTaskStore } from './stores/taskStore'
 import { formatSpeed } from './lib/format'
 
 // 迷你悬浮窗：320×64 永远置顶
 export const MiniApp: React.FC = () => {
   const { tasks, startPolling, stopPolling } = useTaskStore()
+  const { t, i18n } = useTranslation()
+  const isZh = (i18n.language || '').toLowerCase().startsWith('zh')
 
   useEffect(() => {
     startPolling()
@@ -99,9 +102,9 @@ export const MiniApp: React.FC = () => {
               fontVariantNumeric: 'tabular-nums',
             }}
           >
-            {active.length > 0 ? formatSpeed(totalSpeed) : '空闲'}
+            {active.length > 0 ? formatSpeed(totalSpeed) : (isZh ? '空闲' : 'Idle')}
           </span>
-          {active.length > 0 && <span style={{ fontSize: 10, color: '#94a3b8' }}>·  {active.length} 个下载中</span>}
+          {active.length > 0 && <span style={{ fontSize: 10, color: '#94a3b8' }}>·  {active.length} {t('sidebar.downloading')}</span>}
         </div>
         <div
           style={{
@@ -126,7 +129,7 @@ export const MiniApp: React.FC = () => {
       {/* 展开按钮 */}
       <button
         onClick={onShowMain}
-        title="返回主窗口"
+        title={t('tray.show')}
         style={{
           width: 28,
           height: 28,

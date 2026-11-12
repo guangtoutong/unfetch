@@ -20,13 +20,13 @@ export function formatSpeed(bps: number): string {
 /** 格式化剩余时间 */
 export function formatETA(seconds: number): string {
   if (seconds < 0 || !isFinite(seconds)) return '--'
-  if (seconds === 0) return '即将完成'
+  if (seconds === 0) return '< 1s'
   const h = Math.floor(seconds / 3600)
   const m = Math.floor((seconds % 3600) / 60)
   const s = Math.floor(seconds % 60)
-  if (h > 0) return `${h}时${m}分${s}秒`
-  if (m > 0) return `${m}分${s}秒`
-  return `${s}秒`
+  if (h > 0) return `${h}h ${m}m ${s}s`
+  if (m > 0) return `${m}m ${s}s`
+  return `${s}s`
 }
 
 /** 格式化进度百分比 */
@@ -47,12 +47,18 @@ export function formatDate(iso: string): string {
 }
 
 /** 检测 URL 类型 */
-export function detectUrlType(url: string): 'http' | 'bt' | 'ytdlp' | 'ftp' | 'ed2k' {
+export function detectUrlType(url: string): 'http' | 'bt' | 'ytdlp' | 'ftp' | 'ed2k' | 'hls' {
   if (!url) return 'http'
   const lower = url.trim().toLowerCase()
-  if (lower.startsWith('ed2k://')) return 'ed2k'
   if (lower.startsWith('ftp://') || lower.startsWith('ftps://') || lower.startsWith('sftp://')) return 'ftp'
-  if (lower.startsWith('magnet:') || lower.endsWith('.torrent')) return 'bt'
+  if (__APP_STORE_BUILD__) {
+    if (lower.startsWith('http://') || lower.startsWith('https://')) return 'http'
+    return 'bt'
+  }
+  if (lower.startsWith('ed2k://')) return 'ed2k'
+  const pathOnly = lower.split('?')[0].split('#')[0]
+  if (lower.startsWith('magnet:') || pathOnly.endsWith('.torrent')) return 'bt'
+  if (pathOnly.endsWith('.m3u8') || pathOnly.endsWith('.m3u')) return 'hls'
   const ytdlpSites = [
     'youtube.com', 'youtu.be', 'bilibili.com', 'b23.tv',
     'tiktok.com', 'twitter.com', 'x.com', 'instagram.com',
@@ -66,14 +72,18 @@ export function detectUrlType(url: string): 'http' | 'bt' | 'ytdlp' | 'ftp' | 'e
 
 /** 获取网站名称 */
 export function getSiteName(url: string, type: string): string {
-  if (type === 'bt') return 'BT'
-  if (type === 'ed2k') return 'ed2k'
   if (type === 'ftp') {
     const l = url.trim().toLowerCase()
     if (l.startsWith('sftp://')) return 'SFTP'
     if (l.startsWith('ftps://')) return 'FTPS'
     return 'FTP'
   }
+  if (__APP_STORE_BUILD__) {
+    return 'HTTP'
+  }
+  if (type === 'bt') return 'BT'
+  if (type === 'ed2k') return 'ed2k'
+  if (type === 'hls') return 'HLS'
   const lower = url.toLowerCase()
   if (lower.includes('youtube.com') || lower.includes('youtu.be')) return 'YouTube'
   if (lower.includes('bilibili.com') || lower.includes('b23.tv')) return 'Bilibili'

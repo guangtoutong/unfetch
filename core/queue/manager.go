@@ -40,6 +40,7 @@ type Manager struct {
 	ytdlpDL *downloader.YtdlpDownloader
 	ftpDL   *downloader.FTPDownloader
 	ed2kDL  *downloader.Ed2kDownloader
+	hlsDL   *downloader.HLSDownloader
 }
 
 // NewManager 创建 Manager，从数据库恢复历史任务
@@ -62,6 +63,7 @@ func NewManager(cfg *types.Config, saveCfg func(*types.Config) error) (*Manager,
 		ytdlpDL:   downloader.NewYtdlpDownloader(cfg),
 		ftpDL:     downloader.NewFTPDownloader(cfg),
 		ed2kDL:    downloader.NewEd2kDownloader(cfg),
+		hlsDL:     downloader.NewHLSDownloader(cfg),
 	}
 
 	// 从数据库恢复任务
@@ -328,6 +330,13 @@ func (m *Manager) startDownload(task *types.Task) {
 		m.ed2kDL.UpdateConfig(m.cfg)
 		m.cfgMu.RUnlock()
 		dlErr = m.ed2kDL.Download(ctx, current, func() {
+			m.notify(current)
+		})
+	case types.TaskTypeHLS:
+		m.cfgMu.RLock()
+		m.hlsDL.UpdateConfig(m.cfg)
+		m.cfgMu.RUnlock()
+		dlErr = m.hlsDL.Download(ctx, current, func() {
 			m.notify(current)
 		})
 	default:
@@ -671,6 +680,7 @@ func (m *Manager) UpdateConfig(cfg *types.Config) {
 	m.ytdlpDL.UpdateConfig(cfg)
 	m.ftpDL.UpdateConfig(cfg)
 	m.ed2kDL.UpdateConfig(cfg)
+	m.hlsDL.UpdateConfig(cfg)
 	m.cfgMu.Unlock()
 
 	// 重建信号量（调整并发数）

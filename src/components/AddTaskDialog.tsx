@@ -5,7 +5,6 @@ import { useTaskStore } from '../stores/taskStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { detectUrlType } from '../lib/format'
 import { api } from '../lib/api'
-import { openExternal } from '../lib/ads'
 import { TorrentFilePicker } from './TorrentFilePicker'
 import type { AddTaskRequest, TorrentPreview } from '../types'
 
@@ -59,11 +58,12 @@ function parseUrls(input: string): string[] {
 export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) => {
   const { addTask } = useTaskStore()
   const { config } = useSettingsStore()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const isZh = (i18n.language || '').toLowerCase().startsWith('zh')
 
   const [url, setUrl] = useState('')
   const [batchMode, setBatchMode] = useState(false)
-  const [urlType, setUrlType] = useState<'http' | 'bt' | 'ytdlp' | 'ftp' | 'ed2k'>('http')
+  const [urlType, setUrlType] = useState<'http' | 'bt' | 'ytdlp' | 'ftp' | 'ed2k' | 'hls'>('http')
   const [quality, setQuality] = useState('best')
   const [saveDir, setSaveDir] = useState('')
   const [threads, setThreads] = useState(8)
@@ -174,10 +174,10 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
     return {
       url: u,
       save_dir: saveDir || undefined,
-      threads: detectedType === 'http' ? threads : undefined,
+      threads: detectedType === 'http' || detectedType === 'hls' ? threads : undefined,
       proxy: proxy || undefined,
       cookies: cookies || undefined,
-      quality: detectedType === 'ytdlp' ? quality : undefined,
+      quality: detectedType === 'ytdlp' || detectedType === 'hls' ? quality : undefined,
       play_after: playAfter,
       tags: tags.length > 0 ? tags : undefined,
       start_at: getStartAtISO(),
@@ -267,6 +267,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
     ytdlp: t('urlType.ytdlp'),
     ftp: 'FTP / SFTP',
     ed2k: 'eD2k',
+    hls: 'HLS (.m3u8)',
   }
 
   // 批量解析预览
@@ -327,12 +328,12 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
               {torrentPreview ? (
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>选择要下载的文件</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{isZh ? '选择要下载的文件' : 'Select files to download'}</div>
                     <button
                       onClick={() => setTorrentPreview(null)}
                       style={{ fontSize: 12, padding: '5px 10px', background: 'transparent', border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-secondary)', cursor: 'pointer' }}
                     >
-                      ← 返回修改
+                      {isZh ? '← 返回修改' : '← Back'}
                     </button>
                   </div>
                   <TorrentFilePicker
@@ -358,8 +359,12 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                     </svg>
                   </div>
                   <div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>添加下载任务</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{isAppStore ? '多线程 HTTP / HTTPS 直链下载' : '支持 HTTP、BT/磁力、1000+ 视频网站'}</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{t('addTask.title')}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                      {isAppStore
+                        ? (isZh ? '多线程 HTTP / HTTPS 与 FTP 直链下载' : 'Multi-threaded HTTP / HTTPS & FTP downloads')
+                        : t('addTask.subtitle')}
+                    </div>
                   </div>
                 </div>
 
@@ -391,7 +396,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                       <line x1="3" y1="12" x2="3.01" y2="12" />
                       <line x1="3" y1="18" x2="3.01" y2="18" />
                     </svg>
-                    批量
+                    {t('addTask.batchToggle')}
                   </button>
 
                   <button onClick={onClose} style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)' }}>
@@ -406,12 +411,12 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
               {/* URL 输入 */}
               <div style={{ marginBottom: 14 }}>
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
-                  下载地址{batchMode && '（每行一个）'}
+                  {batchMode ? t('addTask.urlBatch') : t('addTask.url')}
                 </label>
                 {batchMode ? (
                   <textarea
                     ref={batchRef}
-                    placeholder="https://example.com/file1.zip&#10;https://example.com/file2.zip&#10;magnet:?xt=urn:btih:..."
+                    placeholder={isAppStore ? 'https://example.com/file1.zip\nhttps://example.com/file2.zip' : t('addTask.urlBatchPlaceholder')}
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
                     className="input-base"
@@ -425,7 +430,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                     <input
                       ref={urlInputRef}
                       type="text"
-                      placeholder={t('addTask.urlPlaceholder')}
+                      placeholder={isAppStore ? 'https://example.com/file.zip' : t('addTask.urlPlaceholder')}
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
@@ -434,35 +439,30 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                     />
                   </div>
                 )}
-                {url && !batchMode && (
+                {url && !batchMode && !blockedByAppStore && (
                   <div style={{ marginTop: 5, fontSize: 11, color: 'var(--text-muted)' }}>
-                    检测到类型：<span style={{ color: 'var(--primary)', fontWeight: 600 }}>{urlTypeLabels[urlType]}</span>
+                    {t('addTask.detectedType')}<span style={{ color: 'var(--primary)', fontWeight: 600 }}>{urlTypeLabels[urlType]}</span>
                   </div>
                 )}
                 {blockedByAppStore && (
                   <div style={{ marginTop: 8, padding: '10px 12px', background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)', borderRadius: 8, fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                    此版本仅支持 HTTP / HTTPS 与 FTP / SFTP 直链下载。
-                    {urlType === 'bt' ? ' BT / 磁力链接' : urlType === 'ed2k' ? ' eD2k 链接' : ' 视频网站'}下载请使用完整版：
-                    <a
-                      onClick={() => openExternal('https://unfetch.org').catch(console.error)}
-                      style={{ color: '#a855f7', fontWeight: 700, cursor: 'pointer', marginLeft: 2 }}
-                    >
-                      unfetch.org →
-                    </a>
+                    {isZh
+                      ? '当前版本仅支持 HTTP / HTTPS 与 FTP / SFTP 直链文件下载。'
+                      : 'This edition supports direct HTTP / HTTPS and FTP / SFTP file downloads only.'}
                   </div>
                 )}
                 {batchMode && parsedBatch.length > 0 && (
                   <div style={{ marginTop: 5, fontSize: 11, color: 'var(--text-muted)' }}>
-                    将创建 <span style={{ color: 'var(--primary)', fontWeight: 700 }}>{parsedBatch.length}</span> 个任务
+                    {t('addTask.willCreate', { count: parsedBatch.length })}
                   </div>
                 )}
               </div>
 
-              {/* 质量（仅 ytdlp 单 URL 模式显示；App Store 版无视频下载，隐藏） */}
-              {urlType === 'ytdlp' && !batchMode && !isAppStore && (
+              {/* 质量（ytdlp / hls 单 URL 模式显示；App Store 版无视频下载，隐藏） */}
+              {(urlType === 'ytdlp' || urlType === 'hls') && !batchMode && !isAppStore && (
                 <div style={{ marginBottom: 14 }}>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
-                    画质选择
+                    {t('addTask.quality')}
                   </label>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     {qualityKeys.map((opt) => (
@@ -487,11 +487,11 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                 </div>
               )}
 
-              {/* HTTP 线程数 */}
-              {urlType === 'http' && !batchMode && (
+              {/* HTTP / HLS 线程数 */}
+              {(urlType === 'http' || urlType === 'hls') && !batchMode && (
                 <div style={{ marginBottom: 14 }}>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
-                    下载线程数：<span style={{ color: 'var(--primary)' }}>{threads}</span>
+                    {t('addTask.threads', { count: threads })}
                   </label>
                   <input type="range" min={1} max={32} value={threads} onChange={(e) => setThreads(Number(e.target.value))} />
                 </div>
@@ -500,7 +500,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
               {/* 保存目录 */}
               <div style={{ marginBottom: 14 }}>
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
-                  保存目录
+                  {t('addTask.saveDir')}
                 </label>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <div style={{ flex: 1, position: 'relative' }}>
@@ -509,14 +509,14 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                     </svg>
                     <input type="text" placeholder={config.download_dir || t('addTask.saveDirPlaceholder')} value={saveDir} onChange={(e) => setSaveDir(e.target.value)} className="input-base" style={{ paddingLeft: 30 }} />
                   </div>
-                  <button onClick={handleSelectDir} className="btn btn-ghost" style={{ flexShrink: 0, height: 38 }}>浏览</button>
+                  <button onClick={handleSelectDir} className="btn btn-ghost" style={{ flexShrink: 0, height: 38 }}>{t('addTask.browse')}</button>
                 </div>
               </div>
 
               {/* 标签 */}
               <div style={{ marginBottom: 14 }}>
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
-                  标签
+                  {t('addTask.tags')}
                 </label>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
                   {tags.map((t) => (
@@ -552,7 +552,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: showAdvanced ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
-                  高级选项
+                  {t('addTask.advanced')}
                 </button>
 
                 <AnimatePresence>
@@ -587,8 +587,8 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
 
                         {/* 代理 */}
                         <div>
-                          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>代理地址</label>
-                          <input type="text" placeholder="http://127.0.0.1:7890" value={proxy} onChange={(e) => setProxy(e.target.value)} className="input-base" />
+                          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>{t('addTask.proxy')}</label>
+                          <input type="text" placeholder={t('addTask.proxyPlaceholder')} value={proxy} onChange={(e) => setProxy(e.target.value)} className="input-base" />
                         </div>
 
                         {/* BT 自定义 tracker（App Store 版无 BT，隐藏） */}
@@ -650,12 +650,12 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                         {/* 定时下载 */}
                         <div>
                           <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>
-                            ⏰ 定时下载（留空 = 立即开始）
+                            {t('addTask.startAt')}
                           </label>
                           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                             <input type="datetime-local" value={startAt} onChange={(e) => setStartAt(e.target.value)} className="input-base" style={{ flex: 1 }} />
                             {startAt && (
-                              <button onClick={() => setStartAt('')} style={{ height: 38, padding: '0 10px', border: '1px solid var(--border)', borderRadius: 7, background: 'rgba(255,255,255,0.04)', color: 'var(--text-muted)', fontSize: 11, cursor: 'pointer' }}>清除</button>
+                              <button onClick={() => setStartAt('')} style={{ height: 38, padding: '0 10px', border: '1px solid var(--border)', borderRadius: 7, background: 'rgba(255,255,255,0.04)', color: 'var(--text-muted)', fontSize: 11, cursor: 'pointer' }}>{t('addTask.clear')}</button>
                             )}
                           </div>
                         </div>
@@ -663,7 +663,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                         {/* 哈希校验 */}
                         <div>
                           <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>
-                            校验码（下载完成后比对）
+                            {t('addTask.checksum')}
                           </label>
                           <input type="text" placeholder={t('addTask.sha256Placeholder')} value={sha256} onChange={(e) => setSha256(e.target.value)} className="input-base" style={{ marginBottom: 6, fontFamily: 'monospace', fontSize: 11 }} />
                           <input type="text" placeholder={t('addTask.md5Placeholder')} value={md5} onChange={(e) => setMd5(e.target.value)} className="input-base" style={{ fontFamily: 'monospace', fontSize: 11 }} />
@@ -672,18 +672,20 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                         {/* Cookie（App Store 版无视频下载，隐藏） */}
                         {urlType === 'ytdlp' && !isAppStore && (
                           <div>
-                            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>Cookie（Netscape 格式）</label>
+                            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>{t('addTask.cookies')}</label>
                             <textarea placeholder={t('addTask.cookiesPlaceholder')} value={cookies} onChange={(e) => setCookies(e.target.value)} className="input-base" style={{ height: 72, resize: 'vertical', fontFamily: 'monospace', fontSize: 11 }} />
                           </div>
                         )}
 
-                        {/* 下载完成后播放 */}
-                        <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-                          <div onClick={() => setPlayAfter(!playAfter)} style={{ width: 36, height: 20, borderRadius: 10, background: playAfter ? 'var(--primary)' : 'rgba(255,255,255,0.1)', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', border: '1px solid var(--border)' }}>
-                            <div style={{ position: 'absolute', top: 2, left: playAfter ? 17 : 2, width: 14, height: 14, borderRadius: '50%', background: 'white', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
-                          </div>
-                          <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>下载完成后自动用 Unflick 播放</span>
-                        </label>
+                        {/* 下载完成后播放（App Store 版隐藏） */}
+                        {!isAppStore && (
+                          <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                            <div onClick={() => setPlayAfter(!playAfter)} style={{ width: 36, height: 20, borderRadius: 10, background: playAfter ? 'var(--primary)' : 'rgba(255,255,255,0.1)', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', border: '1px solid var(--border)' }}>
+                              <div style={{ position: 'absolute', top: 2, left: playAfter ? 17 : 2, width: 14, height: 14, borderRadius: '50%', background: 'white', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
+                            </div>
+                            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{t('addTask.playAfter')}</span>
+                          </label>
+                        )}
                       </div>
                     </motion.div>
                   )}
@@ -712,7 +714,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                   {previewing ? (
                     <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                       <span style={{ width: 12, height: 12, borderRadius: '50%', border: '1.5px solid rgba(255,255,255,0.3)', borderTopColor: 'white', animation: 'spin 0.7s linear infinite' }} />
-                      正在解析种子...
+                      {isZh ? '正在解析种子...' : 'Parsing torrent...'}
                     </span>
                   ) : submitting ? (
                     <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>

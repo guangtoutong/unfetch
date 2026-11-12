@@ -4,12 +4,17 @@ package downloader
 
 import (
 	"bufio"
+	"bytes"
 	"context"
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/sha256"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"net"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -154,5 +159,89 @@ func TestFTPDownloaderResumeAndChecksum(t *testing.T) {
 	}
 	if task.ActualSHA256 != expectedHash {
 		t.Errorf("ActualSHA256 = %s, want %s", task.ActualSHA256, expectedHash)
+	}
+}
+
+func encryptAES128CBCForTest(plain, key []byte, seqNum uint64) []byte {
+	padLen := aes.BlockSize - (len(plain) % aes.BlockSize)
+	padded := make([]byte, len(plain)+padLen)
+	copy(padded, plain)
+	for i := len(plain); i < len(padded); i++ {
+		padded[i] = byte(padLen)
+	}
+	iv := make([]byte, 16)
+	binary.BigEndian.PutUint64(iv[8:], seqNum)
+	block, _ := aes.NewCipher(key)
+	out := make([]byte, len(padded))
+	cipher.NewCBCDecrypter(block, iv)
+	cipher.NewCBCEncrypter(block, iv).CryptBlocks(out, padded)
+	return out
+}
+
+func TestHLSPlaylistParserAndAES128Download(t *testing.T) {
+	aesKey := []byte("0123456789abcdef") // 16 bytes
+	seg0Plain := []byte("HLS-SEGMENT-0-PAYLOAD-ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	seg1Plain := []byte("HLS-SEGMENT-1-PAYLOAD-0123456789abcdefghijklmnop")
+	seg2Plain := []byte("HLS-SEGMENT-2-PAYLOAD-FINAL-CHUNK-DATA!")
+
+	expectedMerged := append(append([]byte{}, seg0Plain...), seg1Plain...)
+	expectedMerged = append(expectedMerged, seg2Plain...)
+	sum := sha256.Sum256(expectedMerged)
+	expectedSHA := hex.EncodeToString(sum[:])
+
+	seg0Enc := encryptAES128CBCForTest(seg0Plain, aesKey, 100)
+	seg1Enc := encryptAES128CBCForTest(seg1Plain, aesKey, 101)
+	seg2Enc := encryptAES128CBCForTest(seg2Plain, aesKey, 102)
+
+	var srv *httptest.Server
+	srv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/master.m3u8":
+			_, _ = fmt.Fprintf(w, "#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=1280x720\n720p/prog.m3u8\n#EXT-X-STREAM-INF:BANDWIDTH=4000000,RESOLUTION=1920x1080\n1080p/prog.m3u8\n")
+		case "/720p/prog.m3u8":
+			_, _ = fmt.Fprintf(w, "#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-MEDIA-SEQUENCE:100\n#EXT-X-KEY:METHOD=AES-128,URI=\"%s/enc.key\"\n#EXTINF:4.0,\nseg0.ts\n#EXTINF:4.0,\nseg1.ts\n#EXTINF:2.5,\nseg2.ts\n#EXT-X-ENDLIST\n", srv.URL)
+		case "/enc.key":
+			_, _ = w.Write(aesKey)
+		case "/720p/seg0.ts":
+			_, _ = w.Write(seg0Enc)
+		case "/720p/seg1.ts":
+			_, _ = w.Write(seg1Enc)
+		case "/720p/seg2.ts":
+			_, _ = w.Write(seg2Enc)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	tmpDir := t.TempDir()
+	dl := NewHLSDownloader(&types.Config{})
+	task := &types.Task{
+		ID:             "hls-test-1",
+		URL:            srv.URL + "/master.m3u8",
+		Filename:       "video.ts",
+		SavePath:       tmpDir,
+		Type:           types.TaskTypeHLS,
+		Quality:        "720p",
+		Threads:        4,
+		ExpectedSHA256: expectedSHA,
+	}
+
+	if err := dl.Download(context.Background(), task, func() {}); err != nil {
+		t.Fatalf("HLS Download failed: %v", err)
+	}
+
+	got, err := os.ReadFile(filepath.Join(tmpDir, "video.ts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(got, expectedMerged) {
+		t.Fatalf("HLS merged output mismatch: got %q, want %q", string(got), string(expectedMerged))
+	}
+	if task.ActualSHA256 != expectedSHA {
+		t.Errorf("ActualSHA256 = %s, want %s", task.ActualSHA256, expectedSHA)
+	}
+	if task.Metadata == nil || task.Metadata.Duration != 10 {
+		t.Errorf("unexpected duration metadata: %+v", task.Metadata)
 	}
 }

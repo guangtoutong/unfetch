@@ -18,8 +18,8 @@ unfetch is the download engine that finishes what your browser starts. Fast mult
 
 ## Features
 
-- **Multi-mirror HTTP & FTP/SFTP** — up to 32 threads × multiple mirror URLs, automatic fallback, resume, SHA256/MD5 verification, plus native FTP/FTPS/SFTP and ed2k support.
-- **BT / Magnet** — 35 public trackers, IPv6 + WebTorrent, file picker before download, peer/seeder stats, auto uTP fallback when your ISP throttles.
+- **Multi-mirror HTTP, HLS (.m3u8) & FTP/SFTP** — up to 32 threads × multiple mirror URLs, native HLS (`.m3u8`) concurrent segment downloading with AES-128 CBC decryption & remuxing, automatic fallback, resume, SHA256/MD5 verification, plus native FTP/FTPS/SFTP and ed2k support.
+- **BT / Magnet & Seeding Control** — 35 public trackers, IPv6 + WebTorrent, file picker before download, peer/seeder stats, configurable target seed ratio & seed time limits, auto uTP fallback when your ISP throttles.
 - **1000+ video sites** — YouTube, Bilibili, TikTok, X, and the rest via bundled yt-dlp.
 - **AI-native (MCP)** — `add_task`, `list_tasks`, `wait_for_task`, progress notifications — from any MCP host (Claude Desktop, Cursor, Codex, …). No vendor lock-in.
 - **Remote Web UI** — token-secured Web UI on `0.0.0.0` — manage downloads from your phone or remote box. QR-shareable.

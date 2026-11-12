@@ -64,6 +64,12 @@ echo "==> Building frontend (VITE_APP_STORE_BUILD=1)"
 pnpm install --frozen-lockfile
 VITE_APP_STORE_BUILD=1 pnpm build
 
+# 同步 MAS 前端产物到 core/web/dist，防止 Go embed 把旧的完整版 Web UI 打进 daemon 二进制
+rm -rf core/web/dist
+mkdir -p core/web/dist
+cp -R dist/* core/web/dist/
+touch core/web/dist/.gitkeep
+
 echo "==> Building Go daemon (universal binary, -tags masbuild → 无 BT/yt-dlp)"
 # masbuild tag 排除 bt.go / ytdlp.go，二进制不链接 anacrolix/torrent，也不内置
 # yt-dlp 调用逻辑；api 层拒绝一切非 HTTP 任务。符合 App Store Guideline 5.2.3。
@@ -84,18 +90,41 @@ chmod +x ../src-tauri/binaries/unfetch-daemon-*-apple-darwin
 popd >/dev/null
 
 # ---------- 2. Tauri build(不自动签名 — 我们后面用 MAS 证书重签)----------
-echo "==> Building .app (universal, 无签名)"
+# 注意：必须把 VITE_APP_STORE_BUILD=1 传给 tauri build，因为 tauri.conf.json 的
+# beforeBuildCommand 会再次运行 pnpm build，否则会把 MAS 前端覆盖成普通版！
+# 同时传入 --features mas，让 Rust 二进制剔除 magnet/.torrent/视频站字符串、
+# LaunchAgent 开机自启及默认后台剪贴板轮询。
+echo "==> Building .app (universal, 无签名, VITE_APP_STORE_BUILD=1, --features mas)"
 env -u APPLE_SIGNING_IDENTITY -u APPLE_ID -u APPLE_PASSWORD -u APPLE_TEAM_ID \
-  pnpm tauri build --target universal-apple-darwin --bundles app
+  VITE_APP_STORE_BUILD=1 \
+  pnpm tauri build --target universal-apple-darwin --bundles app -- --features mas
 
 APP="src-tauri/target/universal-apple-darwin/release/bundle/macos/${PRODUCT}.app"
 [ -d "$APP" ] || { echo "ERROR: .app not found at $APP" >&2; exit 1; }
 
 # ---------- 3. 改 Info.plist ----------
 PLIST="$APP/Contents/Info.plist"
-echo "==> Patching Info.plist with MAS version fields"
+echo "==> Patching Info.plist with MAS version fields & stripping .torrent / magnet associations"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $MAS_VERSION" "$PLIST"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $MAS_BUILD_NUMBER" "$PLIST"
+
+# 移除 tauri.conf.json 注入的 .torrent (CFBundleDocumentTypes) 与 magnet: (CFBundleURLTypes)
+/usr/libexec/PlistBuddy -c "Delete :CFBundleDocumentTypes" "$PLIST" 2>/dev/null || true
+/usr/libexec/PlistBuddy -c "Delete :CFBundleURLTypes" "$PLIST" 2>/dev/null || true
+
+# 声明 App 分类为 Utilities（Mac App Store 必填 LSApplicationCategoryType）
+/usr/libexec/PlistBuddy -c "Set :LSApplicationCategoryType public.app-category.utilities" "$PLIST" 2>/dev/null \
+  || /usr/libexec/PlistBuddy -c "Add :LSApplicationCategoryType string public.app-category.utilities" "$PLIST"
+
+# 声明 CFBundleDevelopmentRegion=en 与 CFBundleLocalizations，确保 macOS 系统注入菜单项与 App 菜单语言一致
+/usr/libexec/PlistBuddy -c "Set :CFBundleDevelopmentRegion en" "$PLIST" 2>/dev/null \
+  || /usr/libexec/PlistBuddy -c "Add :CFBundleDevelopmentRegion string en" "$PLIST"
+/usr/libexec/PlistBuddy -c "Delete :CFBundleLocalizations" "$PLIST" 2>/dev/null || true
+/usr/libexec/PlistBuddy -c "Add :CFBundleLocalizations array" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :CFBundleLocalizations:0 string en" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :CFBundleLocalizations:1 string zh-Hans" "$PLIST"
+/usr/libexec/PlistBuddy -c "Add :CFBundleLocalizations:2 string zh-Hant" "$PLIST"
+mkdir -p "$APP/Contents/Resources/en.lproj" "$APP/Contents/Resources/zh-Hans.lproj" "$APP/Contents/Resources/zh-Hant.lproj"
 
 # 出口合规：unfetch 只用 HTTPS/TLS 这类标准、豁免类加密,声明 false 即
 # "仅使用豁免加密"。不加这个 key,ASC 每个 build 都会弹"App 加密文稿"对话框,

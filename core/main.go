@@ -136,10 +136,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	// 确保下载目录存在
-	if err := os.MkdirAll(cfg.DownloadDir, 0755); err != nil {
-		slog.Error("failed to create download dir", "err", err, "path", cfg.DownloadDir)
-		os.Exit(1)
+	// 确保下载目录存在（在 macOS App Sandbox 中 ~/Downloads 可能是容器软链，若用户曾选过无权限目录则回退）
+	if _, statErr := os.Stat(cfg.DownloadDir); statErr != nil {
+		if err := os.MkdirAll(cfg.DownloadDir, 0755); err != nil {
+			slog.Warn("failed to create download dir, falling back to ~/Downloads", "err", err, "path", cfg.DownloadDir)
+			if home, hErr := os.UserHomeDir(); hErr == nil {
+				cfg.DownloadDir = filepath.Join(home, "Downloads")
+				_ = os.MkdirAll(cfg.DownloadDir, 0755)
+			}
+		}
 	}
 
 	mgr, err := queue.NewManager(cfg, saveConfig)

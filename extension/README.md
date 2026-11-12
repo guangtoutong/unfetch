@@ -11,9 +11,9 @@
 
 ## 工作原理
 
-- 监听 `chrome.downloads.onCreated` 事件
-- 取消浏览器原生下载，把 URL POST 到 daemon `http://127.0.0.1:19543/tasks`
-- 显示桌面通知
+- **下载接管**：监听 `chrome.downloads.onCreated` 事件，取消浏览器原生下载，自动读取目标站点的 `Cookie` 与 `Referer` 转发至 daemon `http://127.0.0.1:19543/tasks`
+- **流媒体嗅探**：监听 `chrome.webRequest` 自动捕获当前标签页中的 HLS (`.m3u8`)、DASH (`.mpd`) 及直链音视频流，在扩展图标徽章显示数量，点击弹窗即可一键发送至 unfetch 下载
+- **桌面通知**：接管或发送成功后弹出系统通知
 
 ## 设置
 

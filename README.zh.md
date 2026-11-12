@@ -18,8 +18,8 @@ unfetch 是把浏览器没下完的活接走的下载引擎。多镜像 HTTP 高
 
 ## 核心功能
 
-- **多镜像 HTTP 与 FTP/SFTP** — 最多 32 线程 × 多镜像 URL 并发,失败自动 fallback,断点续传,SHA256/MD5 校验,原生支持 FTP/FTPS/SFTP 与 ed2k。
-- **BT / 磁力** — 35 个公共 tracker、IPv6 + WebTorrent、下载前选文件、显示 peer 和做种数、ISP 屏蔽时自动切 uTP。
+- **多镜像 HTTP、原生 HLS (.m3u8) 与 FTP/SFTP** — 最多 32 线程 × 多镜像 URL 并发,原生 HLS (`.m3u8`) 多线程分片拉取与 AES-128 解密合并,失败自动 fallback,断点续传,SHA256/MD5 校验,原生支持 FTP/FTPS/SFTP 与 ed2k。
+- **BT / 磁力与做种管理** — 35 个公共 tracker、IPv6 + WebTorrent、下载前选文件、显示 peer 和做种数、可配置目标分享率与做种时长自动停止、ISP 屏蔽时自动切 uTP。
 - **1000+ 视频网站** — 通过内置 yt-dlp 支持 YouTube、B 站、抖音、X 等。
 - **AI 原生(MCP)** — `add_task` / `list_tasks` / `wait_for_task` / 进度通知 —— 任意 MCP 宿主(Claude Desktop、Cursor、Codex …)都能调用,无锁定。
 - **远程 Web UI** — `0.0.0.0` + token 鉴权 —— 手机或远程机器都能管下载,可生成访问链接二维码。

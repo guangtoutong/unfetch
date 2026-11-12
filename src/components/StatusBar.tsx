@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useTaskStore } from '../stores/taskStore'
 import { formatSpeed } from '../lib/format'
 
@@ -26,6 +27,8 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
 
 export const StatusBar: React.FC = () => {
   const { tasks, isConnected } = useTaskStore()
+  const { t, i18n } = useTranslation()
+  const isZh = (i18n.language || '').toLowerCase().startsWith('zh')
 
   const downloading = tasks.filter((t) => t.status === 'downloading')
   const done = tasks.filter((t) => t.status === 'done')
@@ -74,7 +77,7 @@ export const StatusBar: React.FC = () => {
           }}
         />
         <span style={{ color: isConnected ? 'var(--text-muted)' : '#ef4444' }}>
-          {isConnected ? 'Daemon 已连接' : 'Daemon 未连接'}
+          Daemon · {isConnected ? t('statusBar.connected') : t('statusBar.disconnected')}
         </span>
         <span style={{ color: 'var(--border-strong)', margin: '0 4px' }}>·</span>
         <span>127.0.0.1:19543</span>
@@ -94,7 +97,7 @@ export const StatusBar: React.FC = () => {
             </span>
           </>
         ) : (
-          <span>空闲</span>
+          <span>{isZh ? '空闲' : 'Idle'}</span>
         )}
         <Sparkline data={history} color="var(--speed-color)" />
       </div>
@@ -103,15 +106,15 @@ export const StatusBar: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         {downloading.length > 0 && (
           <span style={{ color: 'var(--success)' }}>
-            ↓ {downloading.length} 个下载中
+            ↓ {downloading.length} {t('sidebar.downloading')}
           </span>
         )}
         {done.length > 0 && (
           <span>
-            <span style={{ color: 'var(--primary)' }}>✓</span> {done.length} 个已完成
+            <span style={{ color: 'var(--primary)' }}>✓</span> {done.length} {t('sidebar.done')}
           </span>
         )}
-        {tasks.length === 0 && <span>无任务</span>}
+        {tasks.length === 0 && <span>{t('empty.noTasks')}</span>}
       </div>
     </div>
   )

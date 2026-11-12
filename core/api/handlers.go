@@ -19,23 +19,6 @@ import (
 	"unfetch/core/types"
 )
 
-// videoHostnames 是已知的视频平台域名
-var videoHostnames = []string{
-	"youtube.com", "youtu.be",
-	"bilibili.com",
-	"tiktok.com", "douyin.com",
-	"twitter.com", "x.com",
-	"instagram.com",
-	"facebook.com",
-	"twitch.tv",
-	"vimeo.com",
-	"dailymotion.com",
-	"nicovideo.jp",
-	"weibo.com",
-	"ixigua.com",
-	"v.qq.com",
-}
-
 // detectURLType 根据 URL 判断下载类型
 func detectURLType(url string) types.TaskType {
 	lower := strings.ToLower(strings.TrimSpace(url))
@@ -54,8 +37,14 @@ func detectURLType(url string) types.TaskType {
 	if strings.HasPrefix(lower, "magnet:") {
 		return types.TaskTypeBT
 	}
-	if strings.HasSuffix(lower, ".torrent") {
+	pathOnly := strings.Split(strings.Split(lower, "?")[0], "#")[0]
+	if strings.HasSuffix(pathOnly, ".torrent") {
 		return types.TaskTypeBT
+	}
+
+	// HLS (.m3u8) 原生流媒体判断
+	if strings.HasSuffix(pathOnly, ".m3u8") || strings.HasSuffix(pathOnly, ".m3u") {
+		return types.TaskTypeHLS
 	}
 
 	// 视频平台判断
@@ -194,10 +183,9 @@ func (h *Handlers) AddTask(w http.ResponseWriter, r *http.Request) {
 
 	taskType := detectURLType(req.URL)
 
-	// App Store 版（masbuild）只允许 HTTP/HTTPS 与 FTP/SFTP 直链下载。magnet / .torrent /
-	// ed2k / 视频网站一律拒绝，符合 App Store Review Guideline 5.2.3。
+	// App Store 版（masbuild）只允许 HTTP/HTTPS 与 FTP/SFTP 直链下载。
 	if types.AppStoreEdition && taskType != types.TaskTypeHTTP && taskType != types.TaskTypeFTP {
-		writeError(w, http.StatusForbidden, "此版本仅支持 HTTP/HTTPS 与 FTP/SFTP 直链下载；BT、磁力链接、ed2k 和视频网站下载请使用 unfetch.org 的完整版")
+		writeError(w, http.StatusForbidden, "当前版本仅支持 HTTP/HTTPS 与 FTP/SFTP 直链下载")
 		return
 	}
 
@@ -212,12 +200,12 @@ func (h *Handlers) AddTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	quality := req.Quality
-	if quality == "" && taskType == types.TaskTypeYtdlp {
+	if quality == "" && (taskType == types.TaskTypeYtdlp || taskType == types.TaskTypeHLS) {
 		quality = "best"
 	}
 
 	filename := req.Filename
-	if filename == "" && (taskType == types.TaskTypeHTTP || taskType == types.TaskTypeFTP) {
+	if filename == "" && (taskType == types.TaskTypeHTTP || taskType == types.TaskTypeFTP || taskType == types.TaskTypeHLS) {
 		// 从 URL 中推断文件名
 		parts := strings.Split(strings.Split(req.URL, "?")[0], "/")
 		if len(parts) > 0 {
@@ -535,7 +523,7 @@ func (h *Handlers) PreviewTorrent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if types.AppStoreEdition {
-		writeError(w, http.StatusForbidden, "此版本不支持 BT / 磁力链接；请使用 unfetch.org 的完整版")
+		writeError(w, http.StatusForbidden, "当前版本仅支持 HTTP/HTTPS 与 FTP/SFTP 直链下载")
 		return
 	}
 

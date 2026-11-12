@@ -63,5 +63,26 @@ i18n
       lookupLocalStorage: 'unfetch.lang',
     },
   })
+  .then(() => {
+    syncTrayLabels()
+  })
+
+function syncTrayLabels() {
+  import('@tauri-apps/api/core')
+    .then(({ invoke }) =>
+      invoke('set_tray_labels', {
+        show: i18n.t('tray.show'),
+        toggleMini: i18n.t('tray.toggleMini'),
+        pauseAll: i18n.t('tray.pauseAll'),
+        resumeAll: i18n.t('tray.resumeAll'),
+        quit: i18n.t('tray.quit'),
+      }),
+    )
+    .catch(() => {})
+}
+
+i18n.on('languageChanged', () => {
+  syncTrayLabels()
+})
 
 export default i18n

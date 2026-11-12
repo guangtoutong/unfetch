@@ -34,7 +34,7 @@ const FileIcon: React.FC<{ filename: string; type: string }> = ({ filename, type
     )
   }
 
-  if (videoExts.includes(ext)) {
+  if (type === 'hls' || videoExts.includes(ext)) {
     return (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="1.8">
         <rect x="2" y="4" width="20" height="16" rx="2" />
@@ -150,6 +150,7 @@ const SourceBadge: React.FC<{ url: string; type: string }> = ({ url, type }) => 
     FTPS: { bg: 'rgba(14,165,233,0.15)', text: '#0ea5e9' },
     SFTP: { bg: 'rgba(16,185,129,0.15)', text: '#10b981' },
     ed2k: { bg: 'rgba(245,158,11,0.15)', text: '#f59e0b' },
+    HLS: { bg: 'rgba(139,92,246,0.16)', text: '#8b5cf6' },
     HTTP: { bg: 'rgba(100,116,139,0.15)', text: '#64748b' },
   }
   const style = colorMap[name] ?? colorMap.HTTP
@@ -689,6 +690,11 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
               {(task.seeders ?? 0) > 0 && (
                 <span style={{ color: '#22c55e', marginLeft: 4, fontWeight: 600 }} title="种子数（拥有完整文件的 peer）">
                   ★ {task.seeders}
+                </span>
+              )}
+              {(task.seeding || (task.seed_ratio ?? 0) > 0) && (
+                <span style={{ color: '#10b981', marginLeft: 4, fontWeight: 600 }} title="BT 上传分享率">
+                  ↑ {(task.seed_ratio ?? 0).toFixed(2)}x{task.seeding ? ' (Seeding)' : ''}
                 </span>
               )}
             </span>

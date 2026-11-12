@@ -1,4 +1,5 @@
 import type { Task } from '../types'
+import i18n from '../i18n'
 
 // 触发原生系统通知（Windows 通知中心 / macOS Notification Center）
 // 用户首次使用时会询问权限
@@ -38,10 +39,11 @@ export function notifyTaskTransition(prev: Task, next: Task) {
 
   const name = next.metadata?.title || next.filename || next.url
 
+  const isZh = i18n.language?.startsWith('zh')
   if (prev.status !== 'done' && next.status === 'done') {
-    notify('下载完成', name)
+    notify(isZh ? '下载完成' : 'Download Complete', name)
   } else if (prev.status !== 'error' && next.status === 'error') {
     const msg = next.error ? `${name}\n${next.error.substring(0, 80)}` : name
-    notify('下载失败', msg)
+    notify(isZh ? '下载失败' : 'Download Failed', msg)
   }
 }

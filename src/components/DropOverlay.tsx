@@ -31,9 +31,9 @@ export const DropOverlay: React.FC = () => {
             for (const p of paths) {
               const lower = p.toLowerCase()
               let url: string | null = null
-              if (lower.endsWith('.torrent')) {
+              if (!__APP_STORE_BUILD__ && lower.endsWith('.torrent')) {
                 url = 'file:///' + p.replace(/\\/g, '/')
-              } else if (lower.startsWith('http://') || lower.startsWith('https://') || lower.startsWith('magnet:')) {
+              } else if (lower.startsWith('http://') || lower.startsWith('https://') || lower.startsWith('ftp://') || (!__APP_STORE_BUILD__ && lower.startsWith('magnet:'))) {
                 url = p
               }
               if (url) {
@@ -100,7 +100,7 @@ export const DropOverlay: React.FC = () => {
               {t('drop.release')}
             </div>
             <div style={{ fontSize: 12, color: '#a3a3b8' }}>
-              {count > 0 ? `${count}` : t('drop.supports')}
+              {count > 0 ? `${count}` : (__APP_STORE_BUILD__ ? 'HTTP / HTTPS / FTP URL' : t('drop.supports'))}
             </div>
           </motion.div>
         </motion.div>

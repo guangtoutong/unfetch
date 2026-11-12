@@ -16,12 +16,13 @@ import type { Config, RSSFeed, TaskTemplate } from '../types'
 import type { TFunction } from 'i18next'
 
 export const SettingsPanel: React.FC = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { isOpen, setOpen, config, updateConfig } = useSettingsStore()
   const [detectedProxy, setDetectedProxy] = useState<string>('')
   const [autostart, setAuto] = useState<boolean>(false)
   const [clipSniff, setClipSniff] = useState<boolean>(true)
   const [minToTray, setMinToTray] = useState<boolean>(true)
+  const isAppStore = __APP_STORE_BUILD__
 
   useEffect(() => {
     if (!isOpen) return
@@ -344,21 +345,24 @@ export const SettingsPanel: React.FC = () => {
                 </div>
               </Section>
 
-              <Divider />
-
-              {/* 自动播放 */}
-              <Section title={t('settings.player')} icon={
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polygon points="5 3 19 12 5 21 5 3" />
-                </svg>
-              }>
-                <ToggleRow
-                  label={t('settings.autoPlayUnflick')}
-                  description={t('settings.autoPlayHint')}
-                  checked={config.auto_play_unflick}
-                  onChange={(v) => updateConfig({ auto_play_unflick: v })}
-                />
-              </Section>
+              {/* 自动播放（MAS 沙盒不联动外部播放器） */}
+              {!isAppStore && (
+                <>
+                  <Divider />
+                  <Section title={t('settings.player')} icon={
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                  }>
+                    <ToggleRow
+                      label={t('settings.autoPlayUnflick')}
+                      description={t('settings.autoPlayHint')}
+                      checked={config.auto_play_unflick}
+                      onChange={(v) => updateConfig({ auto_play_unflick: v })}
+                    />
+                  </Section>
+                </>
+              )}
 
               <Divider />
 
@@ -394,8 +398,8 @@ export const SettingsPanel: React.FC = () => {
                     <option value="">{t('settings.onAllDoneOptions.none')}</option>
                     <option value="notify">{t('settings.onAllDoneOptions.notify')}</option>
                     <option value="open_dir">{t('settings.onAllDoneOptions.open_dir')}</option>
-                    <option value="sleep">{t('settings.onAllDoneOptions.sleep')}</option>
-                    <option value="shutdown">{t('settings.onAllDoneOptions.shutdown')}</option>
+                    {!isAppStore && <option value="sleep">{t('settings.onAllDoneOptions.sleep')}</option>}
+                    {!isAppStore && <option value="shutdown">{t('settings.onAllDoneOptions.shutdown')}</option>}
                   </select>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
                     {t('settings.onAllDoneHint')}
@@ -413,12 +417,14 @@ export const SettingsPanel: React.FC = () => {
                   <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg>
               }>
-                <ToggleRow
-                  label={t('settings.autostart')}
-                  description={t('settings.autostartHint')}
-                  checked={autostart}
-                  onChange={onToggleAutostart}
-                />
+                {!isAppStore && (
+                  <ToggleRow
+                    label={t('settings.autostart')}
+                    description={t('settings.autostartHint')}
+                    checked={autostart}
+                    onChange={onToggleAutostart}
+                  />
+                )}
                 <ToggleRow
                   label={t('settings.minimizeToTray')}
                   description={t('settings.minimizeToTrayHint')}
@@ -427,34 +433,90 @@ export const SettingsPanel: React.FC = () => {
                 />
                 <ToggleRow
                   label={t('settings.clipboardSniff')}
-                  description={t('settings.clipboardSniffHint')}
+                  description={
+                    isAppStore
+                      ? i18n.language.startsWith('zh')
+                        ? '复制 HTTP / FTP 下载链接后弹出快速下载提示'
+                        : 'Prompt to download when you copy an HTTP / FTP URL'
+                      : t('settings.clipboardSniffHint')
+                  }
                   checked={clipSniff}
                   onChange={onToggleClipSniff}
                 />
               </Section>
 
-              <Divider />
+              {!isAppStore && (
+                <>
+                  <Divider />
 
-              <Section title={t('settings.btOptim')} icon={
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                  <path d="M2 17l10 5 10-5" />
-                  <path d="M2 12l10 5 10-5" />
-                </svg>
-              }>
-                <ToggleRow
-                  label={t('settings.forceUTP')}
-                  description={t('settings.forceUTPHint')}
-                  checked={!!config.bt_force_utp}
-                  onChange={(v) => updateConfig({ bt_force_utp: v })}
-                />
-                <ToggleRow
-                  label={t('settings.autoUtpFallback')}
-                  description={t('settings.autoUtpFallbackHint')}
-                  checked={!!config.bt_auto_utp_fallback}
-                  onChange={(v) => updateConfig({ bt_auto_utp_fallback: v })}
-                />
-              </Section>
+                  <Section title={t('settings.btOptim')} icon={
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                      <path d="M2 17l10 5 10-5" />
+                      <path d="M2 12l10 5 10-5" />
+                    </svg>
+                  }>
+                    <ToggleRow
+                      label={t('settings.forceUTP')}
+                      description={t('settings.forceUTPHint')}
+                      checked={!!config.bt_force_utp}
+                      onChange={(v) => updateConfig({ bt_force_utp: v })}
+                    />
+                    <ToggleRow
+                      label={t('settings.autoUtpFallback')}
+                      description={t('settings.autoUtpFallbackHint')}
+                      checked={!!config.bt_auto_utp_fallback}
+                      onChange={(v) => updateConfig({ bt_auto_utp_fallback: v })}
+                    />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, paddingTop: 6 }}>
+                      <div>
+                        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>
+                          {t('settings.btSeedRatio', { defaultValue: '目标分享率 (0=即停)' })}
+                        </div>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.5"
+                          value={config.bt_seed_ratio ?? 0}
+                          onChange={(e) => updateConfig({ bt_seed_ratio: Math.max(0, parseFloat(e.target.value) || 0) })}
+                          style={{
+                            width: '100%',
+                            height: 28,
+                            background: 'var(--bg-card)',
+                            border: '1px solid var(--border)',
+                            borderRadius: 6,
+                            color: 'var(--text-primary)',
+                            fontSize: 12,
+                            padding: '0 8px',
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>
+                          {t('settings.btSeedTimeMin', { defaultValue: '做种时长上限 (分钟)' })}
+                        </div>
+                        <input
+                          type="number"
+                          min="0"
+                          step="15"
+                          value={config.bt_seed_time_min ?? 0}
+                          onChange={(e) => updateConfig({ bt_seed_time_min: Math.max(0, parseInt(e.target.value, 10) || 0) })}
+                          style={{
+                            width: '100%',
+                            height: 28,
+                            background: 'var(--bg-card)',
+                            border: '1px solid var(--border)',
+                            borderRadius: 6,
+                            color: 'var(--text-primary)',
+                            fontSize: 12,
+                            padding: '0 8px',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </Section>
+                </>
+              )}
 
               <Divider />
 
@@ -468,16 +530,20 @@ export const SettingsPanel: React.FC = () => {
                 <RSSFeedsEditor config={config} updateConfig={updateConfig} t={t} />
               </Section>
 
-              <Divider />
+              {!isAppStore && (
+                <>
+                  <Divider />
 
-              <Section title={t('settings.hooks.title')} icon={
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M5 12V7a5 5 0 0 1 10 0v5" />
-                  <path d="M19 12H5a2 2 0 0 0-2 2v7h18v-7a2 2 0 0 0-2-2z" />
-                </svg>
-              }>
-                <HooksEditor config={config} updateConfig={updateConfig} t={t} />
-              </Section>
+                  <Section title={t('settings.hooks.title')} icon={
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M5 12V7a5 5 0 0 1 10 0v5" />
+                      <path d="M19 12H5a2 2 0 0 0-2 2v7h18v-7a2 2 0 0 0-2-2z" />
+                    </svg>
+                  }>
+                    <HooksEditor config={config} updateConfig={updateConfig} t={t} />
+                  </Section>
+                </>
+              )}
 
               <Divider />
 
@@ -511,19 +577,31 @@ export const SettingsPanel: React.FC = () => {
 
 // 辅助组件
 
+const THEME_EN_NAMES: Record<string, string> = {
+  'deep-indigo': 'Deep Indigo',
+  'cream-light': 'Cream Light',
+  'light-paper': 'Light Paper',
+  'forest-night': 'Forest Night',
+  'cyberpunk': 'Cyberpunk',
+  'mono-gray': 'Mono Gray',
+}
+
 const ThemePicker: React.FC = () => {
+  const { i18n } = useTranslation()
+  const isZh = i18n.language.startsWith('zh')
   const themeId = useThemeStore((s) => s.themeId)
   const setTheme = useThemeStore((s) => s.setTheme)
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(96px, 1fr))', gap: 8 }}>
       {THEMES.map((t) => {
         const active = t.id === themeId
+        const label = isZh ? t.name : THEME_EN_NAMES[t.id] || t.name
         return (
           <button
             key={t.id}
             type="button"
             onClick={() => setTheme(t.id)}
-            title={t.desc}
+            title={isZh ? t.desc : label}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -551,7 +629,7 @@ const ThemePicker: React.FC = () => {
               <div style={{ flex: 1, background: t.preview[0] }} />
               <div style={{ flex: 1, background: t.preview[1] }} />
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-primary)', fontWeight: 600 }}>{t.name}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-primary)', fontWeight: 600 }}>{label}</div>
           </button>
         )
       })}

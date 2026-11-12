@@ -24,9 +24,8 @@ if [ -f .env.local ]; then
   set +a
 fi
 
-: "${APPLE_ID:?Set APPLE_ID in .env.local}"
-: "${APPLE_PASSWORD:?Set APPLE_PASSWORD in .env.local}"
-: "${APPLE_TEAM_ID:?Set APPLE_TEAM_ID in .env.local}"
+ASC_API_KEY_ID="${ASC_API_KEY_ID:-H85Q4NJPVD}"
+ASC_API_ISSUER_ID="${ASC_API_ISSUER_ID:-21dd1b35-fb04-42f1-8ec0-d847838fa7b6}"
 
 PKG="${1:-}"
 if [ -z "$PKG" ]; then
@@ -37,22 +36,27 @@ if [ -z "$PKG" ] || [ ! -f "$PKG" ]; then
   exit 1
 fi
 
+if [ -f "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_API_KEY_ID}.p8" ]; then
+  AUTH_ARGS=(--apiKey "$ASC_API_KEY_ID" --apiIssuer "$ASC_API_ISSUER_ID")
+else
+  : "${APPLE_ID:?Set APPLE_ID in .env.local}"
+  : "${APPLE_PASSWORD:?Set APPLE_PASSWORD in .env.local}"
+  : "${APPLE_TEAM_ID:?Set APPLE_TEAM_ID in .env.local}"
+  AUTH_ARGS=(-u "$APPLE_ID" -p "$APPLE_PASSWORD" --asc-provider "$APPLE_TEAM_ID")
+fi
+
 echo "==> Validating $PKG against App Store Connect"
 xcrun altool --validate-app \
   -f "$PKG" \
   -t osx \
-  -u "$APPLE_ID" \
-  -p "$APPLE_PASSWORD" \
-  --asc-provider "$APPLE_TEAM_ID"
+  "${AUTH_ARGS[@]}"
 
 echo ""
 echo "==> Uploading $PKG"
 xcrun altool --upload-app \
   -f "$PKG" \
   -t osx \
-  -u "$APPLE_ID" \
-  -p "$APPLE_PASSWORD" \
-  --asc-provider "$APPLE_TEAM_ID"
+  "${AUTH_ARGS[@]}"
 
 cat <<MSG
 

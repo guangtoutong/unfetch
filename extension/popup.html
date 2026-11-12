@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<title>unfetch 设置</title>
+<title>unfetch 下载助手</title>
 <style>
   :root {
     --bg: #070710;
@@ -10,29 +10,29 @@
     --border: #2a2a3a;
     --text: #e5e7eb;
     --muted: #94a3b8;
-    --primary: #6366f1;
+    --primary: #7c3aed;
     --success: #10b981;
     --error: #ef4444;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    width: 320px;
+    width: 340px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 13px;
     background: var(--bg);
     color: var(--text);
   }
   header {
-    padding: 14px 16px;
+    padding: 13px 16px;
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     gap: 10px;
   }
   header .logo {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     border-radius: 6px;
     background: linear-gradient(135deg, #6366f1, #8b5cf6);
     display: flex;
@@ -57,17 +57,86 @@
   header .dot.ok { background: var(--success); }
   header .dot.bad { background: var(--error); }
 
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 10px 16px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .media-list {
+    padding: 0 12px 10px;
+    max-height: 180px;
+    overflow-y: auto;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .media-empty {
+    font-size: 11px;
+    color: var(--muted);
+    padding: 8px 4px;
+    text-align: center;
+  }
+  .media-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 7px 9px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .media-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 5px;
+    border-radius: 4px;
+    background: rgba(124, 58, 237, 0.2);
+    color: #c4b5fd;
+    flex-shrink: 0;
+  }
+  .media-url {
+    flex: 1;
+    min-width: 0;
+    font-size: 11px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .btn-dl {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .btn-dl:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
   .row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
+    padding: 11px 16px;
     border-bottom: 1px solid var(--border);
   }
   .row label { font-weight: 500; }
-  .row .desc { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .row .desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-  /* iOS-style switch */
   .switch {
     position: relative;
     width: 38px;
@@ -76,6 +145,7 @@
     border-radius: 11px;
     cursor: pointer;
     transition: background 0.2s;
+    flex-shrink: 0;
   }
   .switch.on { background: var(--success); }
   .switch::after {
@@ -96,7 +166,7 @@
     color: var(--text);
     font-size: 12px;
     padding: 5px 8px;
-    width: 90px;
+    width: 100%;
   }
 
   textarea {
@@ -107,7 +177,7 @@
     color: var(--text);
     font-size: 12px;
     padding: 6px 8px;
-    min-height: 50px;
+    min-height: 44px;
     resize: vertical;
     font-family: inherit;
   }
@@ -118,7 +188,7 @@
     color: var(--muted);
     text-align: center;
   }
-  a { color: var(--primary); text-decoration: none; }
+  a { color: #a78bfa; text-decoration: none; }
 </style>
 </head>
 <body>
@@ -131,26 +201,41 @@
     </span>
   </header>
 
+  <div class="section-title">
+    <span>当前页嗅探到的流媒体 (<span id="mediaCount">0</span>)</span>
+    <button class="btn-dl" id="downloadPageBtn" style="padding: 2px 7px; font-size: 10px;">抓当前页视频</button>
+  </div>
+  <div class="media-list" id="mediaList">
+    <div class="media-empty">暂未嗅探到 .m3u8 / 视频流</div>
+  </div>
+
   <div class="row">
     <div>
-      <label>启用接管</label>
+      <label>启用下载接管</label>
       <div class="desc">关闭后所有下载走浏览器原生</div>
     </div>
     <div class="switch" id="enabledSwitch"></div>
   </div>
 
-  <div class="row" style="flex-direction: column; align-items: stretch; gap: 6px;">
-    <label>最小文件大小（字节）</label>
-    <input type="number" id="minSize" min="0" step="1024" />
-    <div class="desc">小于这个值的文件让浏览器原生下载（0 = 不限）</div>
+  <div class="row">
+    <div>
+      <label>自动携带 Cookie 与 Referer</label>
+      <div class="desc">下载受保护站点与流媒体时自动透传登录态</div>
+    </div>
+    <div class="switch" id="cookieSwitch"></div>
   </div>
 
-  <div class="row" style="flex-direction: column; align-items: stretch; gap: 6px;">
+  <div class="row" style="flex-direction: column; align-items: stretch; gap: 5px;">
+    <label>最小文件大小（字节，0 = 不限）</label>
+    <input type="number" id="minSize" min="0" step="1024" />
+  </div>
+
+  <div class="row" style="flex-direction: column; align-items: stretch; gap: 5px;">
     <label>忽略后缀（逗号分隔）</label>
     <input type="text" id="ignoreExt" />
   </div>
 
-  <div class="row" style="flex-direction: column; align-items: stretch; gap: 6px;">
+  <div class="row" style="flex-direction: column; align-items: stretch; gap: 5px;">
     <label>白名单域名（逗号分隔）</label>
     <textarea id="ignoreDomains" placeholder="example.com, intranet.local"></textarea>
   </div>

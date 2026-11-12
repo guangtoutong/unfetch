@@ -133,12 +133,13 @@ func (d *BTDownloader) downloadOnce(ctx context.Context, task *types.Task, onPro
 	}
 
 	// 配置 torrent client
+	shouldSeed := cfg != nil && (cfg.BTSeedRatio > 0 || cfg.BTSeedTimeMin > 0)
 	clientCfg := torrent.NewDefaultClientConfig()
 	clientCfg.DefaultStorage = storage.NewFileByInfoHash(task.SavePath)
 	clientCfg.DataDir = task.SavePath
-	clientCfg.NoUpload = false // 允许上传，遵循 BT 协议，提升 swarm 收 peer
-	clientCfg.Seed = false     // 下载完成后不做种
-	clientCfg.ListenPort = 0   // 随机端口
+	clientCfg.NoUpload = false   // 允许上传，遵循 BT 协议，提升 swarm 收 peer
+	clientCfg.Seed = shouldSeed  // 当配置了目标分享率或做种时长时，下载完继续做种
+	clientCfg.ListenPort = 0     // 随机端口
 	// 加大 peer 并发池
 	clientCfg.TorrentPeersLowWater = 200
 	clientCfg.TorrentPeersHighWater = 2000
@@ -297,6 +298,7 @@ func (d *BTDownloader) downloadOnce(ctx context.Context, task *types.Task, onPro
 	defer ticker.Stop()
 
 	startTime := time.Now()
+	var seedStart time.Time
 	initialDone := task.DoneBytes // 断点续传时不为 0
 	slowCheckDone := false
 	// 仅在第一轮（未 forceUTP）+ 开启了自动 fallback + 用户未强制 uTP 时启用检测
@@ -306,16 +308,26 @@ func (d *BTDownloader) downloadOnce(ctx context.Context, task *types.Task, onPro
 		select {
 		case <-ctx.Done():
 			t.Drop()
+			// 若已在做种阶段（文件已 100% 下载完成），用户停止时直接视为完成
+			if t.Complete.Bool() {
+				task.Seeding = false
+				return nil
+			}
 			return ctx.Err()
 		case <-ticker.C:
 			stats := t.Stats()
 			done := t.BytesCompleted()
 			task.DoneBytes = done
 
-			// 上报 peer 统计：active = 正在交换数据的连接，total = 已知 + 半开
+			// 上报 peer 与上传分享率统计
 			task.PeersConnected = stats.ActivePeers
 			task.PeersTotal = stats.TotalPeers
 			task.Seeders = stats.ConnectedSeeders
+			uploaded := stats.BytesWrittenData.Int64()
+			task.UploadedBytes = uploaded
+			if task.TotalBytes > 0 {
+				task.SeedRatio = float64(int(float64(uploaded)/float64(task.TotalBytes)*100)) / 100
+			}
 
 			// 30s 后检查初始速度；< 100 KB/s 触发 uTP fallback
 			if autoFallbackArmed && !slowCheckDone {
@@ -335,8 +347,6 @@ func (d *BTDownloader) downloadOnce(ctx context.Context, task *types.Task, onPro
 
 			if t.Complete.Bool() {
 				task.DoneBytes = task.TotalBytes
-				onProgress()
-				slog.Info("bt: download complete", "name", info.BestName())
 
 				// 找到实际下载的文件路径
 				if len(info.Files) == 1 {
@@ -345,7 +355,36 @@ func (d *BTDownloader) downloadOnce(ctx context.Context, task *types.Task, onPro
 					task.Filename = info.BestName()
 				}
 
-				return nil
+				if !shouldSeed {
+					task.Seeding = false
+					onProgress()
+					slog.Info("bt: download complete", "name", info.BestName())
+					return nil
+				}
+
+				if !task.Seeding {
+					task.Seeding = true
+					seedStart = time.Now()
+					slog.Info("bt: download complete, entering seeding phase",
+						"name", info.BestName(),
+						"target_ratio", cfg.BTSeedRatio,
+						"target_min", cfg.BTSeedTimeMin,
+					)
+				}
+
+				ratioReached := cfg.BTSeedRatio > 0 && task.SeedRatio >= cfg.BTSeedRatio
+				timeReached := cfg.BTSeedTimeMin > 0 && time.Since(seedStart) >= time.Duration(cfg.BTSeedTimeMin)*time.Minute
+				if ratioReached || timeReached {
+					task.Seeding = false
+					onProgress()
+					slog.Info("bt: seeding target reached, stopping",
+						"name", info.BestName(),
+						"ratio", task.SeedRatio,
+						"elapsed", time.Since(seedStart),
+					)
+					t.Drop()
+					return nil
+				}
 			}
 
 			onProgress()

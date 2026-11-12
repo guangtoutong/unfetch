@@ -69,12 +69,15 @@ func TestFullAPIRegression(t *testing.T) {
 
 	// 4. 测试 URL 协议探测函数
 	cases := map[string]types.TaskType{
-		"https://example.com/a.zip":            types.TaskTypeHTTP,
-		"ftp://ftp.gnu.org/gnu/hello.tar.gz":   types.TaskTypeFTP,
-		"sftp://root@10.0.0.1/data/db.sql":     types.TaskTypeFTP,
-		"ed2k://|file|test.iso|1024|abcdef|/|": types.TaskTypeEd2k,
-		"magnet:?xt=urn:btih:123456":           types.TaskTypeBT,
-		"https://www.youtube.com/watch?v=123":  types.TaskTypeYtdlp,
+		"https://example.com/a.zip":                   types.TaskTypeHTTP,
+		"https://cdn.example.com/live/index.m3u8?k=1": types.TaskTypeHLS,
+		"ftp://ftp.gnu.org/gnu/hello.tar.gz":          types.TaskTypeFTP,
+		"sftp://root@10.0.0.1/data/db.sql":            types.TaskTypeFTP,
+		"ed2k://|file|test.iso|1024|abcdef|/|":        types.TaskTypeEd2k,
+		"magnet:?xt=urn:btih:123456":                  types.TaskTypeBT,
+	}
+	if !types.AppStoreEdition {
+		cases["https://www.youtube.com/watch?v=123"] = types.TaskTypeYtdlp
 	}
 	for u, want := range cases {
 		if got := detectURLType(u); got != want {

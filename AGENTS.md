@@ -299,7 +299,8 @@ type Task struct {
 | 协议 | 实现方式 | 状态 |
 |------|---------|------|
 | HTTP/HTTPS 多线程 | 自研（Go `net/http` + goroutine 分片） | Phase 1 |
-| BT 种子文件 | `anacrolix/torrent` | Phase 1 |
+| HLS 流媒体 (`.m3u8`) | 自研（Master/Media 解析 + 多线程分片 + AES-128 解密合并） | Phase 3 |
+| BT 种子文件 | `anacrolix/torrent`（支持分享率/做种时长自动停止） | Phase 1 |
 | 磁力链接 | `anacrolix/torrent`（DHT） | Phase 1 |
 | 视频网站（1000+） | `go-ytdlp`（包装 yt-dlp 二进制） | Phase 1 |
 | ed2k | `go-ed2k` 或 aMule CLI 包装 | Phase 3 |

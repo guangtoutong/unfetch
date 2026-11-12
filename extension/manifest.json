@@ -1,14 +1,17 @@
 {
   "manifest_version": 3,
   "name": "unfetch 下载助手",
-  "version": "0.1.0",
-  "description": "将浏览器下载转发给 unfetch 桌面客户端",
+  "version": "0.3.0",
+  "description": "拦截浏览器下载并自动嗅探网页 HLS (.m3u8) / 视频流，附带 Cookie 与 Referer 一键发送给 unfetch",
   "permissions": [
     "downloads",
     "storage",
     "contextMenus",
     "notifications",
-    "alarms"
+    "alarms",
+    "tabs",
+    "cookies",
+    "webRequest"
   ],
   "host_permissions": [
     "http://127.0.0.1:19543/*",

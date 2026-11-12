@@ -20,7 +20,7 @@ import (
 )
 
 // ErrNotInAppStoreEdition 在 MAS 版被调用受限下载器时返回。
-var ErrNotInAppStoreEdition = errors.New("此功能在 App Store 版不可用，请到 unfetch.org 下载完整版")
+var ErrNotInAppStoreEdition = errors.New("当前版本仅支持 HTTP/HTTPS 与 FTP/SFTP 直链下载")
 
 // ---------- BT / 磁力 桩 ----------
 
@@ -60,5 +60,17 @@ func NewEd2kDownloader(_ *types.Config) *Ed2kDownloader { return &Ed2kDownloader
 func (d *Ed2kDownloader) UpdateConfig(_ *types.Config) {}
 
 func (d *Ed2kDownloader) Download(_ context.Context, _ *types.Task, _ func()) error {
+	return ErrNotInAppStoreEdition
+}
+
+// ---------- HLS (.m3u8) 桩 ----------
+
+type HLSDownloader struct{}
+
+func NewHLSDownloader(_ *types.Config) *HLSDownloader { return &HLSDownloader{} }
+
+func (d *HLSDownloader) UpdateConfig(_ *types.Config) {}
+
+func (d *HLSDownloader) Download(_ context.Context, _ *types.Task, _ func()) error {
 	return ErrNotInAppStoreEdition
 }

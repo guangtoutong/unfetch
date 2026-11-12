@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import type { SpeedScheduleEntry } from '../types'
 
 interface Props {
@@ -8,15 +9,15 @@ interface Props {
 
 const MB = 1024 * 1024
 
-function formatLimit(bytes: number): string {
-  if (bytes <= 0) return '不限'
+function formatLimit(bytes: number, noLimitLabel: string): string {
+  if (bytes <= 0) return noLimitLabel
   if (bytes >= MB) return `${(bytes / MB).toFixed(1)} MB/s`
   return `${(bytes / 1024).toFixed(0)} KB/s`
 }
 
 function parseLimit(text: string): number {
   const t = text.trim().toLowerCase()
-  if (!t || t === '0' || t === '不限') return 0
+  if (!t || t === '0' || t === '不限' || t === 'unlimited') return 0
   const m = /^([\d.]+)\s*(k|kb|kb\/s|m|mb|mb\/s|g|gb)?/i.exec(t)
   if (!m) return 0
   const n = parseFloat(m[1])
@@ -28,6 +29,7 @@ function parseLimit(text: string): number {
 }
 
 export const SpeedScheduleEditor: React.FC<Props> = ({ value, onChange }) => {
+  const { t } = useTranslation()
   const entries = value || []
 
   const addEntry = () => {
@@ -47,7 +49,7 @@ export const SpeedScheduleEditor: React.FC<Props> = ({ value, onChange }) => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {entries.length === 0 && (
         <div style={{ fontSize: 11, color: 'var(--text-muted)', padding: '6px 0' }}>
-          暂无时段。点下方"添加"为不同时段设置限速。例如夜晚 22:00–08:00 不限速，白天限 1MB/s。
+          {t('settings.scheduleEmpty')}
         </div>
       )}
 
@@ -72,9 +74,9 @@ export const SpeedScheduleEditor: React.FC<Props> = ({ value, onChange }) => {
 
           <input
             type="text"
-            value={formatLimit(e.limit)}
+            value={formatLimit(e.limit, t('settings.noLimit'))}
             onChange={(ev) => updateEntry(i, { limit: parseLimit(ev.target.value) })}
-            placeholder="不限 / 1 MB/s"
+            placeholder={`${t('settings.noLimit')} / 1 MB/s`}
             style={{
               flex: 1,
               minWidth: 0,
@@ -91,7 +93,7 @@ export const SpeedScheduleEditor: React.FC<Props> = ({ value, onChange }) => {
 
           <button
             onClick={() => removeEntry(i)}
-            title="删除"
+            title={t('settings.rss.delete')}
             style={{
               width: 24,
               height: 24,
@@ -121,12 +123,11 @@ export const SpeedScheduleEditor: React.FC<Props> = ({ value, onChange }) => {
           fontSize: 12,
         }}
       >
-        + 添加时段
+        {t('settings.scheduleAdd')}
       </button>
 
       <div style={{ fontSize: 10, color: 'var(--text-muted)', lineHeight: 1.5 }}>
-        优先级高于"全局限速"。当前小时不命中任何时段时，使用全局限速。<br />
-        跨夜：将 起始时 设大于 结束时（如 22:00 — 8:00）。
+        {t('settings.scheduleHint')}
       </div>
     </div>
   )

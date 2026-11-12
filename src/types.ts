@@ -1,4 +1,4 @@
-export type TaskType = 'http' | 'bt' | 'ytdlp' | 'ftp' | 'ed2k'
+export type TaskType = 'http' | 'bt' | 'ytdlp' | 'ftp' | 'ed2k' | 'hls'
 export type TaskStatus = 'queued' | 'downloading' | 'paused' | 'done' | 'error'
 export type FilterType = TaskStatus | 'all' | 'trash'
 export type OnAllDoneAction = '' | 'notify' | 'open_dir' | 'shutdown' | 'sleep'
@@ -43,6 +43,9 @@ export interface Task {
   peers_connected?: number
   peers_total?: number
   seeders?: number
+  uploaded_bytes?: number
+  seed_ratio?: number
+  seeding?: boolean
   auto_utp_triggered?: boolean
 }
 
@@ -83,6 +86,8 @@ export interface Config {
   on_all_done?: OnAllDoneAction
   bt_force_utp?: boolean
   bt_auto_utp_fallback?: boolean
+  bt_seed_ratio?: number
+  bt_seed_time_min?: number
   // v0.1.1+ 远程 Web UI
   remote_enabled?: boolean
   remote_token?: string

@@ -4,24 +4,34 @@ pub mod gui;
 pub mod mcp;
 
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use gui::commands;
 use tauri::{
-    menu::{Menu, MenuItem, PredefinedMenuItem},
+    menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-    AppHandle, Emitter, Manager, WindowEvent,
+    AppHandle, Emitter, Manager, WindowEvent, Wry,
 };
 use tauri_plugin_clipboard_manager::ClipboardExt;
 
-/// 全局：剪贴板嗅探是否启用
-static CLIPBOARD_SNIFF_ENABLED: AtomicBool = AtomicBool::new(true);
+struct TrayMenuItems {
+    show: MenuItem<Wry>,
+    mini: MenuItem<Wry>,
+    pause_all: MenuItem<Wry>,
+    resume_all: MenuItem<Wry>,
+    quit: MenuItem<Wry>,
+}
+
+static TRAY_ITEMS: Mutex<Option<TrayMenuItems>> = Mutex::new(None);
+
+/// 全局：剪贴板嗅探是否启用（MAS 版默认关闭，避免后台轮询触发 macOS 剪贴板隐私告警及拒审）
+static CLIPBOARD_SNIFF_ENABLED: AtomicBool = AtomicBool::new(cfg!(not(feature = "mas")));
 /// 全局：关闭窗口时是否最小化到托盘（默认 false：X 直接退出 app）
 static MINIMIZE_TO_TRAY: AtomicBool = AtomicBool::new(false);
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(
             |app, args, _cwd| {
                 daemon::debug_log(&format!("single_instance callback fired with {} args: {:?}", args.len(), args));
@@ -32,14 +42,19 @@ pub fn run() {
                     let _ = win.set_focus();
                 }
             },
-        ))
+        ));
+
+    #[cfg(not(feature = "mas"))]
+    let builder = builder
         .plugin(tauri_plugin_deep_link::init())
-        .plugin(tauri_plugin_notification::init())
-        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             Some(vec![]),
-        ))
+        ));
+
+    let app = builder
+        .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
@@ -48,7 +63,13 @@ pub fn run() {
             daemon::debug_log(&format!("setup() argv: {:?}", args));
             forward_args(app.handle(), &args);
 
-            // 建系统托盘
+            // 建系统托盘与应用菜单
+            let init_zh = std::env::var("LANG")
+                .or_else(|_| std::env::var("LC_ALL"))
+                .map(|v| v.to_lowercase().starts_with("zh"))
+                .unwrap_or(false);
+            #[cfg(target_os = "macos")]
+            let _ = setup_app_menu(app.handle(), init_zh);
             setup_tray(app.handle())?;
 
             // 启动剪贴板嗅探线程
@@ -94,9 +115,28 @@ pub fn run() {
             set_minimize_to_tray,
             get_runtime_flags,
             close_app,
+            set_tray_labels,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running unfetch");
+        .build(tauri::generate_context!())
+        .expect("error while building unfetch");
+
+    app.run(|app_handle, event| {
+        #[cfg(target_os = "macos")]
+        if let tauri::RunEvent::Reopen {
+            has_visible_windows,
+            ..
+        } = event
+        {
+            if !has_visible_windows {
+                if let Some(win) = app_handle.get_webview_window("main") {
+                    let _ = win.unminimize();
+                    let _ = win.show();
+                    let _ = win.set_focus();
+                }
+            }
+        }
+        let _ = (app_handle, event);
+    });
 }
 
 #[tauri::command]
@@ -138,18 +178,186 @@ fn get_runtime_flags() -> RuntimeFlags {
     }
 }
 
+#[tauri::command]
+fn set_tray_labels(
+    app: AppHandle,
+    show: String,
+    toggle_mini: String,
+    pause_all: String,
+    resume_all: String,
+    quit: String,
+) {
+    #[cfg(target_os = "macos")]
+    {
+        let is_zh = show.chars().any(|c| ('\u{4e00}'..='\u{9fff}').contains(&c));
+        let _ = setup_app_menu(&app, is_zh);
+    }
+    #[cfg(not(target_os = "macos"))]
+    let _ = &app;
+    if let Ok(guard) = TRAY_ITEMS.lock() {
+        if let Some(items) = guard.as_ref() {
+            let _ = items.show.set_text(show);
+            let _ = items.mini.set_text(toggle_mini);
+            let _ = items.pause_all.set_text(pause_all);
+            let _ = items.resume_all.set_text(resume_all);
+            let _ = items.quit.set_text(quit);
+        }
+    }
+}
+
+#[cfg(target_os = "macos")]
+fn setup_app_menu(app: &AppHandle, is_zh: bool) -> tauri::Result<()> {
+    let pkg_info = app.package_info();
+    let app_name = &pkg_info.name;
+    let about_meta = AboutMetadata {
+        name: Some(app_name.clone()),
+        version: Some(pkg_info.version.to_string()),
+        ..Default::default()
+    };
+
+    let about_label = if is_zh {
+        format!("关于 {app_name}")
+    } else {
+        format!("About {app_name}")
+    };
+    let hide_label = if is_zh {
+        format!("隐藏 {app_name}")
+    } else {
+        format!("Hide {app_name}")
+    };
+    let quit_label = if is_zh {
+        format!("退出 {app_name}")
+    } else {
+        format!("Quit {app_name}")
+    };
+
+    let app_submenu = Submenu::with_items(
+        app,
+        app_name,
+        true,
+        &[
+            &PredefinedMenuItem::about(app, Some(&about_label), Some(about_meta))?,
+            &PredefinedMenuItem::separator(app)?,
+            &PredefinedMenuItem::services(app, Some(if is_zh { "服务" } else { "Services" }))?,
+            &PredefinedMenuItem::separator(app)?,
+            &PredefinedMenuItem::hide(app, Some(&hide_label))?,
+            &PredefinedMenuItem::hide_others(
+                app,
+                Some(if is_zh { "隐藏其他" } else { "Hide Others" }),
+            )?,
+            &PredefinedMenuItem::show_all(
+                app,
+                Some(if is_zh { "全部显示" } else { "Show All" }),
+            )?,
+            &PredefinedMenuItem::separator(app)?,
+            &PredefinedMenuItem::quit(app, Some(&quit_label))?,
+        ],
+    )?;
+
+    let edit_submenu = Submenu::with_items(
+        app,
+        if is_zh { "编辑" } else { "Edit" },
+        true,
+        &[
+            &PredefinedMenuItem::undo(app, Some(if is_zh { "撤销" } else { "Undo" }))?,
+            &PredefinedMenuItem::redo(app, Some(if is_zh { "重做" } else { "Redo" }))?,
+            &PredefinedMenuItem::separator(app)?,
+            &PredefinedMenuItem::cut(app, Some(if is_zh { "剪切" } else { "Cut" }))?,
+            &PredefinedMenuItem::copy(app, Some(if is_zh { "拷贝" } else { "Copy" }))?,
+            &PredefinedMenuItem::paste(app, Some(if is_zh { "粘贴" } else { "Paste" }))?,
+            &PredefinedMenuItem::select_all(app, Some(if is_zh { "全选" } else { "Select All" }))?,
+        ],
+    )?;
+
+    let view_submenu = Submenu::with_items(
+        app,
+        if is_zh { "显示" } else { "View" },
+        true,
+        &[&PredefinedMenuItem::fullscreen(
+            app,
+            Some(if is_zh { "进入全屏幕" } else { "Enter Full Screen" }),
+        )?],
+    )?;
+
+    let window_submenu = Submenu::with_items(
+        app,
+        if is_zh { "窗口" } else { "Window" },
+        true,
+        &[
+            &PredefinedMenuItem::minimize(app, Some(if is_zh { "最小化" } else { "Minimize" }))?,
+            &PredefinedMenuItem::maximize(app, Some(if is_zh { "缩放" } else { "Zoom" }))?,
+            &PredefinedMenuItem::separator(app)?,
+            &PredefinedMenuItem::close_window(
+                app,
+                Some(if is_zh { "关闭窗口" } else { "Close Window" }),
+            )?,
+        ],
+    )?;
+
+    let menu = Menu::with_items(
+        app,
+        &[&app_submenu, &edit_submenu, &view_submenu, &window_submenu],
+    )?;
+    let _ = app.set_menu(menu);
+    Ok(())
+}
+
 fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
-    let show_item = MenuItem::with_id(app, "show", "显示主窗口", true, None::<&str>)?;
-    let mini_item = MenuItem::with_id(app, "toggle_mini", "切换迷你悬浮窗", true, None::<&str>)?;
-    let pause_all = MenuItem::with_id(app, "pause_all", "暂停全部", true, None::<&str>)?;
-    let resume_all = MenuItem::with_id(app, "resume_all", "继续全部", true, None::<&str>)?;
+    let is_zh = std::env::var("LANG")
+        .or_else(|_| std::env::var("LC_ALL"))
+        .map(|v| v.to_lowercase().starts_with("zh"))
+        .unwrap_or(false);
+    let show_item = MenuItem::with_id(
+        app,
+        "show",
+        if is_zh { "显示主窗口" } else { "Show main window" },
+        true,
+        None::<&str>,
+    )?;
+    let mini_item = MenuItem::with_id(
+        app,
+        "toggle_mini",
+        if is_zh { "切换迷你悬浮窗" } else { "Toggle mini overlay" },
+        true,
+        None::<&str>,
+    )?;
+    let pause_all = MenuItem::with_id(
+        app,
+        "pause_all",
+        if is_zh { "暂停全部" } else { "Pause all" },
+        true,
+        None::<&str>,
+    )?;
+    let resume_all = MenuItem::with_id(
+        app,
+        "resume_all",
+        if is_zh { "继续全部" } else { "Resume all" },
+        true,
+        None::<&str>,
+    )?;
     let separator = PredefinedMenuItem::separator(app)?;
-    let quit_item = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;
+    let quit_item = MenuItem::with_id(
+        app,
+        "quit",
+        if is_zh { "退出" } else { "Quit" },
+        true,
+        None::<&str>,
+    )?;
 
     let menu = Menu::with_items(
         app,
         &[&show_item, &mini_item, &pause_all, &resume_all, &separator, &quit_item],
     )?;
+
+    if let Ok(mut guard) = TRAY_ITEMS.lock() {
+        *guard = Some(TrayMenuItems {
+            show: show_item,
+            mini: mini_item,
+            pause_all,
+            resume_all,
+            quit: quit_item,
+        });
+    }
 
     let _ = TrayIconBuilder::with_id("main")
         .icon(app.default_window_icon().cloned().unwrap())
@@ -264,6 +472,7 @@ fn clipboard_sniff_loop(handle: AppHandle) {
 
 fn is_downloadable_url(s: &str) -> bool {
     let lower = s.to_lowercase();
+    #[cfg(not(feature = "mas"))]
     if lower.starts_with("magnet:?") {
         return true;
     }
@@ -280,17 +489,27 @@ fn forward_args(_app: &AppHandle, args: &[String]) {
             continue;
         }
         let lower = arg.to_lowercase();
-        if lower.starts_with("magnet:")
-            || lower.starts_with("http://")
+        let is_scheme = lower.starts_with("http://")
             || lower.starts_with("https://")
             || lower.starts_with("ftp://")
-        {
+            || {
+                #[cfg(not(feature = "mas"))]
+                {
+                    lower.starts_with("magnet:")
+                }
+                #[cfg(feature = "mas")]
+                {
+                    false
+                }
+            };
+        if is_scheme {
             daemon::debug_log(&format!("forward_args: URL arg matched, submitting: {arg}"));
             if let Err(e) = daemon::submit_url(arg) {
                 daemon::debug_log(&format!("forward_args: submit_url failed: {e}"));
             }
             continue;
         }
+        #[cfg(not(feature = "mas"))]
         if lower.ends_with(".torrent") {
             let path = std::path::Path::new(arg);
             if !path.exists() {
@@ -310,9 +529,9 @@ fn forward_args(_app: &AppHandle, args: &[String]) {
             if let Err(e) = daemon::submit_url(&url) {
                 daemon::debug_log(&format!("forward_args: submit_url failed: {e}"));
             }
-        } else {
-            daemon::debug_log(&format!("forward_args: arg not matched, skipping: {arg}"));
+            continue;
         }
+        daemon::debug_log(&format!("forward_args: arg not matched, skipping: {arg}"));
     }
 }
 

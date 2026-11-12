@@ -2,12 +2,15 @@ use std::{
     env, fs,
     io::Write,
     path::PathBuf,
-    process::{Command, Stdio},
+    process::{Child, Command, Stdio},
+    sync::Mutex,
     thread,
     time::Duration,
 };
 
 pub const DAEMON_URL: &str = "http://127.0.0.1:19543";
+
+static DAEMON_CHILD: Mutex<Option<Child>> = Mutex::new(None);
 
 /// 把诊断日志追加到 unfetch.log（与 daemon.log 同目录）
 pub fn debug_log(msg: &str) {
@@ -37,7 +40,20 @@ pub fn is_running() -> bool {
 /// 对 magnet:// URL 直接发送；对本地 .torrent 文件路径以 file:// URL 发送。
 /// 自动等待 daemon 就绪并重试，最多 6 次（共约 6 秒）。
 pub fn submit_url(input: &str) -> Result<(), String> {
-    let url = if input.starts_with("magnet:") || input.starts_with("http://") || input.starts_with("https://") || input.starts_with("ftp://") {
+    let is_scheme = input.starts_with("http://")
+        || input.starts_with("https://")
+        || input.starts_with("ftp://")
+        || {
+            #[cfg(not(feature = "mas"))]
+            {
+                input.starts_with("magnet:")
+            }
+            #[cfg(feature = "mas")]
+            {
+                false
+            }
+        };
+    let url = if is_scheme {
         input.to_string()
     } else if input.starts_with("file:") {
         input.to_string()
@@ -159,7 +175,15 @@ pub fn shutdown_daemon() {
     // 给 daemon 一点时间退出
     thread::sleep(Duration::from_millis(600));
 
-    // 强杀兜底（防止 daemon 卡死）
+    // 若是由本进程直接启动的 daemon 子进程，优先直接 kill 子进程句柄（兼容 macOS App Sandbox）
+    if let Ok(mut guard) = DAEMON_CHILD.lock() {
+        if let Some(mut child) = guard.take() {
+            let _ = child.kill();
+            let _ = child.wait();
+        }
+    }
+
+    // 强杀兜底（防止外部遗留 daemon 卡死；MAS 沙盒禁止调用外部 pkill，故仅非 MAS 启用）
     #[cfg(target_os = "windows")]
     {
         use std::os::windows::process::CommandExt;
@@ -171,7 +195,7 @@ pub fn shutdown_daemon() {
             .stderr(Stdio::null())
             .output();
     }
-    #[cfg(not(target_os = "windows"))]
+    #[cfg(all(not(target_os = "windows"), not(feature = "mas")))]
     {
         let _ = Command::new("pkill")
             .args(["-9", "-f", "unfetch-daemon"])
@@ -232,7 +256,10 @@ pub fn ensure_running() {
     }
 
     match cmd.spawn() {
-        Ok(_) => {
+        Ok(child) => {
+            if let Ok(mut guard) = DAEMON_CHILD.lock() {
+                *guard = Some(child);
+            }
             // 等待 daemon 就绪（最多 5 秒）
             for _ in 0..50 {
                 thread::sleep(Duration::from_millis(100));

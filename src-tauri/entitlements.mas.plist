@@ -48,11 +48,5 @@
 	<!-- 通常的下载目录(~/Downloads)需要单独入口 -->
 	<key>com.apple.security.files.downloads.read-write</key>
 	<true/>
-
-	<!-- 内嵌 Go daemon (unfetch-daemon) 作为子进程启动。
-	     不开 library validation 豁免,Gatekeeper 会因 sidecar 是我们自签
-	     (不是 Apple 签)而拒绝加载子进程 -->
-	<key>com.apple.security.cs.disable-library-validation</key>
-	<true/>
 </dict>
 </plist>

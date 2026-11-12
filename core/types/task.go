@@ -10,6 +10,7 @@ const (
 	TaskTypeYtdlp TaskType = "ytdlp"
 	TaskTypeFTP   TaskType = "ftp"
 	TaskTypeEd2k  TaskType = "ed2k"
+	TaskTypeHLS   TaskType = "hls"
 )
 
 type Status string
@@ -86,9 +87,12 @@ type Task struct {
 	Mirrors        []string `json:"mirrors,omitempty"` // HTTP 任务：额外的镜像 URL（同一文件的多个来源）
 	DependsOn      []string `json:"depends_on,omitempty"` // 依赖任务 ID，全部 done 后才开始下载
 	// BT 运行时统计（不持久化）
-	PeersConnected int `json:"peers_connected,omitempty"`
-	PeersTotal     int `json:"peers_total,omitempty"`
-	Seeders        int `json:"seeders,omitempty"`
+	PeersConnected int     `json:"peers_connected,omitempty"`
+	PeersTotal     int     `json:"peers_total,omitempty"`
+	Seeders        int     `json:"seeders,omitempty"`
+	UploadedBytes  int64   `json:"uploaded_bytes,omitempty"`
+	SeedRatio      float64 `json:"seed_ratio,omitempty"`
+	Seeding        bool    `json:"seeding,omitempty"`
 	// BT：daemon 检测速度低自动切到 uTP-only 后置 true，仅本次任务有效
 	AutoUTPTriggered bool `json:"auto_utp_triggered,omitempty"`
 	CreatedAt  time.Time  `json:"created_at"`
@@ -143,8 +147,10 @@ type Config struct {
 	AutoRetry       bool   `json:"auto_retry"`
 	MaxRetries      int    `json:"max_retries"`  // 默认 3
 	OnAllDone       OnAllDoneAction `json:"on_all_done"`
-	BTForceUTP      bool   `json:"bt_force_utp"` // 强制 uTP（关闭 TCP），绕开 ISP BT 端口屏蔽
-	BTAutoUTPFallback bool `json:"bt_auto_utp_fallback"` // 速度低时自动切 uTP-only 重连
+	BTForceUTP        bool    `json:"bt_force_utp"`         // 强制 uTP（关闭 TCP），绕开 ISP BT 端口屏蔽
+	BTAutoUTPFallback bool    `json:"bt_auto_utp_fallback"` // 速度低时自动切 uTP-only 重连
+	BTSeedRatio       float64 `json:"bt_seed_ratio"`        // 目标分享率（如 1.0），0 = 下载完立即停止
+	BTSeedTimeMin     int     `json:"bt_seed_time_min"`     // 最长做种分钟数（如 60），0 = 下载完立即停止
 
 	// 远程 Web UI
 	RemoteEnabled bool   `json:"remote_enabled"` // true 时绑定 0.0.0.0 + 强制 token
