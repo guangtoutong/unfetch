@@ -15,6 +15,10 @@ function langHref(code: string): string {
   return code === 'en' ? stripped : `/${code}${stripped === '/' ? '' : stripped}`
 }
 const currentLang = LANGS.find((l) => l.code === lang) || LANGS[0]
+const homeHref = lang === 'en' ? '/' : `/${lang}`
+const mcpHref = lang === 'en' ? '/mcp' : `/${lang}/mcp`
+const privacyHref = lang === 'en' ? '/privacy' : `/${lang}/privacy`
+const VERSION = '0.2.5'
 ---
 <!doctype html>
 <html lang={lang}>
@@ -26,99 +30,294 @@ const currentLang = LANGS.find((l) => l.code === lang) || LANGS[0]
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <style is:global>
     :root {
-      /* 浅色皮肤 v2 — 用户反馈 #fafafa 在他屏幕上看着灰,改成纯白:
-         - bg #ffffff 真正的白(顶部/下载/赞助区)
-         - bg-soft #fafafa 仅 Features section 的微微衬底,跟主底有可辨的微差
-         - bg-card #ffffff 卡片也是纯白(配上 border 描边区分)
-         紫色仍是品牌色,WCAG AAA 对比度。*/
       --bg: #ffffff;
       --bg-2: #ffffff;
-      --bg-3: #fafafa;
-      --fg: #0a0a0a;
-      --muted: #525252;
-      --muted-strong: #262626;
+      --bg-3: #f8fafc;
+      --bg-subtle: #f1f5f9;
+      --fg: #09090b;
+      --muted: #52525b;
+      --muted-strong: #27272a;
       --primary: #7c3aed;
       --primary-strong: #5b21b6;
-      --primary-bg: #f3efff;
+      --primary-light: #8b5cf6;
+      --primary-bg: #f5f3ff;
+      --primary-border: #ddd6fe;
       --accent: #ea580c;
-      --border: #e5e5e5;
-      --border-strong: #d4d4d4;
-      --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-      --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
-      --shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
+      --success: #10b981;
+      --border: #e4e4e7;
+      --border-strong: #d4d4d8;
+      --shadow-sm: 0 1px 2px rgba(9, 9, 11, 0.04);
+      --shadow-md: 0 8px 24px -4px rgba(9, 9, 11, 0.07), 0 2px 6px -1px rgba(9, 9, 11, 0.04);
+      --shadow-lg: 0 20px 48px -12px rgba(9, 9, 11, 0.12), 0 4px 12px -2px rgba(9, 9, 11, 0.05);
+      --shadow-glow: 0 16px 40px -8px rgba(124, 58, 237, 0.18);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     html, body {
       background: var(--bg);
       color: var(--fg);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
     }
-    a { color: var(--primary); text-decoration: none; transition: color 0.15s; }
+    a { color: var(--primary); text-decoration: none; transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease, transform 0.15s ease; }
     a:hover { color: var(--primary-strong); }
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-    h1, h2, h3, h4 { color: var(--fg); letter-spacing: -0.02em; }
+    .container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+    h1, h2, h3, h4 { color: var(--fg); letter-spacing: -0.025em; }
     p { color: var(--muted); }
+    code, pre { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
 
-    .lang-btn { display: flex; align-items: center; gap: 4px; padding: 6px 10px; background: transparent; border: 1px solid transparent; border-radius: 6px; cursor: pointer; color: var(--muted); font: inherit; font-size: 13px; }
-    .lang-btn:hover { background: var(--bg-3); color: var(--fg); }
-    .lang-menu { position: absolute; right: 0; top: 36px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px; padding: 4px; min-width: 170px; z-index: 100; max-height: 360px; overflow-y: auto; box-shadow: var(--shadow-lg); display: none; }
+    /* Header & Nav */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: saturate(180%) blur(16px);
+      -webkit-backdrop-filter: saturate(180%) blur(16px);
+      border-bottom: 1px solid transparent;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+      gap: 16px;
+    }
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--fg);
+      font-weight: 800;
+      font-size: 19px;
+      letter-spacing: -0.03em;
+    }
+    .brand-link:hover { color: var(--fg); }
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+      border: 1px solid var(--primary-border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(124, 58, 237, 0.12);
+    }
+    .brand-ver {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--bg-subtle);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      font-family: ui-monospace, monospace;
+      letter-spacing: 0;
+    }
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--muted);
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+    .nav-link:hover {
+      color: var(--fg);
+      background: var(--bg-3);
+    }
+    .nav-sponsor {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 13px;
+      border-radius: 999px;
+      border: 1px solid #fecdd3;
+      background: #fff1f2;
+      color: #be185d !important;
+      font-weight: 600;
+      font-size: 13px;
+      margin: 0 4px;
+    }
+    .nav-sponsor:hover {
+      background: #ffe4e6;
+      border-color: #fda4af;
+      transform: translateY(-1px);
+    }
+    .nav-gh {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      color: var(--muted-strong);
+      font-weight: 500;
+    }
+    .nav-gh:hover {
+      background: var(--bg-3);
+      color: var(--fg);
+    }
+
+    .lang-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 10px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--muted-strong);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .lang-btn:hover { background: var(--bg-3); border-color: var(--border-strong); color: var(--fg); }
+    .lang-menu {
+      position: absolute;
+      right: 0;
+      top: 42px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 6px;
+      min-width: 176px;
+      z-index: 100;
+      max-height: 380px;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      display: none;
+    }
     .lang-menu.open { display: block; }
-    .lang-menu a { display: block; padding: 7px 10px; border-radius: 5px; color: var(--fg); font-size: 13px; transition: background 0.15s; }
-    .lang-menu a:hover { background: var(--primary-bg); }
+    .lang-menu a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 11px;
+      border-radius: 7px;
+      color: var(--fg);
+      font-size: 13px;
+      transition: background 0.15s;
+    }
+    .lang-menu a:hover { background: var(--primary-bg); color: var(--primary-strong); }
     .lang-menu a.active { color: var(--primary); background: var(--primary-bg); font-weight: 600; }
 
-    .stats-row { display: inline-flex; gap: 10px; margin-top: 20px; align-items: center; flex-wrap: wrap; justify-content: center; }
-    .stats-row a { display: inline-flex; align-items: center; opacity: 0.9; transition: opacity 0.15s; }
-    .stats-row a:hover { opacity: 1; }
-    .stats-row img { display: block; }
+    .stats-row {
+      display: inline-flex;
+      gap: 10px;
+      margin-top: 24px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stats-row a { display: inline-flex; align-items: center; opacity: 0.92; transition: opacity 0.15s, transform 0.15s; }
+    .stats-row a:hover { opacity: 1; transform: translateY(-1px); }
+    .stats-row img { display: block; border-radius: 6px; }
+
+    /* Footer */
+    .site-footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0 40px;
+      margin-top: 80px;
+      background: var(--bg-3);
+    }
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13.5px;
+      color: var(--muted);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .footer-links a {
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+
+    @media (max-width: 720px) {
+      .header-inner { height: auto; padding: 12px 0; flex-wrap: wrap; }
+      .brand-ver { display: none; }
+      .site-nav { gap: 2px; font-size: 13px; }
+      .nav-link { padding: 5px 8px; }
+    }
   </style>
 </head>
 <body>
-  <header id="site-header" style="background: var(--bg); position: sticky; top: 0; z-index: 50; transition: box-shadow 0.2s, border-color 0.2s; border-bottom: 1px solid transparent;">
-    <div class="container" style="display: flex; align-items: center; justify-content: space-between; padding-top: 16px; padding-bottom: 16px;">
-      <a href={lang === 'en' ? '/' : `/${lang}`} style="display: flex; align-items: center; gap: 10px; color: var(--fg);">
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-          <defs>
-            <linearGradient id="u-grad-h" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#a855f7" />
-              <stop offset="100%" stop-color="#7c3aed" />
-            </linearGradient>
-            <linearGradient id="arr-grad-h" x1="0.5" y1="0" x2="0.5" y2="1">
-              <stop offset="0%" stop-color="#fde047" />
-              <stop offset="100%" stop-color="#f59e0b" />
-            </linearGradient>
-          </defs>
-          <path d="M3 3 L3 13.5 Q3 19 12 19 Q21 19 21 13.5 L21 3 L17 3 L17 13.2 Q17 15.5 12 15.5 Q7 15.5 7 13.2 L7 3 Z" fill="url(#u-grad-h)" />
-          <path d="M10 4 L14 4 L14 10.5 L17 10.5 L12 16 L7 10.5 L10 10.5 Z" fill="url(#arr-grad-h)" />
-        </svg>
-        <span style="font-weight: 700; font-size: 18px; letter-spacing: -0.5px; color: var(--fg);">unfetch</span>
+  <header id="site-header" class="site-header">
+    <div class="container header-inner">
+      <a href={homeHref} class="brand-link">
+        <span class="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <defs>
+              <linearGradient id="u-grad-h" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#a855f7" />
+                <stop offset="100%" stop-color="#6d28d9" />
+              </linearGradient>
+              <linearGradient id="arr-grad-h" x1="0.5" y1="0" x2="0.5" y2="1">
+                <stop offset="0%" stop-color="#fbbf24" />
+                <stop offset="100%" stop-color="#ea580c" />
+              </linearGradient>
+            </defs>
+            <path d="M3 3 L3 13.5 Q3 19 12 19 Q21 19 21 13.5 L21 3 L17 3 L17 13.2 Q17 15.5 12 15.5 Q7 15.5 7 13.2 L7 3 Z" fill="url(#u-grad-h)" />
+            <path d="M10 4 L14 4 L14 10.5 L17 10.5 L12 16 L7 10.5 L10 10.5 Z" fill="url(#arr-grad-h)" />
+          </svg>
+        </span>
+        <span>unfetch</span>
+        <span class="brand-ver">v{VERSION}</span>
       </a>
-      <nav style="display: flex; align-items: center; gap: 22px; font-size: 14px;">
-        <a href={lang === 'en' ? '/' : `/${lang}`} style="color: var(--muted); font-weight: 500;">{s.nav.home}</a>
-        <a href={(lang === 'en' ? '/' : `/${lang}/`) + '#download'} style="color: var(--muted); font-weight: 500;">{s.nav.download}</a>
-        <a href={lang === 'en' ? '/mcp' : `/${lang}/mcp`} style="color: var(--muted); font-weight: 500;">{s.nav.mcp}</a>
-        <a href={(lang === 'en' ? '/' : `/${lang}/`) + '#sponsor'} style="display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 999px; border: 1px solid #fbb6ce; background: #fff1f2; color: #be185d; font-weight: 600;">
+      <nav class="site-nav">
+        <a href={homeHref} class="nav-link">{s.nav.home}</a>
+        <a href={(lang === 'en' ? '/' : `/${lang}/`) + '#download'} class="nav-link">{s.nav.download}</a>
+        <a href={mcpHref} class="nav-link">{s.nav.mcp}</a>
+        <a href={(lang === 'en' ? '/' : `/${lang}/`) + '#sponsor'} class="nav-sponsor">
           <span style="color: #e11d48;">♥</span>{s.nav.sponsor}
         </a>
-        <a href="https://github.com/guangtoutong/unfetch" style="color: var(--muted); font-weight: 500;" target="_blank" rel="noreferrer">{s.nav.github}</a>
+        <a href="https://github.com/guangtoutong/unfetch" class="nav-gh" target="_blank" rel="noreferrer">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+          </svg>
+          <span>{s.nav.github}</span>
+        </a>
 
-        <div id="lang-wrap" style="position: relative;">
-          <button class="lang-btn" id="lang-btn" type="button">
+        <div id="lang-wrap" style="position: relative; margin-left: 2px;">
+          <button class="lang-btn" id="lang-btn" type="button" aria-label="Change language">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10" />
               <line x1="2" y1="12" x2="22" y2="12" />
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
             </svg>
             <span>{currentLang.native}</span>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="lang-menu" id="lang-menu">
             {LANGS.map((l) => (
               <a href={langHref(l.code)} class={l.code === lang ? 'active' : ''}>
-                {l.native}
+                <span>{l.native}</span>
+                {l.code === lang && <span>✓</span>}
               </a>
             ))}
           </div>
@@ -131,10 +330,19 @@ const currentLang = LANGS.find((l) => l.code === lang) || LANGS[0]
     <slot />
   </main>
 
-  <footer style="border-top: 1px solid var(--border); padding: 40px 0; margin-top: 80px; background: var(--bg-3);">
-    <div class="container" style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); flex-wrap: wrap; gap: 12px;">
-      <span>{s.footer.copy}</span>
-      <span><a href="https://github.com/guangtoutong/unfetch/blob/master/LICENSE" style="color: var(--primary);">{s.footer.license}</a></span>
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-weight: 700; color: var(--fg);">unfetch</span>
+        <span>·</span>
+        <span>{s.footer.copy}</span>
+      </div>
+      <div class="footer-links">
+        <a href={mcpHref}>{s.nav.mcp}</a>
+        <a href={privacyHref}>{lang === 'zh' ? '隐私政策' : 'Privacy'}</a>
+        <a href="https://github.com/guangtoutong/unfetch/releases" target="_blank" rel="noreferrer">Releases</a>
+        <a href="https://github.com/guangtoutong/unfetch/blob/master/LICENSE" target="_blank" rel="noreferrer">{s.footer.license}</a>
+      </div>
     </div>
   </footer>
 
@@ -155,13 +363,13 @@ const currentLang = LANGS.find((l) => l.code === lang) || LANGS[0]
       })
     })()
 
-    // Header 滚动时才显示阴影 + 边框,顶部静止时纯白无线(避免远看像"灰顶")
+    // Header 滚动时才显示柔和阴影 + 边框，顶部静止时纯白无线
     ;(function () {
       const hdr = document.getElementById('site-header')
       if (!hdr) return
       const onScroll = () => {
         if (window.scrollY > 6) {
-          hdr.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)'
+          hdr.style.boxShadow = '0 4px 20px rgba(9, 9, 11, 0.05)'
           hdr.style.borderBottomColor = 'var(--border)'
         } else {
           hdr.style.boxShadow = 'none'
@@ -172,25 +380,42 @@ const currentLang = LANGS.find((l) => l.code === lang) || LANGS[0]
       window.addEventListener('scroll', onScroll, { passive: true })
     })()
 
-    // Hero "Download" 按钮：默认 href 已是 macOS universal dmg。JS 探测 OS
-    // 后，从按钮上的 data-{os}-href / data-{os}-text 属性读对应平台的链接和
-    // 文案,把 href 换成 "Download for Windows" 这种完整短语,而不是 base + 后缀。
-    // 模式参考 notebook/web 的 Hero.astro。
-    // 前导 ; 防止上一个 IIFE 的 })() 后没分号导致两个 IIFE 被合并成函数调用。
+    // OS 检测：更新 Hero 下载按钮与高亮对应平台下载卡片
     ;(function () {
-      const btn = document.getElementById('download-cta')
-      const label = document.getElementById('download-cta-label')
-      if (!btn) return
       const ua = navigator.userAgent || ''
       const platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || ''
       let os = 'mac'
-      if (/Win/i.test(ua) || /Windows/i.test(platform)) os = 'win'
-      else if (/Linux/i.test(ua) && !/Android/i.test(ua)) os = 'linux'
-      else if (/Mac|iPhone|iPad/i.test(ua) || /Mac/i.test(platform)) os = 'mac'
-      const href = btn.getAttribute('data-' + os + '-href')
-      const text = btn.getAttribute('data-' + os + '-text')
-      if (href) btn.setAttribute('href', href)
-      if (text && label) label.textContent = text
+      let cardKey = 'macos'
+      if (/Win/i.test(ua) || /Windows/i.test(platform)) {
+        os = 'win'
+        cardKey = 'windows'
+      } else if (/Linux/i.test(ua) && !/Android/i.test(ua)) {
+        os = 'linux'
+        cardKey = 'linux'
+      } else if (/Mac|iPhone|iPad/i.test(ua) || /Mac/i.test(platform)) {
+        os = 'mac'
+        cardKey = 'macos'
+      }
+
+      const btn = document.getElementById('download-cta')
+      const label = document.getElementById('download-cta-label')
+      if (btn) {
+        const href = btn.getAttribute('data-' + os + '-href')
+        const text = btn.getAttribute('data-' + os + '-text')
+        if (href) btn.setAttribute('href', href)
+        if (text && label) label.textContent = text
+      }
+
+      const btmBtn = document.getElementById('bottom-download-cta')
+      if (btmBtn && btn) {
+        const href = btn.getAttribute('data-' + os + '-href')
+        if (href) btmBtn.setAttribute('href', href)
+      }
+
+      const card = document.querySelector('[data-platform-card="' + cardKey + '"]')
+      if (card) {
+        card.classList.add('dl-card--recommended')
+      }
     })()
   </script>
 </body>

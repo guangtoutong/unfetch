@@ -50,3 +50,15 @@ func (d *YtdlpDownloader) UpdateConfig(_ *types.Config) {}
 func (d *YtdlpDownloader) Download(_ context.Context, _ *types.Task, _ func()) error {
 	return ErrNotInAppStoreEdition
 }
+
+// ---------- ed2k 桩 ----------
+
+type Ed2kDownloader struct{}
+
+func NewEd2kDownloader(_ *types.Config) *Ed2kDownloader { return &Ed2kDownloader{} }
+
+func (d *Ed2kDownloader) UpdateConfig(_ *types.Config) {}
+
+func (d *Ed2kDownloader) Download(_ context.Context, _ *types.Task, _ func()) error {
+	return ErrNotInAppStoreEdition
+}

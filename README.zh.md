@@ -18,7 +18,7 @@ unfetch 是把浏览器没下完的活接走的下载引擎。多镜像 HTTP 高
 
 ## 核心功能
 
-- **多镜像 HTTP** — 最多 32 线程 × 多镜像 URL 并发,失败自动 fallback,断点续传,SHA256/MD5 校验。
+- **多镜像 HTTP 与 FTP/SFTP** — 最多 32 线程 × 多镜像 URL 并发,失败自动 fallback,断点续传,SHA256/MD5 校验,原生支持 FTP/FTPS/SFTP 与 ed2k。
 - **BT / 磁力** — 35 个公共 tracker、IPv6 + WebTorrent、下载前选文件、显示 peer 和做种数、ISP 屏蔽时自动切 uTP。
 - **1000+ 视频网站** — 通过内置 yt-dlp 支持 YouTube、B 站、抖音、X 等。
 - **AI 原生(MCP)** — `add_task` / `list_tasks` / `wait_for_task` / 进度通知 —— 任意 MCP 宿主(Claude Desktop、Cursor、Codex …)都能调用,无锁定。
@@ -81,7 +81,18 @@ unfetch 用 Go daemon + Tauri 外壳实现。**三个前端共享一个 daemon,�
 }
 ```
 
-然后你的 AI 就可以 `add_task` / `list_tasks` / `wait_for_task` 等。完整工具列表见 [docs/mcp.md](docs/mcp.md) 或 <https://unfetch.org/mcp>。
+然后你的 AI 就可以 `add_task` / `list_tasks` / `wait_for_task` 等。完整工具列表见 [mcp/README.md](mcp/README.md) 或 <https://unfetch.org/mcp>。
+
+**17 个 MCP 工具**(完整 Schema、Resources 与各市场发布材料见 [`mcp/`](mcp/)): `add_task`、`detect_url`、`preview_torrent`、`wait_for_task`、`wait_for_all`、`list_tasks`、`get_task`、`pause_task`、`resume_task`、`remove_task`、`trash_task`、`restore_task`、`empty_trash`、`restore_all_trashed`、`get_config`、`set_config`、`play_in_unflick`。
+
+### Skills 与一键安装
+
+仓库内置了一套搭配 MCP 使用的 [Claude Skills](skills/) —— `unfetch-grab`(单文件下载)、`unfetch-batch`(批量下载)、`unfetch-media`(音视频画质选择)、`unfetch-watch`(队列监控管理)。在 Claude Code 中可作为插件一键安装(同时装好 MCP Server 与 Skills):
+
+```
+/plugin marketplace add guangtoutong/unfetch
+/plugin install unfetch@unfetch
+```
 
 ## 从源码构建
 
@@ -125,6 +136,6 @@ unfetch 由一位开发者业余维护。如果它帮你省了时间,欢迎赞�
 
 ## 许可证
 
-MIT 风格许可。见 [LICENSE](LICENSE)(待补 —— 当前事实上 MIT)。
+MIT 许可。见 [LICENSE](LICENSE)。
 
 欢迎向上游贡献 —— unfetch 维护者也是 [`anacrolix/torrent`](https://github.com/anacrolix/torrent) 的活跃 contributor。

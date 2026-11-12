@@ -238,6 +238,30 @@ func doRequestWithRetry(ctx context.Context, client *http.Client, makeReq func()
 	return nil, fmt.Errorf("%s: gave up after %d retries: %w", label, maxRequestRetries, lastErr)
 }
 
+// applyTaskHeaders 将任务的 User-Agent、Cookie、自定义 Header 写入 HTTP 请求
+func applyTaskHeaders(req *http.Request, task *types.Task) {
+	ua := "unfetch/1.0"
+	if task != nil && strings.TrimSpace(task.UserAgent) != "" {
+		ua = strings.TrimSpace(task.UserAgent)
+	}
+	req.Header.Set("User-Agent", ua)
+	if task == nil {
+		return
+	}
+	for k, v := range task.Headers {
+		k = strings.TrimSpace(k)
+		if k != "" {
+			req.Header.Set(k, v)
+		}
+	}
+	if c := strings.TrimSpace(task.Cookies); c != "" && req.Header.Get("Cookie") == "" {
+		// 若不是多行 Netscape cookie 文件内容，则作为 Cookie 请求头发送
+		if !strings.Contains(c, "\n") && !strings.HasPrefix(c, "# Netscape") {
+			req.Header.Set("Cookie", c)
+		}
+	}
+}
+
 // Download 执行下载，支持断点续传 + 多线程 + 多镜像源
 func (d *HTTPDownloader) Download(ctx context.Context, task *types.Task, onProgress func()) error {
 	cfg := d.getConfig()
@@ -258,7 +282,7 @@ func (d *HTTPDownloader) Download(ctx context.Context, task *types.Task, onProgr
 		if err != nil {
 			return nil, err
 		}
-		req.Header.Set("User-Agent", "unfetch/1.0")
+		applyTaskHeaders(req, task)
 		return req, nil
 	}, "HEAD "+task.URL)
 	if err != nil {
@@ -272,7 +296,7 @@ func (d *HTTPDownloader) Download(ctx context.Context, task *types.Task, onProgr
 	// 部分 CDN（GitHub release 重定向后的 Azure Blob）HEAD 不返回 Content-Length
 	// 但返回 Accept-Ranges: bytes。这种情况下用 Range 探测真实大小。
 	if totalSize <= 0 && acceptRanges {
-		if size, ok := probeSizeViaRange(ctx, client, task.URL); ok {
+		if size, ok := probeSizeViaRange(ctx, client, task.URL, task); ok {
 			totalSize = size
 			slog.Info("size probed via Range", "url", task.URL, "size", size)
 		}
@@ -287,7 +311,7 @@ func (d *HTTPDownloader) Download(ctx context.Context, task *types.Task, onProgr
 				if err != nil {
 					return nil, err
 				}
-				mReq.Header.Set("User-Agent", "unfetch/1.0")
+				applyTaskHeaders(mReq, task)
 				return mReq, nil
 			}, "HEAD "+u)
 			if mErr != nil {
@@ -338,7 +362,7 @@ func (d *HTTPDownloader) Download(ctx context.Context, task *types.Task, onProgr
 		if cfg.SpeedLimit > 0 {
 			tb = newTokenBucket(cfg.SpeedLimit)
 		}
-		if err := d.downloadStreaming(ctx, client, task.URL, savePath, &task.DoneBytes, tb, onProgress); err != nil {
+		if err := d.downloadStreaming(ctx, client, task.URL, savePath, task, &task.DoneBytes, tb, onProgress); err != nil {
 			return err
 		}
 		slog.Info("http streaming download complete", "file", savePath)
@@ -406,7 +430,7 @@ func (d *HTTPDownloader) Download(ctx context.Context, task *types.Task, onProgr
 		g.Go(func() error {
 			return d.downloadChunkMulti(
 				gctx, client, preferredURL, validURLs,
-				file, &state.Chunks[chunkIdx],
+				file, &state.Chunks[chunkIdx], task,
 				&task.DoneBytes, tb,
 				func() {
 					stateMu.Lock()
@@ -474,6 +498,7 @@ func (d *HTTPDownloader) downloadChunkMulti(
 	mirrors []string,
 	file *os.File,
 	chunk *chunkState,
+	task *types.Task,
 	doneBytes *int64,
 	tb *tokenBucket,
 	onSave func(),
@@ -494,7 +519,7 @@ func (d *HTTPDownloader) downloadChunkMulti(
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
-		err := d.downloadChunk(ctx, client, u, file, chunk, doneBytes, tb, onSave)
+		err := d.downloadChunk(ctx, client, u, file, chunk, task, doneBytes, tb, onSave)
 		if err == nil {
 			return nil
 		}
@@ -517,6 +542,7 @@ func (d *HTTPDownloader) downloadChunk(
 	rawURL string,
 	file *os.File,
 	chunk *chunkState,
+	task *types.Task,
 	doneBytes *int64,
 	tb *tokenBucket,
 	onSave func(),
@@ -532,7 +558,7 @@ func (d *HTTPDownloader) downloadChunk(
 			return nil
 		}
 
-		err := d.downloadChunkOnce(ctx, client, rawURL, file, chunk, doneBytes, tb, onSave)
+		err := d.downloadChunkOnce(ctx, client, rawURL, file, chunk, task, doneBytes, tb, onSave)
 		if err == nil {
 			return nil
 		}
@@ -566,6 +592,7 @@ func (d *HTTPDownloader) downloadChunkOnce(
 	rawURL string,
 	file *os.File,
 	chunk *chunkState,
+	task *types.Task,
 	doneBytes *int64,
 	tb *tokenBucket,
 	onSave func(),
@@ -577,7 +604,7 @@ func (d *HTTPDownloader) downloadChunkOnce(
 	if err != nil {
 		return fmt.Errorf("create GET request: %w", err)
 	}
-	req.Header.Set("User-Agent", "unfetch/1.0")
+	applyTaskHeaders(req, task)
 	if chunk.Start > 0 || chunk.Downloaded > 0 || rangeEnd > 0 {
 		req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", rangeStart, rangeEnd))
 	}
@@ -639,13 +666,13 @@ func (d *HTTPDownloader) downloadChunkOnce(
 }
 
 // probeSizeViaRange 用 Range: bytes=0-0 探测文件大小（适用于 HEAD 不返回 Content-Length 的 CDN）
-func probeSizeViaRange(ctx context.Context, client *http.Client, rawURL string) (int64, bool) {
+func probeSizeViaRange(ctx context.Context, client *http.Client, rawURL string, task *types.Task) (int64, bool) {
 	resp, err := doRequestWithRetry(ctx, client, func() (*http.Request, error) {
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 		if err != nil {
 			return nil, err
 		}
-		req.Header.Set("User-Agent", "unfetch/1.0")
+		applyTaskHeaders(req, task)
 		req.Header.Set("Range", "bytes=0-0")
 		return req, nil
 	}, "probe-range "+rawURL)
@@ -713,6 +740,7 @@ func (d *HTTPDownloader) downloadStreaming(
 	ctx context.Context,
 	client *http.Client,
 	rawURL, savePath string,
+	task *types.Task,
 	doneBytes *int64,
 	tb *tokenBucket,
 	onProgress func(),
@@ -721,7 +749,7 @@ func (d *HTTPDownloader) downloadStreaming(
 	if err != nil {
 		return fmt.Errorf("create GET request: %w", err)
 	}
-	req.Header.Set("User-Agent", "unfetch/1.0")
+	applyTaskHeaders(req, task)
 
 	resp, err := client.Do(req)
 	if err != nil {

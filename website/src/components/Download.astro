@@ -3,66 +3,97 @@ import { getStrings } from '../i18n/strings'
 interface Props { lang: string }
 const { lang } = Astro.props
 const s = getStrings(lang)
+const isZh = lang === 'zh'
 
 // 与 scripts/release.sh + scripts/build-mac.sh 保持一致：每次发版改这里一次
 const VERSION = '0.2.5'
 const REPO = 'guangtoutong/unfetch'
 const base = `https://github.com/${REPO}/releases/download/v${VERSION}`
 
-// 三个平台：macOS Universal（本地公证后上传）、Windows、Linux x64
-// 文件名约定参考 Tauri 2 默认产物名 + 我们 build-mac.sh 里 hdiutil 的命名
 const platforms = [
   {
     key: 'macos' as const,
-    icon: '🍎',
     primary: `unfetch_${VERSION}_universal.dmg`,
+    badge: 'Universal DMG',
   },
   {
     key: 'windows' as const,
-    icon: '🪟',
     primary: `unfetch_${VERSION}_x64-setup.exe`,
+    badge: 'NSIS Setup .exe',
   },
   {
     key: 'linux' as const,
-    icon: '🐧',
     primary: `unfetch_${VERSION}_amd64.AppImage`,
     secondary: `unfetch_${VERSION}_amd64.deb`,
     tertiary: `unfetch-${VERSION}-1.x86_64.rpm`,
+    badge: 'AppImage / deb / rpm',
   },
 ]
 ---
 
-<section id="download" style="padding: 60px 0;">
+<section id="download" class="dl-section">
   <div class="container">
-    <div style="text-align: center; margin-bottom: 40px;">
-      <h2 style="font-size: 32px; font-weight: 700; margin-bottom: 8px;">
-        {s.download.heading} <span style="color: var(--muted); font-family: monospace; font-size: 0.7em; font-weight: 500;">v{VERSION}</span>
+    <div class="dl-header">
+      <span class="dl-eyebrow">{isZh ? '全平台安装包' : 'DOWNLOADS'}</span>
+      <h2 class="dl-heading">
+        {s.download.heading}
+        <span class="dl-ver-pill">v{VERSION}</span>
       </h2>
-      <p style="font-size: 15px; color: var(--muted); max-width: 640px; margin: 12px auto 0;">
-        {s.download.lead}
-      </p>
+      <p class="dl-lead">{s.download.lead}</p>
     </div>
 
     <div class="dl-grid">
       {platforms.map((p) => {
         const meta = s.download.platforms[p.key]
         return (
-          <article class="dl-card">
+          <article class="dl-card" data-platform-card={p.key}>
+            <div class="dl-card__rec">{isZh ? '当前系统推荐' : 'Recommended for your OS'}</div>
             <div class="dl-card__head">
-              <span class="dl-card__icon">{p.icon}</span>
-              <div>
-                <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 4px;">{meta.name}</h3>
-                <div style="font-size: 12px; color: var(--muted);">{meta.note}</div>
+              <span class="dl-card__icon">
+                {p.key === 'macos' && (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.96 6.33c.67-.81 1.12-1.94 1-3.08-.96.04-2.13.64-2.82 1.45-.61.7-.115 1.85-1.01 2.97 1.08.08 2.16-.53 2.83-1.34z"/>
+                  </svg>
+                )}
+                {p.key === 'windows' && (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 5.3L10.9 4.2v7.1H3V5.3zm0 13.4l7.9 1.1v-7H3v5.9zm8.8 1.2L21 21.2v-8.4h-9.2v7.1zm0-15.8v7.2H21V2.8l-9.2 1.3z"/>
+                  </svg>
+                )}
+                {p.key === 'linux' && (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="4 17 10 11 4 5"/>
+                    <line x1="12" y1="19" x2="20" y2="19"/>
+                  </svg>
+                )}
+              </span>
+              <div style="flex: 1;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                  <h3 class="dl-card__title">{meta.name}</h3>
+                  <span class="dl-card__fmt">{p.badge}</span>
+                </div>
+                <div class="dl-card__note">{meta.note}</div>
               </div>
             </div>
+
             <a href={`${base}/${p.primary}`} class="dl-card__btn">
-              {meta.primary}
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                <polyline points="8 17 12 21 16 17" />
+                <line x1="12" y1="12" x2="12" y2="21" />
+                <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" />
+              </svg>
+              <span>{meta.primary}</span>
             </a>
-            {p.secondary && 'secondary' in meta && (
-              <a href={`${base}/${p.secondary}`} class="dl-card__alt">— {meta.secondary}</a>
-            )}
-            {p.tertiary && 'tertiary' in meta && (
-              <a href={`${base}/${p.tertiary}`} class="dl-card__alt">— {meta.tertiary}</a>
+
+            {(p.secondary || p.tertiary) && (
+              <div class="dl-card__alts">
+                {p.secondary && 'secondary' in meta && (
+                  <a href={`${base}/${p.secondary}`} class="dl-card__alt">{meta.secondary}</a>
+                )}
+                {p.tertiary && 'tertiary' in meta && (
+                  <a href={`${base}/${p.tertiary}`} class="dl-card__alt">{meta.tertiary}</a>
+                )}
+              </div>
             )}
           </article>
         )
@@ -70,14 +101,23 @@ const platforms = [
     </div>
 
     <div class="dl-notes">
-      <div class="dl-note"><strong>macOS</strong>: {s.download.notes.macos}</div>
-      <div class="dl-note"><strong>Windows</strong>: {s.download.notes.windows}</div>
-      <div class="dl-note"><strong>Linux</strong>: {s.download.notes.linux}</div>
+      <div class="dl-note">
+        <span class="dl-note__tag">macOS</span>
+        <span>{s.download.notes.macos}</span>
+      </div>
+      <div class="dl-note">
+        <span class="dl-note__tag">Windows</span>
+        <span>{s.download.notes.windows}</span>
+      </div>
+      <div class="dl-note">
+        <span class="dl-note__tag">Linux</span>
+        <span>{s.download.notes.linux}</span>
+      </div>
     </div>
 
-    <p style="text-align: center; color: var(--muted); font-size: 13px; margin-top: 24px;">
+    <p style="text-align: center; color: var(--muted); font-size: 13.5px; margin-top: 28px;">
       {s.download.allReleases}
-      <a href={`https://github.com/${REPO}/releases`} target="_blank" rel="noreferrer" style="color: var(--primary); margin-left: 6px;">
+      <a href={`https://github.com/${REPO}/releases`} target="_blank" rel="noreferrer" style="color: var(--primary); font-weight: 600; margin-left: 6px;">
         {s.download.allReleasesLink}
       </a>
     </p>
@@ -85,20 +125,63 @@ const platforms = [
 </section>
 
 <style>
+  .dl-section {
+    padding: 84px 0 64px;
+  }
+  .dl-header {
+    text-align: center;
+    margin-bottom: 44px;
+  }
+  .dl-eyebrow {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 10px;
+  }
+  .dl-heading {
+    font-size: clamp(28px, 4vw, 38px);
+    font-weight: 800;
+    margin-bottom: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .dl-ver-pill {
+    font-family: ui-monospace, monospace;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--primary-bg);
+    color: var(--primary-strong);
+    border: 1px solid var(--primary-border);
+  }
+  .dl-lead {
+    font-size: 15.5px;
+    color: var(--muted);
+    max-width: 640px;
+    margin: 8px auto 0;
+  }
   .dl-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
     margin-bottom: 32px;
   }
   .dl-card {
+    position: relative;
     background: var(--bg-2);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 18px;
     padding: 28px;
     display: flex;
     flex-direction: column;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     box-shadow: var(--shadow-sm);
   }
   .dl-card:hover {
@@ -106,62 +189,140 @@ const platforms = [
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
   }
+  .dl-card--recommended {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-glow);
+    background: linear-gradient(180deg, #ffffff 0%, #fcfaff 100%);
+  }
+  .dl-card__rec {
+    display: none;
+    position: absolute;
+    top: -11px;
+    right: 20px;
+    background: var(--primary);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+  }
+  .dl-card--recommended .dl-card__rec {
+    display: inline-block;
+  }
   .dl-card__head {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 14px;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
   }
   .dl-card__icon {
-    font-size: 34px;
-    line-height: 1;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .dl-card--recommended .dl-card__icon {
+    background: var(--primary-bg);
+    border-color: var(--primary-border);
+    color: var(--primary-strong);
+  }
+  .dl-card__title {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 0;
+  }
+  .dl-card__fmt {
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--bg-subtle);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .dl-card__note {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 4px;
   }
   .dl-card__btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     width: 100%;
-    padding: 12px 18px;
+    padding: 13px 18px;
     background: var(--primary);
     color: #fff !important;
-    border-radius: 9px;
+    border-radius: 11px;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 14.5px;
     text-align: center;
     transition: all 0.18s;
+    margin-top: auto;
   }
   .dl-card__btn:hover {
     background: var(--primary-strong);
     transform: translateY(-1px);
   }
-  .dl-card__alt {
-    display: block;
+  .dl-card__alts {
+    display: flex;
+    gap: 8px;
     margin-top: 10px;
-    font-size: 13px;
-    color: var(--muted);
+    flex-wrap: wrap;
+  }
+  .dl-card__alt {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted-strong);
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
     text-align: center;
   }
   .dl-card__alt:hover {
+    border-color: var(--primary);
     color: var(--primary);
+    background: var(--primary-bg);
   }
   .dl-notes {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 14px;
-    margin: 32px 0 0;
+    margin: 28px 0 0;
   }
   .dl-note {
     padding: 16px 18px;
-    background: var(--primary-bg);
-    border-left: 3px solid var(--primary);
-    border-radius: 0 8px 8px 0;
-    font-size: 13.5px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 13px;
     color: var(--muted-strong);
     line-height: 1.65;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
-  .dl-note strong {
-    color: var(--fg);
-    margin-right: 4px;
+  .dl-note__tag {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 11px;
     font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--primary-bg);
+    color: var(--primary-strong);
   }
 </style>

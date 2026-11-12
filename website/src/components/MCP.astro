@@ -1,5 +1,18 @@
 ---
-const config = `{
+interface Props { lang?: string }
+const { lang = 'en' } = Astro.props
+const isZh = lang === 'zh'
+
+const configMac = `{
+  "mcpServers": {
+    "unfetch": {
+      "command": "/Applications/unfetch.app/Contents/MacOS/unfetch",
+      "args": ["--mcp"]
+    }
+  }
+}`
+
+const configWin = `{
   "mcpServers": {
     "unfetch": {
       "command": "C:\\\\Program Files\\\\unfetch\\\\unfetch.exe",
@@ -8,55 +21,340 @@ const config = `{
   }
 }`
 
+const configLinux = `{
+  "mcpServers": {
+    "unfetch": {
+      "command": "unfetch",
+      "args": ["--mcp"]
+    }
+  }
+}`
+
+const pluginInstall = `/plugin marketplace add guangtoutong/unfetch
+/plugin install unfetch@unfetch`
+
 const tools = [
-  { name: 'add_task', desc: 'Add a download task — HTTP, magnet, or video page' },
-  { name: 'list_tasks', desc: 'List all tasks (filter by status)' },
-  { name: 'get_task', desc: 'Get details of a single task' },
-  { name: 'pause_task', desc: 'Pause a downloading task' },
-  { name: 'resume_task', desc: 'Resume a paused task' },
-  { name: 'remove_task', desc: 'Permanently delete a task' },
-  { name: 'trash_task', desc: 'Move a task to trash (reversible)' },
-  { name: 'restore_task', desc: 'Restore a task from trash' },
-  { name: 'empty_trash', desc: 'Empty the trash bin' },
-  { name: 'restore_all_trashed', desc: 'Restore everything in the trash' },
-  { name: 'get_config', desc: 'Read current configuration' },
-  { name: 'set_config', desc: 'Update configuration (download dir, threads, ...)' },
-  { name: 'play_in_unflick', desc: 'Open a downloaded file in Unflick player' },
+  { name: 'add_task', req: 'url', descEn: 'Add a download task — HTTP/S (with multi-mirror fan-out), FTP/FTPS/SFTP, magnet/torrent, ed2k, or 1000+ video sites', descZh: '添加下载任务 —— 支持多镜像 HTTP/S、FTP/FTPS/SFTP、BT 磁力/种子、ed2k 及 1000+ 视频网站' },
+  { name: 'detect_url', req: 'url', descEn: 'Detect URL protocol and engine type (http / ftp / bt / ed2k / ytdlp)', descZh: '检测下载链接所属协议与引擎类型（http / ftp / bt / ed2k / ytdlp）' },
+  { name: 'preview_torrent', req: 'url', descEn: 'Preview files inside a magnet link or .torrent (returns file paths, sizes, and indices for selective download)', descZh: '预览磁力或种子内的文件列表（返回文件名、大小与下标，用于按需选择下载）' },
+  { name: 'wait_for_task', req: 'id', descEn: 'Block until a task completes or fails while streaming live notifications/progress updates', descZh: '阻塞等待单个任务完成或失败，期间持续推送 notifications/progress 实时进度' },
+  { name: 'wait_for_all', req: '—', descEn: 'Block until all active tasks (queued/downloading/paused) finish or timeout', descZh: '阻塞等待当前所有活动任务全部下载完成或超时' },
+  { name: 'list_tasks', req: '—', descEn: 'List all tasks (optional status filter: all / downloading / paused / done / error / queued)', descZh: '列出下载任务（支持按状态过滤：all / downloading / paused / done / error / queued）' },
+  { name: 'get_task', req: 'id', descEn: 'Get full metadata, speed, ETA, peer count, and SHA256 verification status of a task', descZh: '获取单个任务的详细进度、速度、剩余时间、Peer 统计与哈希校验结果' },
+  { name: 'pause_task', req: 'id', descEn: 'Pause a running or queued download task', descZh: '暂停正在下载或排队的任务' },
+  { name: 'resume_task', req: 'id', descEn: 'Resume a paused or failed download task from its saved breakpoint', descZh: '从断点恢复已暂停或失败的任务' },
+  { name: 'remove_task', req: 'id', descEn: 'Permanently delete a task (optional delete_file: true to remove local file)', descZh: '彻底删除任务（可传 delete_file: true 同时删除本地文件）' },
+  { name: 'trash_task', req: 'id', descEn: 'Move a task to the recycle bin (reversible, preserves downloaded data)', descZh: '将任务移入回收站（可恢复，不删除已下载数据）' },
+  { name: 'restore_task', req: 'id', descEn: 'Restore a single task from the recycle bin', descZh: '从回收站恢复单个任务' },
+  { name: 'empty_trash', req: '—', descEn: 'Permanently delete all tasks in the recycle bin and their local files', descZh: '清空回收站（彻底删除回收站内所有任务及对应本地文件）' },
+  { name: 'restore_all_trashed', req: '—', descEn: 'Restore all tasks currently in the recycle bin', descZh: '一键恢复回收站内的全部任务' },
+  { name: 'get_config', req: '—', descEn: 'Read current daemon configuration (download_dir, threads, speed_limit, proxy, etc.)', descZh: '读取当前 Daemon 配置（下载目录、线程数、限速、代理等）' },
+  { name: 'set_config', req: '—', descEn: 'Update daemon configuration live without restarting', descZh: '热更新配置项（下载目录、并发数、线程数、全局限速、完成动作等）' },
+  { name: 'play_in_unflick', req: 'path', descEn: 'Open and play a downloaded media file in Unflick player', descZh: '调用 Unflick 播放器直接播放已下载的媒体文件' },
+]
+
+const skills = [
+  { name: 'unfetch-grab', descEn: 'Single-URL smart download with protocol detection, checksum verification & progress wait', descZh: '单链接智能下载：自动探测协议、哈希校验并等待完成回报' },
+  { name: 'unfetch-batch', descEn: 'Bulk URL ingestion, mirror fan-out, and dependency chain orchestration', descZh: '批量链接队列编排、多镜像并发加速与前置任务依赖链' },
+  { name: 'unfetch-media', descEn: 'Video & audio extraction from 1000+ sites with quality selection (4K/1080p/audio)', descZh: '1000+ 视频网站音视频抓取，支持画质与纯音频选择' },
+  { name: 'unfetch-watch', descEn: 'Queue health monitoring, slow-task uTP switching, and trash cleanup', descZh: '下载队列实时监控、慢速任务诊断与回收站清理' },
 ]
 ---
-<section style="padding: 80px 0;">
-  <div class="container" style="max-width: 760px;">
-    <h1 style="font-size: 44px; font-weight: 800; margin-bottom: 18px; letter-spacing: -1px; color: var(--fg);">
-      Drive unfetch from your AI assistant
-    </h1>
-    <p style="font-size: 17px; color: var(--muted); margin-bottom: 44px; line-height: 1.7;">
-      unfetch ships with a built-in <strong style="color: var(--fg);">MCP server</strong> — exposing 13 tools so Claude Desktop, Cursor, or any MCP host can search, queue, and manage downloads on your behalf.
-    </p>
+<section class="mcp-page">
+  <div class="container" style="max-width: 880px;">
+    <div class="mcp-hero">
+      <span class="mcp-pill">Model Context Protocol · 2024-11-05 · stdio</span>
+      <h1 class="mcp-title">
+        {isZh ? '让 AI 助手直接驱动 unfetch 下载引擎' : 'Drive unfetch from your AI assistant'}
+      </h1>
+      <p class="mcp-lead">
+        {isZh
+          ? 'unfetch 二进制自身即内置完整的 MCP Server（--mcp），暴露 17 个工具、task://{id} 资源实时订阅以及 4 个 Claude Skills —— Claude Desktop、Claude Code、Cursor、Codex 等任意 MCP 宿主均可零配置调用。'
+          : 'unfetch ships with a built-in MCP server (--mcp) exposing 17 tools, live task://{id} resource subscriptions, and 4 Claude Skills — ready for Claude Desktop, Claude Code, Cursor, Codex, or any MCP host.'}
+      </p>
+    </div>
 
-    <h2 style="font-size: 22px; margin-bottom: 14px; color: var(--fg);">Claude Desktop configuration</h2>
-    <p style="color: var(--muted); margin-bottom: 12px; font-size: 14px;">
-      Add this to <code style="background: var(--bg-3); padding: 2px 6px; border-radius: 4px; color: var(--primary); font-family: ui-monospace, monospace; font-size: 13px;">claude_desktop_config.json</code>:
-    </p>
-    <pre style="background: var(--fg); border: 1px solid var(--border); border-radius: 10px; padding: 18px; overflow-x: auto; font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 13px; line-height: 1.6; color: #f4f4f5;"><code>{config}</code></pre>
-    <p style="color: var(--muted); margin-top: 12px; font-size: 13px;">
-      Restart Claude Desktop. You should see a 🔌 icon — unfetch is now available as a tool source.
-    </p>
+    <!-- One-Command Claude Code Plugin -->
+    <div class="mcp-card mcp-card--highlight">
+      <div class="mcp-card__head">
+        <h2>{isZh ? '方式一：Claude Code 插件一键安装（MCP + 4 Skills）' : 'Option 1: One-command install for Claude Code (MCP + 4 Skills)'}</h2>
+        <span class="mcp-tag">Recommended</span>
+      </div>
+      <p style="font-size: 14px; color: var(--muted); margin-bottom: 12px;">
+        {isZh ? '在 Claude Code 中运行以下两条命令，即可同时安装 unfetch MCP Server 与全套 4 个下载 Skills：' : 'Run these two commands in Claude Code to install both the MCP server and all 4 download skills:'}
+      </p>
+      <pre class="mcp-pre"><code>{pluginInstall}</code></pre>
+    </div>
 
-    <h2 style="font-size: 22px; margin: 56px 0 18px; color: var(--fg);">Available tools</h2>
-    <div style="display: grid; gap: 8px;">
+    <!-- Standard MCP Host Config -->
+    <div class="mcp-card" style="margin-top: 24px;">
+      <div class="mcp-card__head">
+        <h2>{isZh ? '方式二：Claude Desktop / Cursor / 通用 MCP 配置' : 'Option 2: Claude Desktop / Cursor / Standard MCP Config'}</h2>
+        <div class="os-tabs">
+          <button type="button" class="os-tab active" data-os-tab="mac">macOS</button>
+          <button type="button" class="os-tab" data-os-tab="win">Windows</button>
+          <button type="button" class="os-tab" data-os-tab="linux">Linux</button>
+        </div>
+      </div>
+      <p style="font-size: 14px; color: var(--muted); margin-bottom: 12px;">
+        {isZh ? '将以下配置加入 ' : 'Add this to '}
+        <code class="inline-code">claude_desktop_config.json</code>
+        {isZh ? ' 或 ' : ' or '}
+        <code class="inline-code">.mcp.json</code>：
+      </p>
+      <pre class="mcp-pre os-pane active" data-os-pane="mac"><code>{configMac}</code></pre>
+      <pre class="mcp-pre os-pane" data-os-pane="win"><code>{configWin}</code></pre>
+      <pre class="mcp-pre os-pane" data-os-pane="linux"><code>{configLinux}</code></pre>
+    </div>
+
+    <!-- 17 Tools Table -->
+    <h2 class="mcp-section-title">{isZh ? '17 个内置 MCP 工具' : '17 Built-in MCP Tools'}</h2>
+    <div class="tools-grid">
       {tools.map((tool) => (
-        <div style="display: flex; gap: 16px; padding: 12px 16px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-sm);">
-          <code style="flex-shrink: 0; min-width: 180px; color: var(--primary); font-size: 13px; font-weight: 600;">{tool.name}</code>
-          <span style="font-size: 13.5px; color: var(--muted);">{tool.desc}</span>
+        <div class="tool-row">
+          <div class="tool-row__left">
+            <code class="tool-name">{tool.name}</code>
+            {tool.req !== '—' && <span class="tool-req">req: {tool.req}</span>}
+          </div>
+          <div class="tool-desc">{isZh ? tool.descZh : tool.descEn}</div>
         </div>
       ))}
     </div>
 
-    <h2 style="font-size: 22px; margin: 56px 0 18px; color: var(--fg);">Example prompts</h2>
-    <ul style="color: var(--muted); font-size: 14.5px; line-height: 1.85; padding-left: 22px;">
-      <li>「Download this 4K video to my Downloads folder and pause it once it hits 500 MB」</li>
-      <li>「How many active downloads do I have? Pause anything bigger than 1 GB」</li>
-      <li>「Search YouTube for the latest Linus Torvalds keynote and grab the 1080p mp4」</li>
-    </ul>
+    <!-- 4 Claude Skills -->
+    <h2 class="mcp-section-title">{isZh ? '4 个配套 AI Skills' : '4 Bundled AI Skills'}</h2>
+    <div class="skills-grid">
+      {skills.map((sk) => (
+        <div class="skill-card">
+          <code class="skill-name">{sk.name}</code>
+          <p class="skill-desc">{isZh ? sk.descZh : sk.descEn}</p>
+        </div>
+      ))}
+    </div>
+
+    <!-- Example Prompts -->
+    <h2 class="mcp-section-title">{isZh ? '典型提示词示例' : 'Example Prompts'}</h2>
+    <div class="prompts-list">
+      <div class="prompt-item">
+        {isZh
+          ? '「帮我把这个 4K 视频下到 ~/Downloads，画质选 1080p，下完自动用 Unflick 播放」'
+          : '“Download this 4K video to ~/Downloads in 1080p, wait for it to finish, and open it in Unflick.”'}
+      </div>
+      <div class="prompt-item">
+        {isZh
+          ? '「先预览这个磁力链接里的文件列表，只勾选最大的 mp4 视频和 .srt 字幕文件开始下载」'
+          : '“Preview the files in this magnet link first, then download only the main .mp4 video and .srt subtitle.”'}
+      </div>
+      <div class="prompt-item">
+        {isZh
+          ? '「我有几个正在进行的下载？把大于 2 GB 的任务暂停，晚上 23:00 再定时恢复」'
+          : '“How many active downloads do I have? Pause anything larger than 2 GB.”'}
+      </div>
+    </div>
   </div>
 </section>
+
+<script is:inline>
+  ;(function () {
+    const tabs = document.querySelectorAll('.os-tab')
+    const panes = document.querySelectorAll('.os-pane')
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const k = tab.getAttribute('data-os-tab')
+        tabs.forEach((t) => t.classList.toggle('active', t === tab))
+        panes.forEach((p) => p.classList.toggle('active', p.getAttribute('data-os-pane') === k))
+      })
+    })
+  })()
+</script>
+
+<style>
+  .mcp-page { padding: 72px 0 40px; }
+  .mcp-hero { margin-bottom: 40px; }
+  .mcp-pill {
+    display: inline-block;
+    padding: 5px 13px;
+    border-radius: 999px;
+    background: var(--primary-bg);
+    border: 1px solid var(--primary-border);
+    color: var(--primary-strong);
+    font-size: 12px;
+    font-weight: 700;
+    font-family: ui-monospace, monospace;
+    margin-bottom: 18px;
+  }
+  .mcp-title {
+    font-size: clamp(32px, 4.5vw, 46px);
+    font-weight: 850;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .mcp-lead {
+    font-size: 17px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .mcp-card {
+    padding: 26px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .mcp-card--highlight {
+    border-color: var(--primary-border);
+    background: linear-gradient(180deg, #ffffff 0%, #faf8ff 100%);
+    box-shadow: var(--shadow-md);
+  }
+  .mcp-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .mcp-card__head h2 {
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .mcp-tag {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--primary);
+    color: #fff;
+  }
+  .inline-code {
+    background: var(--bg-subtle);
+    padding: 2px 6px;
+    border-radius: 5px;
+    color: var(--primary-strong);
+    font-size: 13px;
+  }
+  .mcp-pre {
+    background: #09090b;
+    border: 1px solid #27272a;
+    border-radius: 12px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.65;
+    color: #f4f4f5;
+  }
+  .os-tabs {
+    display: inline-flex;
+    gap: 4px;
+    padding: 3px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .os-tab {
+    border: none;
+    background: transparent;
+    padding: 4px 11px;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .os-tab.active {
+    background: #ffffff;
+    color: var(--primary-strong);
+    box-shadow: var(--shadow-sm);
+  }
+  .os-pane { display: none; }
+  .os-pane.active { display: block; }
+
+  .mcp-section-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 52px 0 18px;
+  }
+  .tools-grid {
+    display: grid;
+    gap: 8px;
+  }
+  .tool-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 13px 16px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+  }
+  .tool-row__left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 220px;
+    flex-shrink: 0;
+  }
+  .tool-name {
+    color: var(--primary-strong);
+    font-size: 13.5px;
+    font-weight: 700;
+  }
+  .tool-req {
+    font-family: ui-monospace, monospace;
+    font-size: 10.5px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--primary-bg);
+    color: var(--primary);
+  }
+  .tool-desc {
+    flex: 1;
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+  }
+  .skill-card {
+    padding: 18px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+  }
+  .skill-name {
+    display: inline-block;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--primary-strong);
+    background: var(--primary-bg);
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+  }
+  .skill-desc {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .prompts-list {
+    display: grid;
+    gap: 10px;
+  }
+  .prompt-item {
+    padding: 14px 18px;
+    background: var(--bg-3);
+    border-left: 3px solid var(--primary);
+    border-radius: 0 10px 10px 0;
+    font-size: 14px;
+    color: var(--muted-strong);
+  }
+  @media (max-width: 640px) {
+    .tool-row { flex-direction: column; gap: 6px; }
+  }
+</style>

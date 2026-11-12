@@ -47,9 +47,11 @@ export function formatDate(iso: string): string {
 }
 
 /** 检测 URL 类型 */
-export function detectUrlType(url: string): 'http' | 'bt' | 'ytdlp' {
+export function detectUrlType(url: string): 'http' | 'bt' | 'ytdlp' | 'ftp' | 'ed2k' {
   if (!url) return 'http'
-  const lower = url.toLowerCase()
+  const lower = url.trim().toLowerCase()
+  if (lower.startsWith('ed2k://')) return 'ed2k'
+  if (lower.startsWith('ftp://') || lower.startsWith('ftps://') || lower.startsWith('sftp://')) return 'ftp'
   if (lower.startsWith('magnet:') || lower.endsWith('.torrent')) return 'bt'
   const ytdlpSites = [
     'youtube.com', 'youtu.be', 'bilibili.com', 'b23.tv',
@@ -65,6 +67,13 @@ export function detectUrlType(url: string): 'http' | 'bt' | 'ytdlp' {
 /** 获取网站名称 */
 export function getSiteName(url: string, type: string): string {
   if (type === 'bt') return 'BT'
+  if (type === 'ed2k') return 'ed2k'
+  if (type === 'ftp') {
+    const l = url.trim().toLowerCase()
+    if (l.startsWith('sftp://')) return 'SFTP'
+    if (l.startsWith('ftps://')) return 'FTPS'
+    return 'FTP'
+  }
   const lower = url.toLowerCase()
   if (lower.includes('youtube.com') || lower.includes('youtu.be')) return 'YouTube'
   if (lower.includes('bilibili.com') || lower.includes('b23.tv')) return 'Bilibili'

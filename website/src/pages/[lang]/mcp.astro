@@ -10,5 +10,5 @@ export function getStaticPaths() {
 const { lang } = Astro.params
 ---
 <Base lang={lang as string} pageTitle="MCP integration">
-  <MCP />
+  <MCP lang={lang as string} />
 </Base>

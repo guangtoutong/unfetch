@@ -63,7 +63,7 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
 
   const [url, setUrl] = useState('')
   const [batchMode, setBatchMode] = useState(false)
-  const [urlType, setUrlType] = useState<'http' | 'bt' | 'ytdlp'>('http')
+  const [urlType, setUrlType] = useState<'http' | 'bt' | 'ytdlp' | 'ftp' | 'ed2k'>('http')
   const [quality, setQuality] = useState('best')
   const [saveDir, setSaveDir] = useState('')
   const [threads, setThreads] = useState(8)
@@ -265,15 +265,17 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
     http: t('urlType.http'),
     bt: t('urlType.bt'),
     ytdlp: t('urlType.ytdlp'),
+    ftp: 'FTP / SFTP',
+    ed2k: 'eD2k',
   }
 
   // 批量解析预览
   const parsedBatch = batchMode ? parseUrls(url) : []
 
-  // Mac App Store 版（masbuild）只支持 HTTP/HTTPS 直链。检测到 BT/磁力/视频站
+  // Mac App Store 版（masbuild）只支持 HTTP/HTTPS 与 FTP/SFTP 直链。检测到 BT/磁力/ed2k/视频站
   // URL 时给出引导到官网完整版的提示并禁止提交（后端也会以 403 兜底）。
   const isAppStore = __APP_STORE_BUILD__
-  const blockedByAppStore = isAppStore && !batchMode && url.trim().length > 0 && urlType !== 'http'
+  const blockedByAppStore = isAppStore && !batchMode && url.trim().length > 0 && urlType !== 'http' && urlType !== 'ftp'
 
   return (
     <AnimatePresence>
@@ -439,8 +441,8 @@ export const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, onClose }) =
                 )}
                 {blockedByAppStore && (
                   <div style={{ marginTop: 8, padding: '10px 12px', background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)', borderRadius: 8, fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                    此版本仅支持 HTTP / HTTPS 直链下载。
-                    {urlType === 'bt' ? ' BT / 磁力链接' : ' 视频网站'}下载请使用完整版：
+                    此版本仅支持 HTTP / HTTPS 与 FTP / SFTP 直链下载。
+                    {urlType === 'bt' ? ' BT / 磁力链接' : urlType === 'ed2k' ? ' eD2k 链接' : ' 视频网站'}下载请使用完整版：
                     <a
                       onClick={() => openExternal('https://unfetch.org').catch(console.error)}
                       style={{ color: '#a855f7', fontWeight: 700, cursor: 'pointer', marginLeft: 2 }}

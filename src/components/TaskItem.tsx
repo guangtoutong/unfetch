@@ -146,6 +146,10 @@ const SourceBadge: React.FC<{ url: string; type: string }> = ({ url, type }) => 
     爱奇艺: { bg: 'rgba(0,255,0,0.1)', text: '#00b140' },
     优酷: { bg: 'rgba(0,120,255,0.15)', text: '#0078ff' },
     腾讯视频: { bg: 'rgba(255,164,0,0.15)', text: '#ffa400' },
+    FTP: { bg: 'rgba(14,165,233,0.15)', text: '#0ea5e9' },
+    FTPS: { bg: 'rgba(14,165,233,0.15)', text: '#0ea5e9' },
+    SFTP: { bg: 'rgba(16,185,129,0.15)', text: '#10b981' },
+    ed2k: { bg: 'rgba(245,158,11,0.15)', text: '#f59e0b' },
     HTTP: { bg: 'rgba(100,116,139,0.15)', text: '#64748b' },
   }
   const style = colorMap[name] ?? colorMap.HTTP

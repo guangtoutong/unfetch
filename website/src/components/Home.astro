@@ -5,6 +5,7 @@ import Sponsor from './Sponsor.astro'
 interface Props { lang: string }
 const { lang } = Astro.props
 const s = getStrings(lang)
+const isZh = lang === 'zh'
 const mcpHref = lang === 'en' ? '/mcp' : `/${lang}/mcp`
 
 const VERSION = '0.2.5'
@@ -13,19 +14,36 @@ const baseUrl = `https://github.com/${REPO}/releases/download/v${VERSION}`
 const dlMac = `${baseUrl}/unfetch_${VERSION}_universal.dmg`
 const dlWin = `${baseUrl}/unfetch_${VERSION}_x64-setup.exe`
 const dlLinux = `${baseUrl}/unfetch_${VERSION}_amd64.AppImage`
+
+const featureBadges = [
+  '32 Threads · Multi-Mirror',
+  '35 Trackers · Auto uTP',
+  'yt-dlp · 4K / Audio',
+  '17 Tools · JSON-RPC',
+  '0.0.0.0 · QR Token',
+  'Regex · GUID Dedup',
+  'Webhook · Shell Exec',
+  'Cookies · Chain · Cron',
+  '6 Live Themes',
+  'Zero Telemetry · MIT',
+]
 ---
-<section style="padding: 100px 0 80px;">
-  <div class="container" style="text-align: center;">
-    <span style="display: inline-block; padding: 6px 14px; border-radius: 999px; background: var(--primary-bg); border: 1px solid #c4b5fd; color: var(--primary-strong); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 28px;">
-      {s.hero.tag}
-    </span>
-    <h1 style="font-size: 60px; font-weight: 800; line-height: 1.05; letter-spacing: -2px; margin-bottom: 24px; color: var(--fg); max-width: 16ch; margin-left: auto; margin-right: auto;">
-      {s.hero.title}
-    </h1>
-    <p style="font-size: 20px; color: var(--muted); max-width: 680px; margin: 0 auto 40px; line-height: 1.6;">
-      {s.hero.subtitle}
-    </p>
-    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+<section class="hero-section">
+  <div class="hero-aura" aria-hidden="true"></div>
+  <div class="container hero-container">
+    <a href={`https://github.com/${REPO}/releases/latest`} target="_blank" rel="noreferrer" class="hero-pill">
+      <span class="hero-pill__dot"></span>
+      <span>{s.hero.tag}</span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+        <polyline points="9 18 15 12 9 6" />
+      </svg>
+    </a>
+
+    <h1 class="hero-title">{s.hero.title}</h1>
+
+    <p class="hero-subtitle">{s.hero.subtitle}</p>
+
+    <div class="hero-actions">
       <a id="download-cta"
          href={dlMac}
          data-default-text={s.hero.download}
@@ -35,66 +53,298 @@ const dlLinux = `${baseUrl}/unfetch_${VERSION}_amd64.AppImage`
          data-mac-href={dlMac}
          data-win-href={dlWin}
          data-linux-href={dlLinux}
-         style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: var(--fg); color: var(--bg); border-radius: 999px; font-weight: 600; font-size: 15px; box-shadow: var(--shadow-md);">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+         class="btn-hero-primary">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
           <polyline points="8 17 12 21 16 17" />
           <line x1="12" y1="12" x2="12" y2="21" />
           <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" />
         </svg>
         <span id="download-cta-label">{s.hero.download}</span>
       </a>
-      <a href={mcpHref}
-         style="display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: var(--bg-2); border: 1px solid var(--border-strong); color: var(--fg); border-radius: 999px; font-weight: 600; font-size: 15px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z" />
-          <path d="M12 8v8M8 12h8" />
+      <a href={mcpHref} class="btn-hero-secondary">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="4" />
+          <path d="M9 9h6v6H9z" />
+          <path d="M9 1v2M15 1v2M9 21v2M15 21v2M1 9h2M1 15h2M21 9h2M21 15h2" />
         </svg>
-        {s.hero.mcp}
+        <span>{s.hero.mcp}</span>
       </a>
     </div>
-    <p style="margin-top: 18px; font-size: 13px; color: var(--muted); letter-spacing: 0.01em;">{s.hero.requirements}</p>
 
-    <div style="margin-top: 22px;">
-      <a href={(lang === 'en' ? '/' : `/${lang}/`) + '#download'}
-         style="display: inline-block; color: var(--primary); font-size: 14px; font-weight: 500; border-bottom: 1px dashed var(--primary); padding-bottom: 2px;">
+    <div class="hero-meta">
+      <span>{s.hero.requirements}</span>
+      <span class="hero-meta__sep">·</span>
+      <a href={(lang === 'en' ? '/' : `/${lang}/`) + '#download'} class="hero-all-platforms">
         {s.hero.allPlatforms}
       </a>
     </div>
 
     <div class="stats-row">
       <a href="https://github.com/guangtoutong/unfetch/stargazers" target="_blank" rel="noreferrer">
-        <img src="https://img.shields.io/github/stars/guangtoutong/unfetch?label=stars&color=7c3aed&labelColor=ede9fe&style=for-the-badge" alt="GitHub stars" height="28" />
+        <img src="https://img.shields.io/github/stars/guangtoutong/unfetch?label=stars&color=7c3aed&labelColor=ede9fe&style=for-the-badge" alt="GitHub stars" height="26" />
       </a>
       <a href="https://github.com/guangtoutong/unfetch/releases" target="_blank" rel="noreferrer">
-        <img src="https://img.shields.io/github/downloads/guangtoutong/unfetch/total?label=downloads&color=8b5cf6&labelColor=ede9fe&style=for-the-badge" alt="GitHub downloads" height="28" />
+        <img src="https://img.shields.io/github/downloads/guangtoutong/unfetch/total?label=downloads&color=8b5cf6&labelColor=ede9fe&style=for-the-badge" alt="GitHub downloads" height="26" />
       </a>
       <a href="https://github.com/guangtoutong/unfetch/releases/latest" target="_blank" rel="noreferrer">
-        <img src="https://img.shields.io/github/v/release/guangtoutong/unfetch?label=latest&color=a78bfa&labelColor=ede9fe&style=for-the-badge" alt="latest release" height="28" />
+        <img src="https://img.shields.io/github/v/release/guangtoutong/unfetch?label=latest&color=a78bfa&labelColor=ede9fe&style=for-the-badge" alt="latest release" height="26" />
       </a>
     </div>
 
-    <div style="margin-top: 34px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+    <div class="hero-chips">
       {s.hero.chips.map((c) => (
-        <span style="display: inline-block; padding: 8px 14px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--border); font-size: 13px; font-weight: 500; color: var(--muted-strong); box-shadow: var(--shadow-sm);">{c}</span>
+        <span class="hero-chip">{c}</span>
       ))}
+    </div>
+
+    <!-- Interactive Product Showcase (GUI / MCP / CLI + Live 6-Theme Switcher) -->
+    <div class="showcase-wrap">
+      <div class="showcase-toolbar">
+        <div class="showcase-tabs" role="tablist">
+          <button type="button" class="showcase-tab active" data-tab="gui">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+            <span>{isZh ? '桌面 GUI' : 'Desktop GUI'}</span>
+          </button>
+          <button type="button" class="showcase-tab" data-tab="mcp">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/><path d="M8 12h8M12 8v8"/></svg>
+            <span>{isZh ? 'AI 原生 (MCP)' : 'AI Agent (MCP)'}</span>
+          </button>
+          <button type="button" class="showcase-tab" data-tab="cli">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            <span>{isZh ? 'CLI 命令行' : 'CLI & Automation'}</span>
+          </button>
+        </div>
+
+        <div class="showcase-themes" id="theme-picker-bar" title={isZh ? '点击实时预览 6 套内置主题' : 'Click to preview 6 built-in themes'}>
+          <span class="showcase-themes__label">{isZh ? '预览主题：' : 'Theme:'}</span>
+          <button type="button" class="theme-dot active" data-theme="cream" style="background: #faf7f0; border-color: #7c3aed;" title="Cream Light"></button>
+          <button type="button" class="theme-dot" data-theme="indigo" style="background: #0d0d1a;" title="Deep Indigo"></button>
+          <button type="button" class="theme-dot" data-theme="paper" style="background: #ffffff;" title="Light Paper"></button>
+          <button type="button" class="theme-dot" data-theme="forest" style="background: #0a1410;" title="Forest Night"></button>
+          <button type="button" class="theme-dot" data-theme="cyber" style="background: #140824;" title="Cyberpunk"></button>
+          <button type="button" class="theme-dot" data-theme="mono" style="background: #18181b;" title="Mono Gray"></button>
+        </div>
+      </div>
+
+      <!-- Window Frame -->
+      <div class="mock-window" id="mock-window" data-preview-theme="cream">
+        <!-- Pane 1: Desktop GUI -->
+        <div class="showcase-pane active" data-pane="gui">
+          <div class="mock-titlebar">
+            <div class="mock-dots">
+              <span style="background:#ef4444;"></span>
+              <span style="background:#f59e0b;"></span>
+              <span style="background:#22c55e;"></span>
+            </div>
+            <div class="mock-titlebar__center">unfetch — {isZh ? '正在下载 (3)' : 'Active Downloads (3)'}</div>
+            <div class="mock-titlebar__speed">↓ 118.6 MB/s</div>
+          </div>
+
+          <div class="mock-body">
+            <aside class="mock-sidebar">
+              <div class="mock-nav-item active">
+                <span>{isZh ? '全部任务' : 'All Tasks'}</span>
+                <span class="mock-badge">4</span>
+              </div>
+              <div class="mock-nav-item">
+                <span>{isZh ? '下载中' : 'Downloading'}</span>
+                <span class="mock-badge">3</span>
+              </div>
+              <div class="mock-nav-item">
+                <span>{isZh ? '已完成' : 'Completed'}</span>
+                <span class="mock-badge">1</span>
+              </div>
+              <div class="mock-nav-sep"></div>
+              <div class="mock-nav-meta">
+                <div>⚡ HTTP × 32</div>
+                <div>🧲 DHT + uTP</div>
+                <div>🤖 MCP :19543</div>
+              </div>
+            </aside>
+
+            <div class="mock-main">
+              <!-- Task 1: Multi-mirror HTTP -->
+              <div class="mock-task">
+                <div class="mock-task__row">
+                  <div class="mock-task__name">
+                    <strong>ubuntu-24.04.1-desktop-amd64.iso</strong>
+                    <span class="mock-tag mock-tag--http">HTTP · 4 Mirrors</span>
+                    <span class="mock-tag mock-tag--ok">32 Threads</span>
+                  </div>
+                  <div class="mock-task__speed">84.2 MB/s · ETA 00:19</div>
+                </div>
+                <div class="mock-bar"><div class="mock-bar__fill" style="width: 74%;"></div></div>
+                <div class="mock-task__sub">
+                  <span>74.0% · 3.75 GB / 5.07 GB</span>
+                  <span>SHA256 {isZh ? '待校验' : 'armed'}</span>
+                </div>
+              </div>
+
+              <!-- Task 2: BitTorrent + uTP -->
+              <div class="mock-task">
+                <div class="mock-task__row">
+                  <div class="mock-task__name">
+                    <strong>blender-4.3-studio-open-movie-pack.torrent</strong>
+                    <span class="mock-tag mock-tag--bt">BT · uTP</span>
+                    <span class="mock-tag mock-tag--purple">142 peers · ★ 38</span>
+                  </div>
+                  <div class="mock-task__speed">28.9 MB/s · ETA 01:04</div>
+                </div>
+                <div class="mock-bar"><div class="mock-bar__fill" style="width: 52%;"></div></div>
+                <div class="mock-task__sub">
+                  <span>52.0% · 1.98 GB / 3.80 GB</span>
+                  <span>{isZh ? '已选 12/15 个文件' : '12 of 15 files selected'}</span>
+                </div>
+              </div>
+
+              <!-- Task 3: yt-dlp 4K Video -->
+              <div class="mock-task">
+                <div class="mock-task__row">
+                  <div class="mock-task__name">
+                    <strong>Linus Torvalds — Open Source Summit Keynote (4K60).mp4</strong>
+                    <span class="mock-tag mock-tag--yt">YouTube · 1080p+</span>
+                  </div>
+                  <div class="mock-task__speed">5.5 MB/s · ETA 00:12</div>
+                </div>
+                <div class="mock-bar"><div class="mock-bar__fill" style="width: 89%;"></div></div>
+                <div class="mock-task__sub">
+                  <span>89.0% · 612 MB / 688 MB</span>
+                  <span>yt-dlp · Play in Unflick</span>
+                </div>
+              </div>
+
+              <!-- Task 4: SFTP Done -->
+              <div class="mock-task mock-task--done">
+                <div class="mock-task__row">
+                  <div class="mock-task__name">
+                    <strong>prod-db-snapshot-2026-11.tar.zst</strong>
+                    <span class="mock-tag mock-tag--ftp">SFTP</span>
+                    <span class="mock-tag mock-tag--done">✓ SHA256 Verified</span>
+                  </div>
+                  <div class="mock-task__speed">{isZh ? '已完成 · Webhook 已触发' : 'Done · Webhook 200 OK'}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pane 2: AI Agent (MCP) -->
+        <div class="showcase-pane" data-pane="mcp">
+          <div class="mock-terminal">
+            <div class="mock-terminal__head">
+              <span>Claude Desktop / Cursor / Claude Code ↔ <code>unfetch --mcp</code> (17 tools)</span>
+              <span style="color:#4ade80;">● Connected via stdio</span>
+            </div>
+            <div class="mock-terminal__body">
+              <div class="mcp-msg mcp-msg--user">
+                <span class="mcp-role">User</span>
+                <span>{isZh ? '帮我用 4 个镜像高速下载 Ubuntu 24.04 ISO，校验 SHA256，下完告诉我。' : 'Download the Ubuntu 24.04 ISO across 4 mirrors with 32 threads, verify SHA256, and let me know when it finishes.'}</span>
+              </div>
+              <div class="mcp-msg mcp-msg--tool">
+                <span class="mcp-role">MCP Tool</span>
+                <code>unfetch.add_task({`{ url: "https://releases.ubuntu.com/.../ubuntu.iso", mirrors: [...], threads: 32, expected_sha256: "a329ca..." }`})</code>
+              </div>
+              <div class="mcp-msg mcp-msg--tool">
+                <span class="mcp-role">MCP Progress</span>
+                <code>notifications/progress → 48.2% · 86.4 MB/s · ETA 28s → 100.0% · SHA256 OK</code>
+              </div>
+              <div class="mcp-msg mcp-msg--ai">
+                <span class="mcp-role">AI</span>
+                <span>{isZh ? '✅ 下载完成并已通过 SHA256 校验：~/Downloads/ubuntu-24.04.1-desktop-amd64.iso（耗时 54 秒，平均 93.8 MB/s）。' : '✅ Download complete & SHA256 verified at ~/Downloads/ubuntu-24.04.1-desktop-amd64.iso (54s, avg 93.8 MB/s).'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pane 3: CLI -->
+        <div class="showcase-pane" data-pane="cli">
+          <div class="mock-terminal">
+            <div class="mock-terminal__head">
+              <span>zsh — unfetch CLI ↔ localhost:19543</span>
+              <span style="color:#a78bfa;">GUI / CLI / MCP share the same daemon</span>
+            </div>
+            <pre class="mock-cli-pre"><code><span style="color:#6ee7b7;">$</span> unfetch add "https://releases.ubuntu.com/24.04/ubuntu.iso" \
+    --threads 32 \
+    --mirrors "https://mirror.sjtu.edu.cn/ubuntu-releases/24.04/ubuntu.iso" \
+    --sha256 "a329ca391a7e73623ff2c2bde1240c9b879def8e7d1e038c46ea6f62dcd6ae4e"
+
+<span style="color:#94a3b8;"># {isZh ? '阻塞等待任务完成并实时显示进度条' : 'Wait with live progress in terminal'}</span>
+<span style="color:#6ee7b7;">$</span> unfetch wait 7f9c2a10-4b8e-4d1a-9c3b-0e12f8a4d911
+[downloading]  84.6%  91.42 MB/s
+
+<span style="color:#94a3b8;"># {isZh ? '支持 FTP / SFTP / 磁力 / ed2k / 1000+ 视频网站与 Shell 自动补全' : 'FTP / SFTP / Magnet / ed2k / 1000+ video sites & shell completions'}</span>
+<span style="color:#6ee7b7;">$</span> unfetch add "sftp://deploy@10.0.0.8/backups/db.tar.zst" --depends-on 7f9c2a10
+<span style="color:#6ee7b7;">$</span> unfetch completions zsh &gt; ~/.zsh/completion/_unfetch</code></pre>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<section style="padding: 80px 0; background: var(--bg-3);">
+<!-- Architecture Strip: 3 Frontends, 1 Engine -->
+<section class="arch-section">
   <div class="container">
-    <h2 style="text-align: center; font-size: 36px; font-weight: 800; margin-bottom: 16px; letter-spacing: -1px;">
-      {s.features.title}
-    </h2>
-    <p style="text-align: center; color: var(--muted); font-size: 16px; margin-bottom: 56px;">
-      {s.hero.requirements}
-    </p>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px;">
-      {s.features.items.map((f) => (
-        <div class="feature-card" style="padding: 26px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-sm); transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;">
-          <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 10px; color: var(--fg);">{f.title}</h3>
-          <p style="font-size: 14px; color: var(--muted); line-height: 1.65; margin: 0;">{f.desc}</p>
+    <div class="arch-box">
+      <div class="arch-col">
+        <div class="arch-col__label">{isZh ? '4 种驱动方式' : '4 Control Surfaces'}</div>
+        <div class="arch-pills">
+          <span class="arch-pill">🖥️ Tauri 2 GUI + Mini Window</span>
+          <span class="arch-pill">⌨️ <code>unfetch</code> CLI</span>
+          <span class="arch-pill">🤖 <code>--mcp</code> (17 AI Tools)</span>
+          <span class="arch-pill">📱 0.0.0.0 Remote Web UI</span>
         </div>
+      </div>
+      <div class="arch-arrow" aria-hidden="true">⇄</div>
+      <div class="arch-center">
+        <div class="arch-center__badge">REST + SSE · localhost:19543</div>
+        <div class="arch-center__title">Go Download Daemon</div>
+        <div class="arch-center__sub">{isZh ? 'SQLite 断点续传 · 令牌桶限速 · 自动退避重试 · 关窗口不断载' : 'SQLite state · Token-bucket rate limit · Exponential backoff · Headless ready'}</div>
+      </div>
+      <div class="arch-arrow" aria-hidden="true">⇄</div>
+      <div class="arch-col">
+        <div class="arch-col__label">{isZh ? '全协议引擎' : '5 Protocol Engines'}</div>
+        <div class="arch-pills">
+          <span class="arch-pill">⚡ Multi-Mirror HTTP/S</span>
+          <span class="arch-pill">🧲 BitTorrent / Magnet / uTP</span>
+          <span class="arch-pill">🎬 yt-dlp (1000+ Sites)</span>
+          <span class="arch-pill">📂 FTP / FTPS / SFTP &amp; ed2k</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Bento Features Grid -->
+<section class="features-section">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-eyebrow">{isZh ? '核心能力' : 'CAPABILITIES'}</span>
+      <h2 class="section-title">{s.features.title}</h2>
+      <p class="section-sub">{s.hero.requirements}</p>
+    </div>
+
+    <div class="bento-grid">
+      {s.features.items.map((f, idx) => (
+        <article class={`bento-card ${idx === 0 || idx === 3 ? 'bento-card--wide' : ''}`}>
+          <div class="bento-card__top">
+            <span class="bento-icon">
+              {idx === 0 && (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>)}
+              {idx === 1 && (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>)}
+              {idx === 2 && (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="4" width="20" height="16" rx="3"/><polygon points="10 9 15 12 10 15 10 9" fill="currentColor"/></svg>)}
+              {idx === 3 && (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6v6H9z"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>)}
+              {idx === 4 && (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>)}
+              {idx === 5 && (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>)}
+              {idx === 6 && (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>)}
+              {idx === 7 && (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>)}
+              {idx === 8 && (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>)}
+              {idx >= 9 && (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>)}
+            </span>
+            <span class="bento-badge">{featureBadges[idx] || 'unfetch'}</span>
+          </div>
+          <h3 class="bento-card__title">{f.title}</h3>
+          <p class="bento-card__desc">{f.desc}</p>
+        </article>
       ))}
     </div>
   </div>
@@ -104,21 +354,766 @@ const dlLinux = `${baseUrl}/unfetch_${VERSION}_amd64.AppImage`
 
 <Sponsor lang={lang} />
 
-<section style="padding: 80px 0;">
-  <div class="container" style="text-align: center; padding: 64px 32px; background: var(--fg); border-radius: 24px; box-shadow: var(--shadow-lg);">
-    <h2 style="font-size: 34px; font-weight: 800; margin-bottom: 14px; color: var(--bg); letter-spacing: -0.7px;">{s.cta.title}</h2>
-    <p style="font-size: 17px; color: #d4d4d4; margin-bottom: 30px;">{s.cta.desc}</p>
-    <a href={dlMac}
-       style="display: inline-flex; align-items: center; gap: 8px; padding: 15px 34px; background: var(--bg); color: var(--fg); border-radius: 999px; font-weight: 700; font-size: 15px;">
-      {s.cta.button}
-    </a>
+<section style="padding: 72px 0 32px;">
+  <div class="container">
+    <div class="cta-banner">
+      <div class="cta-banner__glow" aria-hidden="true"></div>
+      <h2 class="cta-banner__title">{s.cta.title}</h2>
+      <p class="cta-banner__desc">{s.cta.desc}</p>
+      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1;">
+        <a id="bottom-download-cta" href={dlMac} class="cta-banner__btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="8 17 12 21 16 17" />
+            <line x1="12" y1="12" x2="12" y2="21" />
+            <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" />
+          </svg>
+          <span>{s.cta.button}</span>
+        </a>
+        <a href={mcpHref} class="cta-banner__btn-secondary">
+          <span>{s.hero.mcp}</span>
+        </a>
+      </div>
+    </div>
   </div>
 </section>
 
+<script is:inline>
+  // Interactive Showcase Tabs & Live Theme Switcher
+  ;(function () {
+    const tabs = document.querySelectorAll('.showcase-tab')
+    const panes = document.querySelectorAll('.showcase-pane')
+    const themeBar = document.getElementById('theme-picker-bar')
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-tab')
+        tabs.forEach((t) => t.classList.toggle('active', t === tab))
+        panes.forEach((p) => p.classList.toggle('active', p.getAttribute('data-pane') === target))
+        if (themeBar) {
+          themeBar.style.opacity = target === 'gui' ? '1' : '0.45'
+        }
+      })
+    })
+
+    const win = document.getElementById('mock-window')
+    const dots = document.querySelectorAll('.theme-dot')
+    dots.forEach((dot) => {
+      dot.addEventListener('click', () => {
+        const th = dot.getAttribute('data-theme')
+        if (win && th) win.setAttribute('data-preview-theme', th)
+        dots.forEach((d) => d.classList.toggle('active', d === dot))
+      })
+    })
+  })()
+</script>
+
 <style>
-  .feature-card:hover {
-    transform: translateY(-2px);
+  .hero-section {
+    position: relative;
+    padding: 76px 0 64px;
+    overflow: hidden;
+  }
+  .hero-aura {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 75% 45% at 50% -8%, rgba(124, 58, 237, 0.11), transparent 70%),
+      radial-gradient(ellipse 45% 35% at 80% 10%, rgba(234, 88, 12, 0.05), transparent 65%);
+    pointer-events: none;
+  }
+  .hero-container {
+    position: relative;
+    text-align: center;
+  }
+  .hero-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 15px;
+    border-radius: 999px;
+    background: var(--primary-bg);
+    border: 1px solid var(--primary-border);
+    color: var(--primary-strong);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .hero-pill:hover {
+    border-color: var(--primary);
+    transform: translateY(-1px);
+  }
+  .hero-pill__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  }
+  .hero-title {
+    font-size: clamp(38px, 6vw, 64px);
+    font-weight: 850;
+    line-height: 1.06;
+    letter-spacing: -0.035em;
+    margin: 0 auto 22px;
+    max-width: 17ch;
+    color: var(--fg);
+  }
+  .hero-subtitle {
+    font-size: clamp(16.5px, 2.1vw, 19.5px);
+    color: var(--muted);
+    max-width: 700px;
+    margin: 0 auto 36px;
+    line-height: 1.65;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-hero-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 14px 28px;
+    background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
+    color: #ffffff !important;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 15px;
+    box-shadow: 0 10px 25px -5px rgba(9, 9, 11, 0.28), 0 0 0 1px rgba(9, 9, 11, 0.9);
+  }
+  .btn-hero-primary:hover {
+    background: linear-gradient(180deg, #7c3aed 0%, #6d28d9 100%);
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-1.5px);
+  }
+  .btn-hero-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 26px;
+    background: var(--bg-2);
+    border: 1px solid var(--border-strong);
+    color: var(--fg) !important;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 15px;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-hero-secondary:hover {
+    border-color: var(--primary);
+    color: var(--primary-strong) !important;
+    background: var(--primary-bg);
+    transform: translateY(-1.5px);
+  }
+  .hero-meta {
+    margin-top: 18px;
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .hero-meta__sep { opacity: 0.5; }
+  .hero-all-platforms {
+    color: var(--primary);
+    font-weight: 600;
+    border-bottom: 1px dashed var(--primary);
+    padding-bottom: 1px;
+  }
+  .hero-chips {
+    margin-top: 26px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .hero-chip {
+    display: inline-block;
+    padding: 6px 13px;
+    border-radius: 999px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--muted-strong);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Showcase Window */
+  .showcase-wrap {
+    margin: 44px auto 0;
+    max-width: 980px;
+    text-align: left;
+  }
+  .showcase-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .showcase-tabs {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: 11px;
+  }
+  .showcase-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .showcase-tab:hover { color: var(--fg); }
+  .showcase-tab.active {
+    background: #ffffff;
+    color: var(--primary-strong);
+    box-shadow: var(--shadow-sm);
+  }
+  .showcase-themes {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 12px;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    transition: opacity 0.2s;
+  }
+  .showcase-themes__label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+    margin-right: 2px;
+  }
+  .theme-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--border-strong);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .theme-dot:hover { transform: scale(1.15); }
+  .theme-dot.active {
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--primary);
+  }
+
+  /* Mock Window Themes */
+  .mock-window {
+    --mw-bg: #faf7f0;
+    --mw-sidebar: #f3efe4;
+    --mw-card: #ffffff;
+    --mw-border: rgba(30, 25, 16, 0.11);
+    --mw-fg: #1c1917;
+    --mw-muted: #6b6358;
+    --mw-accent: #7c3aed;
+    background: var(--mw-bg);
+    color: var(--mw-fg);
+    border: 1px solid var(--border-strong);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+  .mock-window[data-preview-theme="indigo"] {
+    --mw-bg: #0b0c16;
+    --mw-sidebar: #111324;
+    --mw-card: #17192e;
+    --mw-border: rgba(148, 163, 184, 0.16);
+    --mw-fg: #f1f5f9;
+    --mw-muted: #94a3b8;
+    --mw-accent: #818cf8;
+  }
+  .mock-window[data-preview-theme="paper"] {
+    --mw-bg: #ffffff;
+    --mw-sidebar: #f8fafc;
+    --mw-card: #ffffff;
+    --mw-border: #e2e8f0;
+    --mw-fg: #0f172a;
+    --mw-muted: #64748b;
+    --mw-accent: #6366f1;
+  }
+  .mock-window[data-preview-theme="forest"] {
+    --mw-bg: #08120e;
+    --mw-sidebar: #0d1c16;
+    --mw-card: #12261e;
+    --mw-border: rgba(52, 211, 153, 0.18);
+    --mw-fg: #ecfdf5;
+    --mw-muted: #6ee7b7;
+    --mw-accent: #10b981;
+  }
+  .mock-window[data-preview-theme="cyber"] {
+    --mw-bg: #12071f;
+    --mw-sidebar: #1a0b2e;
+    --mw-card: #24103d;
+    --mw-border: rgba(236, 72, 153, 0.26);
+    --mw-fg: #fdf4ff;
+    --mw-muted: #f0abfc;
+    --mw-accent: #ec4899;
+  }
+  .mock-window[data-preview-theme="mono"] {
+    --mw-bg: #141417;
+    --mw-sidebar: #1c1c20;
+    --mw-card: #232329;
+    --mw-border: rgba(255, 255, 255, 0.12);
+    --mw-fg: #fafafa;
+    --mw-muted: #a1a1aa;
+    --mw-accent: #a855f7;
+  }
+
+  .showcase-pane { display: none; }
+  .showcase-pane.active { display: block; }
+
+  .mock-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 16px;
+    background: var(--mw-sidebar);
+    border-bottom: 1px solid var(--mw-border);
+    font-size: 12.5px;
+  }
+  .mock-dots { display: flex; gap: 6px; }
+  .mock-dots span { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .mock-titlebar__center { font-weight: 600; color: var(--mw-muted); }
+  .mock-titlebar__speed {
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    color: #10b981;
+    font-size: 12px;
+  }
+  .mock-body {
+    display: grid;
+    grid-template-columns: 185px 1fr;
+    min-height: 330px;
+  }
+  .mock-sidebar {
+    background: var(--mw-sidebar);
+    border-right: 1px solid var(--mw-border);
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12.5px;
+  }
+  .mock-nav-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 10px;
+    border-radius: 7px;
+    color: var(--mw-muted);
+    font-weight: 500;
+  }
+  .mock-nav-item.active {
+    background: rgba(124, 58, 237, 0.14);
+    color: var(--mw-accent);
+    font-weight: 700;
+  }
+  .mock-badge {
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: rgba(124, 58, 237, 0.12);
+  }
+  .mock-nav-sep {
+    height: 1px;
+    background: var(--mw-border);
+    margin: 8px 0;
+  }
+  .mock-nav-meta {
+    margin-top: auto;
+    font-size: 11px;
+    color: var(--mw-muted);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-family: ui-monospace, monospace;
+    opacity: 0.85;
+  }
+  .mock-main {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mock-task {
+    background: var(--mw-card);
+    border: 1px solid var(--mw-border);
+    border-radius: 10px;
+    padding: 11px 14px;
+  }
+  .mock-task--done { opacity: 0.85; }
+  .mock-task__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 7px;
+  }
+  .mock-task__name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+  }
+  .mock-task__speed {
+    font-family: ui-monospace, monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--mw-accent);
+  }
+  .mock-tag {
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .mock-tag--http { background: rgba(59, 130, 246, 0.14); color: #3b82f6; }
+  .mock-tag--ok { background: rgba(16, 185, 129, 0.14); color: #10b981; }
+  .mock-tag--bt { background: rgba(14, 165, 233, 0.14); color: #0ea5e9; }
+  .mock-tag--purple { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+  .mock-tag--yt { background: rgba(239, 68, 68, 0.14); color: #ef4444; }
+  .mock-tag--ftp { background: rgba(245, 158, 11, 0.15); color: #d97706; }
+  .mock-tag--done { background: rgba(16, 185, 129, 0.14); color: #10b981; }
+  .mock-bar {
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(124, 58, 237, 0.12);
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .mock-bar__fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+  }
+  .mock-task__sub {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--mw-muted);
+    font-family: ui-monospace, monospace;
+  }
+
+  /* Terminal / MCP Pane */
+  .mock-terminal {
+    background: #09090b;
+    color: #f4f4f5;
+    min-height: 360px;
+    display: flex;
+    flex-direction: column;
+  }
+  .mock-terminal__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    background: #18181b;
+    border-bottom: 1px solid #27272a;
+    font-size: 12px;
+    color: #a1a1aa;
+  }
+  .mock-terminal__body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 13px;
+  }
+  .mcp-msg {
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+    padding: 11px 14px;
+    border-radius: 10px;
+    background: #18181b;
+    border: 1px solid #27272a;
+    line-height: 1.55;
+  }
+  .mcp-msg code {
+    color: #c4b5fd;
+    font-size: 12px;
+    word-break: break-all;
+  }
+  .mcp-role {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: #27272a;
+    color: #e4e4e7;
+  }
+  .mcp-msg--tool .mcp-role { background: rgba(124, 58, 237, 0.25); color: #ddd6fe; }
+  .mcp-msg--ai .mcp-role { background: rgba(16, 185, 129, 0.22); color: #6ee7b7; }
+  .mock-cli-pre {
+    padding: 22px;
+    font-size: 12.8px;
+    line-height: 1.7;
+    color: #e4e4e7;
+    overflow-x: auto;
+  }
+
+  /* Architecture Strip */
+  .arch-section {
+    padding: 20px 0 56px;
+  }
+  .arch-box {
+    display: grid;
+    grid-template-columns: 1fr auto 1.1fr auto 1fr;
+    align-items: center;
+    gap: 18px;
+    padding: 26px 28px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+  .arch-col__label {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--primary);
+    margin-bottom: 10px;
+  }
+  .arch-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .arch-pill {
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 11px;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--fg);
+    box-shadow: var(--shadow-sm);
+  }
+  .arch-arrow {
+    font-size: 22px;
+    color: var(--primary);
+    font-weight: 700;
+  }
+  .arch-center {
+    text-align: center;
+    padding: 18px 20px;
+    background: #ffffff;
+    border: 1.5px solid var(--primary-border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-md);
+  }
+  .arch-center__badge {
+    display: inline-block;
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--primary-strong);
+    background: var(--primary-bg);
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-bottom: 6px;
+  }
+  .arch-center__title {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--fg);
+    margin-bottom: 4px;
+  }
+  .arch-center__sub {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* Features Bento Grid */
+  .features-section {
+    padding: 84px 0;
+    background: var(--bg-3);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .section-head {
+    text-align: center;
+    margin-bottom: 52px;
+  }
+  .section-eyebrow {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 10px;
+  }
+  .section-title {
+    font-size: clamp(28px, 4vw, 38px);
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: -0.025em;
+  }
+  .section-sub {
+    font-size: 15.5px;
+    color: var(--muted);
+  }
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  .bento-card {
+    padding: 26px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .bento-card--wide {
+    grid-column: span 2;
+    background: linear-gradient(180deg, #ffffff 0%, #faf8ff 100%);
+  }
+  .bento-card:hover {
+    transform: translateY(-3px);
     box-shadow: var(--shadow-md);
     border-color: var(--primary);
+  }
+  .bento-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .bento-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--primary-bg);
+    border: 1px solid var(--primary-border);
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bento-badge {
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--bg-subtle);
+    padding: 3px 9px;
+    border-radius: 999px;
+  }
+  .bento-card__title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--fg);
+  }
+  .bento-card__desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  /* Bottom CTA */
+  .cta-banner {
+    position: relative;
+    text-align: center;
+    padding: 68px 32px;
+    background: linear-gradient(135deg, #09090b 0%, #1e1b4b 100%);
+    border-radius: 24px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+  .cta-banner__glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.32), transparent 65%);
+    pointer-events: none;
+  }
+  .cta-banner__title {
+    position: relative;
+    z-index: 1;
+    font-size: clamp(26px, 3.8vw, 36px);
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: #ffffff;
+  }
+  .cta-banner__desc {
+    position: relative;
+    z-index: 1;
+    font-size: 16.5px;
+    color: #cbd5e1;
+    margin-bottom: 28px;
+  }
+  .cta-banner__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: #ffffff;
+    color: #09090b !important;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 15px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+  .cta-banner__btn:hover {
+    transform: translateY(-2px);
+    background: #f5f3ff;
+    color: var(--primary-strong) !important;
+  }
+  .cta-banner__btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 26px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: #ffffff !important;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .cta-banner__btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.18);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 920px) {
+    .bento-grid { grid-template-columns: 1fr; }
+    .bento-card--wide { grid-column: span 1; }
+    .arch-box { grid-template-columns: 1fr; text-align: center; }
+    .arch-pills { justify-content: center; }
+    .arch-arrow { transform: rotate(90deg); }
+    .mock-body { grid-template-columns: 1fr; }
+    .mock-sidebar { display: none; }
   }
 </style>

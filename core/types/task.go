@@ -8,6 +8,8 @@ const (
 	TaskTypeHTTP  TaskType = "http"
 	TaskTypeBT    TaskType = "bt"
 	TaskTypeYtdlp TaskType = "ytdlp"
+	TaskTypeFTP   TaskType = "ftp"
+	TaskTypeEd2k  TaskType = "ed2k"
 )
 
 type Status string
@@ -68,7 +70,9 @@ type Task struct {
 	Threads    int        `json:"threads"`
 	Proxy      string     `json:"proxy,omitempty"`
 	Quality    string     `json:"quality,omitempty"` // for ytdlp: best/1080p/720p/480p/audio
-	Cookies    string     `json:"cookies,omitempty"` // browser name or cookie file path
+	Cookies    string     `json:"cookies,omitempty"` // browser name, cookie file path, or raw Cookie header
+	UserAgent  string     `json:"user_agent,omitempty"`
+	Headers    map[string]string `json:"headers,omitempty"`
 	PlayAfter  bool       `json:"play_after"`
 	Trashed    bool       `json:"trashed"`
 	RetryCount int        `json:"retry_count"`            // 已重试次数
@@ -101,6 +105,8 @@ type AddTaskRequest struct {
 	Proxy         string     `json:"proxy,omitempty"`
 	Quality       string     `json:"quality,omitempty"`
 	Cookies       string     `json:"cookies,omitempty"`
+	UserAgent     string     `json:"user_agent,omitempty"`
+	Headers       map[string]string `json:"headers,omitempty"`
 	PlayAfter     bool       `json:"play_after,omitempty"`
 	StartAt       *time.Time `json:"start_at,omitempty"`
 	Tags          []string   `json:"tags,omitempty"`

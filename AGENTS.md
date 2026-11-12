@@ -337,36 +337,38 @@ unfetch add "<stream_url>" --filename "video_title.mp4" --play-after
 
 ## 开发阶段
 
-### Phase 0：脚手架（当前）
-- [ ] 项目目录初始化
-- [ ] Go daemon 骨架（HTTP 服务器 + /health 端点）
-- [ ] Rust/Tauri 骨架（三模式检测：GUI/CLI/MCP）
-- [ ] React 前端骨架（空白任务列表）
-- [ ] Rust CLI 骨架（`unfetch add`、`unfetch list`）
-- [ ] 确认三个进程能正常通信
+### Phase 0：脚手架（已完成）
+- [x] 项目目录初始化
+- [x] Go daemon 骨架（HTTP 服务器 + /health 端点）
+- [x] Rust/Tauri 骨架（三模式检测：GUI/CLI/MCP）
+- [x] React 前端骨架（空白任务列表）
+- [x] Rust CLI 骨架（`unfetch add`、`unfetch list`）
+- [x] 确认三个进程能正常通信
 
-### Phase 1：核心下载能力
-- [ ] HTTP 多线程下载（分片 + 断点续传）
-- [ ] BT + 磁力链接下载（anacrolix/torrent）
-- [ ] yt-dlp 集成（go-ytdlp，支持 1000+ 网站）
-- [ ] 任务队列（并发控制：最多同时 N 个任务）
-- [ ] SQLite 任务持久化（重启恢复任务状态）
-- [ ] 前端：任务列表 + 实时进度条（轮询 /tasks）
-- [ ] 前端：添加任务对话框（URL 输入 + 质量选择）
+### Phase 1：核心下载能力（已完成）
+- [x] HTTP 多线程下载（分片 + 断点续传 + 多镜像并发 + SHA256/MD5 校验）
+- [x] BT + 磁力链接下载（anacrolix/torrent + 文件预览选择 + uTP 自动 fallback）
+- [x] yt-dlp 集成（支持 1000+ 网站）
+- [x] 任务队列（并发控制：最多同时 N 个任务 + 任务依赖链）
+- [x] SQLite 任务持久化（重启恢复任务状态）
+- [x] 前端：任务列表 + 实时进度条（SSE + 轮询 /tasks）
+- [x] 前端：添加任务对话框（URL 输入 + 质量选择 + 批量 + 模板）
 
-### Phase 2：体验打磨
-- [ ] 浏览器扩展（Chrome/Edge/Firefox，右键"用 unfetch 下载"）
-- [ ] 系统托盘（最小化到托盘，不退出 daemon）
-- [ ] 下载完成通知（系统通知）
-- [ ] Unflick 联动（下载完播放按钮）
-- [ ] FTP/SFTP 支持
+### Phase 2：体验打磨（已完成）
+- [x] 浏览器扩展（Chrome/Edge，右键與嗅探下载 `extension/`）
+- [x] 系统托盘（最小化到托盘，不退出 daemon）+ 迷你悬浮窗
+- [x] 下载完成通知（系统通知 + Webhook / Shell 完成钩子）
+- [x] Unflick 联动（下载完播放按钮）
+- [x] FTP/FTPS/SFTP 支持（`core/downloader/ftp.go`）
 
-### Phase 3：高级功能
-- [ ] 调度下载（定时开始/限速时段）
-- [ ] 全局限速（上传/下载带宽上限）
-- [ ] ed2k 协议
-- [ ] MCP 工具完整实现
-- [ ] CLI 补全（bash/zsh/fish/powershell）
+### Phase 3：高级功能（已完成）
+- [x] 调度下载（定时开始 `start_at` / 24h 分时段限速计划 `speed_schedule`）
+- [x] 全局限速（下载带宽上限令牌桶）
+- [x] ed2k 协议（`core/downloader/ed2k.go`，WebSeed 直连 + aMule CLI 联动）
+- [x] MCP 工具完整实现（17 个工具 + Resources 订阅 + Progress 通知 + 4 个 Claude Skills）
+- [x] CLI 补全（`unfetch completions <bash|zsh|fish|powershell|elvish>`）
+- [x] RSS 自动订阅（正则过滤 + GUID 去重）与远程 Web UI（`0.0.0.0` + Token 鉴权）
+- [x] 6 套主题皮肤 + 14 种语言国际化 + 多语言官网（`website/`）+ Mac App Store 合规版（`-tags masbuild`）
 
 ---
 

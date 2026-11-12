@@ -1,4 +1,4 @@
-export type TaskType = 'http' | 'bt' | 'ytdlp'
+export type TaskType = 'http' | 'bt' | 'ytdlp' | 'ftp' | 'ed2k'
 export type TaskStatus = 'queued' | 'downloading' | 'paused' | 'done' | 'error'
 export type FilterType = TaskStatus | 'all' | 'trash'
 export type OnAllDoneAction = '' | 'notify' | 'open_dir' | 'shutdown' | 'sleep'

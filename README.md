@@ -18,7 +18,7 @@ unfetch is the download engine that finishes what your browser starts. Fast mult
 
 ## Features
 
-- **Multi-mirror HTTP** — up to 32 threads × multiple mirror URLs, automatic fallback, resume, SHA256/MD5 verification.
+- **Multi-mirror HTTP & FTP/SFTP** — up to 32 threads × multiple mirror URLs, automatic fallback, resume, SHA256/MD5 verification, plus native FTP/FTPS/SFTP and ed2k support.
 - **BT / Magnet** — 35 public trackers, IPv6 + WebTorrent, file picker before download, peer/seeder stats, auto uTP fallback when your ISP throttles.
 - **1000+ video sites** — YouTube, Bilibili, TikTok, X, and the rest via bundled yt-dlp.
 - **AI-native (MCP)** — `add_task`, `list_tasks`, `wait_for_task`, progress notifications — from any MCP host (Claude Desktop, Cursor, Codex, …). No vendor lock-in.
@@ -81,9 +81,9 @@ Drop this into your Claude Desktop / Cursor config (`~/Library/Application Suppo
 }
 ```
 
-Then your AI can `add_task`, `list_tasks`, `wait_for_task`, etc. See [docs/mcp.md](docs/mcp.md) for the full tool schema, or visit <https://unfetch.org/mcp>.
+Then your AI can `add_task`, `list_tasks`, `wait_for_task`, etc. See [mcp/README.md](mcp/README.md) for the full tool schema, or visit <https://unfetch.org/mcp>.
 
-**17 MCP tools** (full schemas, resources, and per-marketplace publishing materials live in [`mcp/`](mcp/)): `add_task`, `wait_for_task`, `wait_for_all`, `list_tasks`, `get_task`, `pause_task`, `resume_task`, `remove_task`, `trash_task`, `restore_task`, `empty_trash`, `restore_all_trashed`, `get_config`, `set_config`, `play_in_unflick`.
+**17 MCP tools** (full schemas, resources, and per-marketplace publishing materials live in [`mcp/`](mcp/)): `add_task`, `detect_url`, `preview_torrent`, `wait_for_task`, `wait_for_all`, `list_tasks`, `get_task`, `pause_task`, `resume_task`, `remove_task`, `trash_task`, `restore_task`, `empty_trash`, `restore_all_trashed`, `get_config`, `set_config`, `play_in_unflick`.
 
 ### Skills & one-command install
 
@@ -136,6 +136,6 @@ unfetch is built and maintained by one developer. If it saves you time, sponsors
 
 ## License
 
-MIT-style license. See [LICENSE](LICENSE) (forthcoming — currently de-facto MIT).
+MIT License. See [LICENSE](LICENSE).
 
 Contributions to upstream are encouraged — unfetch's maintainer is also an active contributor to [`anacrolix/torrent`](https://github.com/anacrolix/torrent).

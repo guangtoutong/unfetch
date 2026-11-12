@@ -36,7 +36,7 @@ unfetch --mcp        # stdio JSON-RPC 2.0，自动拉起本地 daemon（localhos
 - **能力**：`tools` + `resources`（支持 subscribe / listChanged）+ `logging`
 - **传输**：stdio（行分隔 JSON）
 
-> ⚠️ **版本对齐提醒**：`serverInfo.version` 取的是 `CARGO_PKG_VERSION`，目前 `src-tauri/Cargo.toml` 是 `0.2.1`，而产品公开版是 `0.2.4`。上架材料统一按 `0.2.4` 写，建议把 Cargo.toml 也 bump 到 `0.2.4`，否则市场上看到的版本会是 0.2.1。
+> 💡 **版本对齐说明**：`serverInfo.version` 取自 `CARGO_PKG_VERSION`（`src-tauri/Cargo.toml`），发版脚本 `scripts/release.sh` 会自动同步更新 `package.json`、`src-tauri/Cargo.toml`、`src-tauri/tauri.conf.json`、`mcp/server.json` 与 `.claude-plugin/` 的版本号。
 
 ## 2. 客户端接入配置
 
@@ -63,7 +63,9 @@ Claude Desktop / Cursor / Codex 等任意 MCP host：
 
 | 工具 | 说明 | 必填参数 |
 |---|---|---|
-| `add_task` | 添加下载（HTTP/HTTPS、`magnet:`、1000+ 视频站） | `url` |
+| `add_task` | 添加下载（HTTP/HTTPS、FTP/FTPS/SFTP、`magnet:`、`ed2k:`、1000+ 视频站） | `url` |
+| `detect_url` | 检测 URL 协议与引擎类型（`http`/`ftp`/`bt`/`ed2k`/`ytdlp`） | `url` |
+| `preview_torrent` | 预览种子或磁力链接内的文件列表（返回文件名、大小及下标） | `url` |
 | `wait_for_task` | 阻塞等单个任务完成/失败，期间推 `notifications/progress` | `id` |
 | `wait_for_all` | 等所有未完成任务（queued/downloading/paused）跑完或超时 | — |
 | `list_tasks` | 列任务，可按 `status` 过滤 | — |
@@ -79,7 +81,7 @@ Claude Desktop / Cursor / Codex 等任意 MCP host：
 | `set_config` | 改配置（下载目录/并发/线程/代理/限速/完成动作…） | — |
 | `play_in_unflick` | 用 Unflick 播放本地文件 | `path` |
 
-`add_task` 完整参数：`url`(必填)、`save_dir`、`filename`、`threads`、`quality`(`best`/`1080p`/`720p`/`480p`/`audio`)、`proxy`、`play_after`、`tags[]`、`start_at`(RFC3339 定时)、`expected_sha256`、`expected_md5`。
+`add_task` 完整参数：`url`(必填)、`save_dir`、`filename`、`threads`、`quality`(`best`/`1080p`/`720p`/`480p`/`audio`)、`proxy`、`cookies`、`play_after`、`tags[]`、`start_at`(RFC3339 定时)、`expected_sha256`、`expected_md5`、`mirrors[]`、`depends_on[]`、`template`、`selected_files[]`、`custom_trackers[]`。
 
 ### Resources（任务即资源）
 
@@ -148,6 +150,6 @@ mcp-publisher publish ./mcp/server.json
 - [x] `LICENSE`（MIT）已创建 —— 多数市场要求明确 license
 - [x] 主仓库 README 有 MCP 章节
 - [x] `mcp/server.json` 结构化元信息齐全
-- [ ] 把 `Cargo.toml` 版本 bump 到 `0.2.4`，让 `serverInfo.version` 对齐
+- [x] `Cargo.toml` 版本已与发版版本对齐（`release.sh` 自动同步）
 - [ ] （可选，官方 registry 用）出一个 `.mcpb` bundle 挂到 Release
 - [ ] 截图 / GIF：AI 下载并回报进度的演示（市场详情页转化率高）

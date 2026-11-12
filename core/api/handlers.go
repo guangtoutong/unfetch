@@ -38,7 +38,17 @@ var videoHostnames = []string{
 
 // detectURLType 根据 URL 判断下载类型
 func detectURLType(url string) types.TaskType {
-	lower := strings.ToLower(url)
+	lower := strings.ToLower(strings.TrimSpace(url))
+
+	// ed2k 判断
+	if strings.HasPrefix(lower, "ed2k://") {
+		return types.TaskTypeEd2k
+	}
+
+	// FTP / FTPS / SFTP 判断
+	if strings.HasPrefix(lower, "ftp://") || strings.HasPrefix(lower, "ftps://") || strings.HasPrefix(lower, "sftp://") {
+		return types.TaskTypeFTP
+	}
 
 	// BT 判断
 	if strings.HasPrefix(lower, "magnet:") {
@@ -164,10 +174,19 @@ func (h *Handlers) AddTask(w http.ResponseWriter, r *http.Request) {
 				if req.Cookies == "" {
 					req.Cookies = t.Cookies
 				}
-				// User-Agent 和 Headers 透传给 downloader（依赖下载器实现）；先合并到 Cookies 行内是不合适的
-				// 此处仅做 Cookies 合并，UA/Headers 暂未在下载器中接入，留待后续扩展
-				_ = t.UserAgent
-				_ = t.Headers
+				if req.UserAgent == "" {
+					req.UserAgent = t.UserAgent
+				}
+				if len(t.Headers) > 0 {
+					if req.Headers == nil {
+						req.Headers = make(map[string]string, len(t.Headers))
+					}
+					for k, v := range t.Headers {
+						if _, exists := req.Headers[k]; !exists {
+							req.Headers[k] = v
+						}
+					}
+				}
 				break
 			}
 		}
@@ -175,10 +194,10 @@ func (h *Handlers) AddTask(w http.ResponseWriter, r *http.Request) {
 
 	taskType := detectURLType(req.URL)
 
-	// App Store 版（masbuild）只允许 HTTP/HTTPS 直链下载。magnet / .torrent /
-	// 视频网站一律拒绝，符合 App Store Review Guideline 5.2.3。
-	if types.AppStoreEdition && taskType != types.TaskTypeHTTP {
-		writeError(w, http.StatusForbidden, "此版本仅支持 HTTP/HTTPS 直链下载；BT、磁力链接和视频网站下载请使用 unfetch.org 的完整版")
+	// App Store 版（masbuild）只允许 HTTP/HTTPS 与 FTP/SFTP 直链下载。magnet / .torrent /
+	// ed2k / 视频网站一律拒绝，符合 App Store Review Guideline 5.2.3。
+	if types.AppStoreEdition && taskType != types.TaskTypeHTTP && taskType != types.TaskTypeFTP {
+		writeError(w, http.StatusForbidden, "此版本仅支持 HTTP/HTTPS 与 FTP/SFTP 直链下载；BT、磁力链接、ed2k 和视频网站下载请使用 unfetch.org 的完整版")
 		return
 	}
 
@@ -198,7 +217,7 @@ func (h *Handlers) AddTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filename := req.Filename
-	if filename == "" && taskType == types.TaskTypeHTTP {
+	if filename == "" && (taskType == types.TaskTypeHTTP || taskType == types.TaskTypeFTP) {
 		// 从 URL 中推断文件名
 		parts := strings.Split(strings.Split(req.URL, "?")[0], "/")
 		if len(parts) > 0 {
@@ -206,6 +225,11 @@ func (h *Handlers) AddTask(w http.ResponseWriter, r *http.Request) {
 		}
 		if filename == "" {
 			filename = "download"
+		}
+	} else if filename == "" && taskType == types.TaskTypeEd2k {
+		segs := strings.Split(req.URL, "|")
+		if len(segs) >= 3 && strings.EqualFold(segs[1], "file") && segs[2] != "" {
+			filename = segs[2]
 		}
 	}
 
@@ -217,6 +241,8 @@ func (h *Handlers) AddTask(w http.ResponseWriter, r *http.Request) {
 		Proxy:          req.Proxy,
 		Quality:        quality,
 		Cookies:        req.Cookies,
+		UserAgent:      req.UserAgent,
+		Headers:        req.Headers,
 		PlayAfter:      req.PlayAfter,
 		StartAt:        req.StartAt,
 		Tags:           req.Tags,

@@ -38,6 +38,8 @@ type Manager struct {
 	httpDL  *downloader.HTTPDownloader
 	btDL    *downloader.BTDownloader
 	ytdlpDL *downloader.YtdlpDownloader
+	ftpDL   *downloader.FTPDownloader
+	ed2kDL  *downloader.Ed2kDownloader
 }
 
 // NewManager 创建 Manager，从数据库恢复历史任务
@@ -58,6 +60,8 @@ func NewManager(cfg *types.Config, saveCfg func(*types.Config) error) (*Manager,
 		httpDL:    downloader.NewHTTPDownloader(cfg),
 		btDL:      downloader.NewBTDownloader(cfg),
 		ytdlpDL:   downloader.NewYtdlpDownloader(cfg),
+		ftpDL:     downloader.NewFTPDownloader(cfg),
+		ed2kDL:    downloader.NewEd2kDownloader(cfg),
 	}
 
 	// 从数据库恢复任务
@@ -166,6 +170,8 @@ func (m *Manager) AddTask(req types.AddTaskRequest, taskType types.TaskType) (*t
 		Proxy:     req.Proxy,
 		Quality:   req.Quality,
 		Cookies:   req.Cookies,
+		UserAgent: req.UserAgent,
+		Headers:   req.Headers,
 		PlayAfter: req.PlayAfter,
 		StartAt:   req.StartAt,
 		Tags:      req.Tags,
@@ -308,6 +314,20 @@ func (m *Manager) startDownload(task *types.Task) {
 		m.ytdlpDL.UpdateConfig(m.cfg)
 		m.cfgMu.RUnlock()
 		dlErr = m.ytdlpDL.Download(ctx, current, func() {
+			m.notify(current)
+		})
+	case types.TaskTypeFTP:
+		m.cfgMu.RLock()
+		m.ftpDL.UpdateConfig(m.cfg)
+		m.cfgMu.RUnlock()
+		dlErr = m.ftpDL.Download(ctx, current, func() {
+			m.notify(current)
+		})
+	case types.TaskTypeEd2k:
+		m.cfgMu.RLock()
+		m.ed2kDL.UpdateConfig(m.cfg)
+		m.cfgMu.RUnlock()
+		dlErr = m.ed2kDL.Download(ctx, current, func() {
 			m.notify(current)
 		})
 	default:
@@ -649,6 +669,8 @@ func (m *Manager) UpdateConfig(cfg *types.Config) {
 	m.httpDL.UpdateConfig(cfg)
 	m.btDL.UpdateConfig(cfg)
 	m.ytdlpDL.UpdateConfig(cfg)
+	m.ftpDL.UpdateConfig(cfg)
+	m.ed2kDL.UpdateConfig(cfg)
 	m.cfgMu.Unlock()
 
 	// 重建信号量（调整并发数）
@@ -781,6 +803,8 @@ func (m *Manager) applyScheduledSpeedLimit() {
 		m.httpDL.UpdateConfig(&cfgCopy)
 		m.btDL.UpdateConfig(&cfgCopy)
 		m.ytdlpDL.UpdateConfig(&cfgCopy)
+		m.ftpDL.UpdateConfig(&cfgCopy)
+		m.ed2kDL.UpdateConfig(&cfgCopy)
 		m.cfgMu.Unlock()
 		slog.Info("speed limit applied by schedule", "hour", hour, "limit", target)
 	} else {

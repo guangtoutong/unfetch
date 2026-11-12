@@ -391,8 +391,46 @@ fn handle_tool(name: &str, args: &Value) -> Value {
                 "start_at":  args.get("start_at"),
                 "expected_sha256": args.get("expected_sha256"),
                 "expected_md5":    args.get("expected_md5"),
+                "mirrors":         args.get("mirrors"),
+                "depends_on":      args.get("depends_on"),
+                "template":        args.get("template"),
+                "selected_files":  args.get("selected_files"),
+                "custom_trackers": args.get("custom_trackers"),
             });
             client.post(format!("{base}/tasks")).json(&body).send()
+                .and_then(|r| r.json::<Value>())
+                .unwrap_or_else(|e| json!({"error": e.to_string()}))
+        }
+        "detect_url" => {
+            let url = args["url"].as_str().unwrap_or("").trim();
+            let lower = url.to_lowercase();
+            let ytdlp_sites = [
+                "youtube.com", "youtu.be", "bilibili.com", "b23.tv",
+                "tiktok.com", "douyin.com", "twitter.com", "x.com",
+                "instagram.com", "facebook.com", "vimeo.com", "dailymotion.com",
+                "twitch.tv", "nicovideo.jp", "weibo.com", "iqiyi.com",
+                "youku.com", "v.qq.com", "mgtv.com", "acfun.cn", "ixigua.com",
+            ];
+            let task_type = if lower.starts_with("ed2k://") {
+                "ed2k"
+            } else if lower.starts_with("ftp://") || lower.starts_with("ftps://") || lower.starts_with("sftp://") {
+                "ftp"
+            } else if lower.starts_with("magnet:") || lower.ends_with(".torrent") {
+                "bt"
+            } else if ytdlp_sites.iter().any(|s| lower.contains(s)) {
+                "ytdlp"
+            } else {
+                "http"
+            };
+            json!({ "url": url, "type": task_type })
+        }
+        "preview_torrent" => {
+            let body = json!({ "url": args["url"] });
+            let long_client = reqwest::blocking::Client::builder()
+                .timeout(Duration::from_secs(110))
+                .build()
+                .unwrap();
+            long_client.post(format!("{base}/torrent/preview")).json(&body).send()
                 .and_then(|r| r.json::<Value>())
                 .unwrap_or_else(|e| json!({"error": e.to_string()}))
         }
@@ -481,21 +519,49 @@ fn tool_definitions() -> Value {
     json!([
         {
             "name": "add_task",
-            "description": "添加下载任务（支持 HTTP/HTTPS、BT 磁力链接、YouTube 等 1000+ 视频网站）",
+            "description": "添加下载任务（支持 HTTP/HTTPS、FTP/FTPS/SFTP、BT 磁力链接、ed2k、YouTube 等 1000+ 视频网站）",
             "inputSchema": {
                 "type": "object",
                 "properties": {
-                    "url":       { "type": "string", "description": "下载链接（HTTP URL、magnet:// 或视频网站 URL）" },
+                    "url":       { "type": "string", "description": "下载链接（HTTP/FTP/SFTP URL、magnet://、ed2k:// 或视频网站 URL）" },
                     "save_dir":  { "type": "string", "description": "保存目录" },
                     "filename":  { "type": "string", "description": "文件名" },
                     "threads":   { "type": "integer", "description": "HTTP 分片线程数" },
                     "quality":   { "type": "string", "enum": ["best","1080p","720p","480p","audio"] },
                     "proxy":     { "type": "string" },
+                    "cookies":   { "type": "string", "description": "Cookie 头或 Netscape cookie 内容" },
                     "play_after":{ "type": "boolean" },
                     "tags":      { "type": "array", "items": { "type": "string" }, "description": "任务标签" },
                     "start_at":  { "type": "string", "description": "RFC3339 时间，定时下载" },
                     "expected_sha256": { "type": "string" },
-                    "expected_md5":    { "type": "string" }
+                    "expected_md5":    { "type": "string" },
+                    "mirrors":         { "type": "array", "items": { "type": "string" }, "description": "额外 HTTP 镜像源 URL" },
+                    "depends_on":      { "type": "array", "items": { "type": "string" }, "description": "前置依赖的任务 ID" },
+                    "template":        { "type": "string", "description": "预设任务模板名称" },
+                    "selected_files":  { "type": "array", "items": { "type": "integer" }, "description": "BT 任务仅下载的文件下标" },
+                    "custom_trackers": { "type": "array", "items": { "type": "string" }, "description": "BT 任务额外 Tracker" }
+                },
+                "required": ["url"]
+            }
+        },
+        {
+            "name": "detect_url",
+            "description": "检测下载链接所属协议与下载引擎类型（http / ftp / bt / ed2k / ytdlp）",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "url": { "type": "string", "description": "待检测的 URL" }
+                },
+                "required": ["url"]
+            }
+        },
+        {
+            "name": "preview_torrent",
+            "description": "预览种子或磁力链接内的文件列表（返回文件名、大小及下标，供 add_task 的 selected_files 使用）",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "url": { "type": "string", "description": "magnet:?xt=... 或 .torrent 链接/路径" }
                 },
                 "required": ["url"]
             }

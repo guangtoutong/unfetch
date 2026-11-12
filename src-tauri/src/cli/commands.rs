@@ -1,5 +1,5 @@
 use anyhow::{bail, Context, Result};
-use clap::{Parser, Subcommand};
+use clap::{CommandFactory, Parser, Subcommand};
 use serde_json::Value;
 
 use crate::daemon;
@@ -44,6 +44,21 @@ pub enum Commands {
         /// 下载完成后用 Unflick 播放
         #[arg(long)]
         play_after: bool,
+        /// 额外镜像 URL（可多次指定或逗号分隔）
+        #[arg(long, value_delimiter = ',')]
+        mirrors: Vec<String>,
+        /// 依赖的前置任务 ID（可多次指定或逗号分隔）
+        #[arg(long, value_delimiter = ',')]
+        depends_on: Vec<String>,
+        /// 任务模板名称
+        #[arg(long)]
+        template: Option<String>,
+        /// 期望的 SHA256 校验值
+        #[arg(long)]
+        sha256: Option<String>,
+        /// 期望的 MD5 校验值
+        #[arg(long)]
+        md5: Option<String>,
     },
 
     /// 列出所有下载任务
@@ -102,6 +117,11 @@ pub enum Commands {
         #[command(subcommand)]
         action: ConfigAction,
     },
+
+    /// 生成 Shell 自动补全脚本（bash / zsh / fish / powershell / elvish）
+    Completions {
+        shell: clap_complete::Shell,
+    },
 }
 
 #[derive(Subcommand)]
@@ -141,17 +161,36 @@ fn _run(cli: Cli) -> Result<i32> {
             bail!("daemon binary 未找到，请确认 unfetch-daemon 已安装");
         }
 
-        Commands::Add { url, output, filename, threads, quality, proxy, cookies, play_after } => {
+        Commands::Add {
+            url,
+            output,
+            filename,
+            threads,
+            quality,
+            proxy,
+            cookies,
+            play_after,
+            mirrors,
+            depends_on,
+            template,
+            sha256,
+            md5,
+        } => {
             ensure_daemon()?;
             let body = serde_json::json!({
-                "url":       url,
-                "save_dir":  output,
-                "filename":  filename,
-                "threads":   threads,
-                "quality":   quality,
-                "proxy":     proxy,
-                "cookies":   cookies,
-                "play_after": play_after,
+                "url":             url,
+                "save_dir":        output,
+                "filename":        filename,
+                "threads":         threads,
+                "quality":         quality,
+                "proxy":           proxy,
+                "cookies":         cookies,
+                "play_after":      play_after,
+                "mirrors":         if mirrors.is_empty() { None } else { Some(mirrors) },
+                "depends_on":      if depends_on.is_empty() { None } else { Some(depends_on) },
+                "template":        template,
+                "expected_sha256": sha256,
+                "expected_md5":    md5,
             });
             let resp = post("/tasks", &body)?;
             print_json(&resp);
@@ -325,6 +364,11 @@ fn _run(cli: Cli) -> Result<i32> {
                     print_json(&resp);
                 }
             }
+        }
+
+        Commands::Completions { shell } => {
+            let mut cmd = Cli::command();
+            clap_complete::generate(shell, &mut cmd, "unfetch", &mut std::io::stdout());
         }
     }
 
