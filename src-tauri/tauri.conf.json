@@ -1,6 +1,6 @@
 {
   "productName": "unfetch",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "identifier": "app.unfetch.client",
   "build": {
     "frontendDist": "../dist",

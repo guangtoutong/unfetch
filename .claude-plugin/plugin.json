@@ -1,7 +1,7 @@
 {
   "name": "unfetch",
   "description": "AI-native download manager: add HTTP / BT-magnet / 1000+ video-site downloads, wait for completion with live progress, and manage the queue. Bundles the unfetch MCP server plus skills for grabbing, batching, media, and queue management.",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "author": {
     "name": "unfetch contributors",
     "url": "https://github.com/guangtoutong/unfetch"

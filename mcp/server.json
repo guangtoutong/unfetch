@@ -3,7 +3,7 @@
   "name": "io.github.guangtoutong/unfetch",
   "description": "AI-native download manager. Add HTTP/BT-magnet/1000+ video-site downloads, wait for completion with live progress, manage the queue, and subscribe to per-task resources — all over MCP stdio.",
   "status": "active",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "repository": {
     "url": "https://github.com/guangtoutong/unfetch",
     "source": "github"
@@ -13,7 +13,7 @@
     {
       "registryType": "mcpb",
       "identifier": "unfetch",
-      "version": "0.2.5",
+      "version": "0.2.6",
       "transport": { "type": "stdio" },
       "runtimeHint": "Requires the unfetch desktop app installed (https://unfetch.org/#download). The MCP server is the app binary launched with the --mcp flag; it auto-starts the bundled download daemon on localhost:19543.",
       "runtimeArguments": [
