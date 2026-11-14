@@ -38,9 +38,19 @@ if [ -f .env.local ]; then
 fi
 
 : "${APPLE_SIGNING_IDENTITY:?Set APPLE_SIGNING_IDENTITY in .env.local}"
-: "${APPLE_ID:?Set APPLE_ID in .env.local}"
-: "${APPLE_PASSWORD:?Set APPLE_PASSWORD in .env.local}"
-: "${APPLE_TEAM_ID:?Set APPLE_TEAM_ID in .env.local}"
+
+ASC_API_KEY_ID="${ASC_API_KEY_ID:-H85Q4NJPVD}"
+ASC_API_ISSUER_ID="${ASC_API_ISSUER_ID:-21dd1b35-fb04-42f1-8ec0-d847838fa7b6}"
+ASC_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_API_KEY_ID}.p8"
+
+if [ -f "$ASC_KEY_PATH" ]; then
+  NOTARY_AUTH_ARGS=(--key "$ASC_KEY_PATH" --key-id "$ASC_API_KEY_ID" --issuer "$ASC_API_ISSUER_ID")
+else
+  : "${APPLE_ID:?Set APPLE_ID in .env.local}"
+  : "${APPLE_PASSWORD:?Set APPLE_PASSWORD in .env.local}"
+  : "${APPLE_TEAM_ID:?Set APPLE_TEAM_ID in .env.local}"
+  NOTARY_AUTH_ARGS=(--apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID")
+fi
 
 VERSION="${1:-$(node -p "require('./package.json').version")}"
 TAG="v${VERSION}"
@@ -52,6 +62,12 @@ echo "==> ${PRODUCT} ${TAG} — 本地 macOS 构建 + 公证"
 echo "==> Building frontend"
 pnpm install --frozen-lockfile
 pnpm build
+
+# 同步完整版前端产物到 core/web/dist，确保 Go embed 打进 daemon 的远程 Web UI 是最新完整版
+rm -rf core/web/dist
+mkdir -p core/web/dist
+cp -R dist/* core/web/dist/
+touch core/web/dist/.gitkeep
 
 echo "==> Building Go daemon (universal binary)"
 mkdir -p src-tauri/binaries
@@ -112,9 +128,7 @@ ZIP="/tmp/${PRODUCT}-${VERSION}-notarize.zip"
 rm -f "$ZIP"
 ditto -c -k --keepParent "$APP" "$ZIP"
 xcrun notarytool submit "$ZIP" \
-  --apple-id "$APPLE_ID" \
-  --password "$APPLE_PASSWORD" \
-  --team-id "$APPLE_TEAM_ID" \
+  "${NOTARY_AUTH_ARGS[@]}" \
   --wait
 rm -f "$ZIP"
 
