@@ -515,14 +515,9 @@ fn handle_tool(name: &str, args: &Value) -> Value {
         }
         "play_in_unflick" => {
             let path = args["path"].as_str().unwrap_or("");
-            let result = if cfg!(target_os = "windows") {
-                std::process::Command::new("unflick.exe").arg("play").arg(path).spawn()
-            } else {
-                std::process::Command::new("unflick").arg("play").arg(path).spawn()
-            };
-            match result {
+            match crate::gui::commands::play_in_unflick(path.to_string()) {
                 Ok(_) => json!({"ok": true}),
-                Err(e) => json!({"error": e.to_string()}),
+                Err(e) => json!({"error": e}),
             }
         }
         _ => json!({"error": format!("unknown tool: {name}")}),

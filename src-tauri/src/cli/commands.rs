@@ -59,6 +59,21 @@ pub enum Commands {
         /// 期望的 MD5 校验值
         #[arg(long)]
         md5: Option<String>,
+        /// 定时开始下载（RFC3339 时间戳，如 2026-11-15T02:00:00Z）
+        #[arg(long)]
+        start_at: Option<String>,
+        /// 任务标签（可多次指定或逗号分隔）
+        #[arg(long, value_delimiter = ',')]
+        tags: Vec<String>,
+        /// 自定义 User-Agent
+        #[arg(long)]
+        user_agent: Option<String>,
+        /// BT 任务：仅下载指定下标的文件（逗号分隔）
+        #[arg(long, value_delimiter = ',')]
+        selected_files: Vec<usize>,
+        /// BT 任务：额外 Tracker URL（逗号分隔）
+        #[arg(long, value_delimiter = ',')]
+        trackers: Vec<String>,
     },
 
     /// 列出所有下载任务
@@ -66,6 +81,9 @@ pub enum Commands {
         /// 按状态过滤：all / downloading / paused / done / error
         #[arg(long, default_value = "all")]
         status: String,
+        /// 以 JSON 格式输出
+        #[arg(long)]
+        json: bool,
     },
 
     /// 查看任务详情
@@ -96,7 +114,7 @@ pub enum Commands {
     Remove {
         id: String,
         /// 同时删除已下载的文件
-        #[arg(long)]
+        #[arg(long, alias = "delete")]
         delete_file: bool,
     },
 
@@ -175,6 +193,11 @@ fn _run(cli: Cli) -> Result<i32> {
             template,
             sha256,
             md5,
+            start_at,
+            tags,
+            user_agent,
+            selected_files,
+            trackers,
         } => {
             ensure_daemon()?;
             let body = serde_json::json!({
@@ -191,12 +214,17 @@ fn _run(cli: Cli) -> Result<i32> {
                 "template":        template,
                 "expected_sha256": sha256,
                 "expected_md5":    md5,
+                "start_at":        start_at,
+                "tags":            if tags.is_empty() { None } else { Some(tags) },
+                "user_agent":      user_agent,
+                "selected_files":  if selected_files.is_empty() { None } else { Some(selected_files) },
+                "custom_trackers": if trackers.is_empty() { None } else { Some(trackers) },
             });
             let resp = post("/tasks", &body)?;
             print_json(&resp);
         }
 
-        Commands::List { status } => {
+        Commands::List { status, json: _ } => {
             ensure_daemon()?;
             let url = if status == "all" {
                 "/tasks".to_string()

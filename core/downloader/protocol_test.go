@@ -245,3 +245,21 @@ func TestHLSPlaylistParserAndAES128Download(t *testing.T) {
 		t.Errorf("unexpected duration metadata: %+v", task.Metadata)
 	}
 }
+
+func TestParseScutilProxy(t *testing.T) {
+	sample := `<dictionary> {
+  HTTPEnable : 1
+  HTTPPort : 7890
+  HTTPProxy : 127.0.0.1
+  HTTPSEnable : 1
+  HTTPSPort : 7890
+  HTTPSProxy : 127.0.0.1
+  SOCKSEnable : 1
+  SOCKSPort : 7891
+  SOCKSProxy : 127.0.0.1
+}`
+	kv := parseScutilProxy(sample)
+	if kv["HTTPSEnable"] != "1" || kv["HTTPSProxy"] != "127.0.0.1" || kv["HTTPSPort"] != "7890" {
+		t.Fatalf("unexpected scutil parsed map: %+v", kv)
+	}
+}

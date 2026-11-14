@@ -5,15 +5,37 @@ use tauri_plugin_dialog::DialogExt;
 /// 用 Unflick 播放已下载的文件。
 #[tauri::command]
 pub fn play_in_unflick(path: String) -> Result<(), String> {
-    let result = if cfg!(target_os = "windows") {
-        Command::new("unflick.exe").arg("play").arg(&path).spawn()
-    } else {
-        Command::new("unflick").arg("play").arg(&path).spawn()
-    };
+    if cfg!(target_os = "windows") {
+        return Command::new("unflick.exe")
+            .arg("play")
+            .arg(&path)
+            .spawn()
+            .map(|_| ())
+            .map_err(|e| format!("无法启动 Unflick：{e}"));
+    }
 
-    result
-        .map(|_| ())
-        .map_err(|e| format!("无法启动 Unflick：{e}"))
+    if Command::new("unflick").arg("play").arg(&path).spawn().is_ok() {
+        return Ok(());
+    }
+
+    let mut candidates = vec![
+        "/Applications/Unflick.app/Contents/MacOS/unflick".to_string(),
+        "/Applications/unflick.app/Contents/MacOS/unflick".to_string(),
+        "/opt/homebrew/bin/unflick".to_string(),
+        "/usr/local/bin/unflick".to_string(),
+    ];
+    if let Ok(home) = std::env::var("HOME") {
+        candidates.insert(0, format!("{home}/.local/bin/unflick"));
+    }
+    for bin in candidates {
+        if std::path::Path::new(&bin).is_file() {
+            if Command::new(&bin).arg("play").arg(&path).spawn().is_ok() {
+                return Ok(());
+            }
+        }
+    }
+
+    Err("未找到 Unflick 可执行文件，请确认已安装 Unflick".to_string())
 }
 
 /// 在文件管理器中打开目录。

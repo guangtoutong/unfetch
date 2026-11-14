@@ -38,6 +38,61 @@ func configDir() string {
 	return filepath.Join(home, ".config", "unfetch")
 }
 
+func suiteConfigPath() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ""
+	}
+	return filepath.Join(home, ".config", "un-suite", configFile)
+}
+
+// loadSuiteDefaults 从 ~/.config/un-suite/config.json 读取共享的默认下载目录与代理
+func loadSuiteDefaults() (downloadDir, proxy string) {
+	p := suiteConfigPath()
+	if p == "" {
+		return "", ""
+	}
+	data, err := os.ReadFile(p)
+	if err != nil {
+		return "", ""
+	}
+	var shared struct {
+		DownloadDir string `json:"download_dir"`
+		Proxy       string `json:"proxy"`
+	}
+	if err := json.Unmarshal(data, &shared); err != nil {
+		return "", ""
+	}
+	return shared.DownloadDir, shared.Proxy
+}
+
+// syncSuiteConfig 将 download_dir 与 proxy 同步写入 ~/.config/un-suite/config.json（保留其他字段）
+func syncSuiteConfig(cfg *types.Config) {
+	if types.AppStoreEdition || cfg == nil {
+		return
+	}
+	p := suiteConfigPath()
+	if p == "" {
+		return
+	}
+	if err := os.MkdirAll(filepath.Dir(p), 0755); err != nil {
+		return
+	}
+	merged := make(map[string]any)
+	if existing, err := os.ReadFile(p); err == nil {
+		_ = json.Unmarshal(existing, &merged)
+	}
+	merged["download_dir"] = cfg.DownloadDir
+	if cfg.Proxy != "" {
+		merged["proxy"] = cfg.Proxy
+	} else {
+		delete(merged, "proxy")
+	}
+	if data, err := json.MarshalIndent(merged, "", "  "); err == nil {
+		_ = os.WriteFile(p, data, 0644)
+	}
+}
+
 func loadConfig() (*types.Config, error) {
 	dir := configDir()
 	if err := os.MkdirAll(dir, 0755); err != nil {
@@ -47,10 +102,15 @@ func loadConfig() (*types.Config, error) {
 	path := filepath.Join(dir, configFile)
 	data, err := os.ReadFile(path)
 	if os.IsNotExist(err) {
-		// 创建默认配置
+		// 创建默认配置（优先继承 ~/.config/un-suite/config.json 的共享配置）
 		home, _ := os.UserHomeDir()
+		sharedDir, sharedProxy := loadSuiteDefaults()
+		if sharedDir == "" {
+			sharedDir = filepath.Join(home, "Downloads")
+		}
 		cfg := &types.Config{
-			DownloadDir:   filepath.Join(home, "Downloads"),
+			DownloadDir:   sharedDir,
+			Proxy:         sharedProxy,
 			MaxConcurrent: 5,
 			HTTPThreads:   16,
 			SpeedLimit:    0,
@@ -70,6 +130,7 @@ func loadConfig() (*types.Config, error) {
 	if err := json.Unmarshal(data, &cfg); err != nil {
 		return nil, fmt.Errorf("parse config: %w", err)
 	}
+	sharedDir, sharedProxy := loadSuiteDefaults()
 	// 补全零值
 	if cfg.MaxConcurrent <= 0 {
 		cfg.MaxConcurrent = 5
@@ -78,8 +139,15 @@ func loadConfig() (*types.Config, error) {
 		cfg.HTTPThreads = 16
 	}
 	if cfg.DownloadDir == "" {
-		home, _ := os.UserHomeDir()
-		cfg.DownloadDir = filepath.Join(home, "Downloads")
+		if sharedDir != "" {
+			cfg.DownloadDir = sharedDir
+		} else {
+			home, _ := os.UserHomeDir()
+			cfg.DownloadDir = filepath.Join(home, "Downloads")
+		}
+	}
+	if cfg.Proxy == "" && sharedProxy != "" {
+		cfg.Proxy = sharedProxy
 	}
 	if cfg.MaxRetries <= 0 {
 		cfg.MaxRetries = 5
@@ -109,7 +177,11 @@ func saveConfig(cfg *types.Config) error {
 	if err != nil {
 		return fmt.Errorf("marshal config: %w", err)
 	}
-	return os.WriteFile(filepath.Join(dir, configFile), data, 0644)
+	if err := os.WriteFile(filepath.Join(dir, configFile), data, 0644); err != nil {
+		return err
+	}
+	syncSuiteConfig(cfg)
+	return nil
 }
 
 func main() {

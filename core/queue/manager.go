@@ -385,14 +385,15 @@ func (m *Manager) startDownload(task *types.Task) {
 		current.ETA = 0
 		slog.Info("download done", "id", task.ID, "file", filepath.Join(current.SavePath, current.Filename))
 
-		if current.PlayAfter && current.Filename != "" {
+		m.cfgMu.RLock()
+		hookCfg := *m.cfg
+		m.cfgMu.RUnlock()
+
+		if (current.PlayAfter || hookCfg.AutoPlayUnflick) && current.Filename != "" {
 			go openFile(filepath.Join(current.SavePath, current.Filename))
 		}
 
 		// 触发完成钩子（webhook + exec）
-		m.cfgMu.RLock()
-		hookCfg := *m.cfg
-		m.cfgMu.RUnlock()
 		hooks.FireCompletion(current, &hookCfg)
 	}
 	m.mu.Unlock()
@@ -489,7 +490,7 @@ func (m *Manager) checkAllDone() {
 	}
 
 	slog.Info("all tasks done, triggering action", "action", action)
-	go executeAllDoneAction(action)
+	go executeAllDoneAction(action, cfgCopy.DownloadDir)
 }
 
 // PauseTask 暂停一个正在下载的任务
@@ -815,6 +816,7 @@ func (m *Manager) applyScheduledSpeedLimit() {
 		m.ytdlpDL.UpdateConfig(&cfgCopy)
 		m.ftpDL.UpdateConfig(&cfgCopy)
 		m.ed2kDL.UpdateConfig(&cfgCopy)
+		m.hlsDL.UpdateConfig(&cfgCopy)
 		m.cfgMu.Unlock()
 		slog.Info("speed limit applied by schedule", "hour", hour, "limit", target)
 	} else {
@@ -823,7 +825,7 @@ func (m *Manager) applyScheduledSpeedLimit() {
 }
 
 // executeAllDoneAction 执行"所有任务完成后"的系统动作
-func executeAllDoneAction(action types.OnAllDoneAction) {
+func executeAllDoneAction(action types.OnAllDoneAction, downloadDir string) {
 	switch action {
 	case types.OnDoneShutdown:
 		switch runtime.GOOS {
@@ -844,8 +846,17 @@ func executeAllDoneAction(action types.OnAllDoneAction) {
 			_ = exec.Command("pmset", "sleepnow").Start()
 		}
 	case types.OnDoneOpenDir:
-		// 由调用方处理：daemon 不知道具体目录，可以传当前下载目录
-		// 这里不实现
+		if downloadDir == "" {
+			return
+		}
+		switch runtime.GOOS {
+		case "windows":
+			_ = exec.Command("explorer", downloadDir).Start()
+		case "darwin":
+			_ = exec.Command("open", downloadDir).Start()
+		default:
+			_ = exec.Command("xdg-open", downloadDir).Start()
+		}
 	}
 	// OnDoneNotify 由前端处理
 }
