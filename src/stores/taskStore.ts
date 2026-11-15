@@ -50,6 +50,7 @@ interface TaskStore {
   addTask: (req: Parameters<typeof api.addTask>[0]) => Promise<Task>
   pauseTask: (id: string) => Promise<void>
   resumeTask: (id: string) => Promise<void>
+  setTaskPriority: (id: string, priority: number) => Promise<void>
   trashTask: (id: string) => Promise<void>
   restoreTask: (id: string) => Promise<void>
   emptyTrash: () => Promise<number>
@@ -147,6 +148,11 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
   resumeTask: async (id) => {
     const task = await api.resumeTask(id)
+    get().updateTask(task)
+  },
+
+  setTaskPriority: async (id, priority) => {
+    const task = await api.setTaskPriority(id, priority)
     get().updateTask(task)
   },
 

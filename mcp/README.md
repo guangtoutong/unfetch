@@ -59,26 +59,28 @@ Claude Desktop / Cursor / Codex 等任意 MCP host：
 
 不需要任何 API key —— 所有状态在本地 daemon。
 
-## 3. 工具清单（17 个）
+## 3. 工具清单（19 个）
 
 | 工具 | 说明 | 必填参数 |
 |---|---|---|
-| `add_task` | 添加下载（HTTP/HTTPS、FTP/FTPS/SFTP、`magnet:`、`ed2k:`、1000+ 视频站） | `url` |
-| `detect_url` | 检测 URL 协议与引擎类型（`http`/`ftp`/`bt`/`ed2k`/`ytdlp`） | `url` |
-| `preview_torrent` | 预览种子或磁力链接内的文件列表（返回文件名、大小及下标） | `url` |
+| `add_task` | 添加下载（HTTP/HTTPS、Metalink、HLS `.m3u8`、MPEG-DASH `.mpd`、FTP/FTPS/SFTP、`magnet:`、`ed2k:`、1000+ 视频站） | `url` |
+| `detect_url` | 检测 URL 协议与引擎类型（`http`/`hls`/`ftp`/`bt`/`ed2k`/`ytdlp`） | `url` |
+| `preview_torrent` | 预览种子或磁力链接内的文件列表（返回文件名、大小、下标及 `suspicious` 可疑木马标记） | `url` |
 | `wait_for_task` | 阻塞等单个任务完成/失败，期间推 `notifications/progress` | `id` |
 | `wait_for_all` | 等所有未完成任务（queued/downloading/paused）跑完或超时 | — |
 | `list_tasks` | 列任务，可按 `status` 过滤 | — |
 | `get_task` | 单任务详情 + 实时进度 | `id` |
 | `pause_task` | 暂停 | `id` |
 | `resume_task` | 恢复 | `id` |
+| `set_task_priority` | 动态设置任务队列优先级（`-1` 低 / `0` 普通 / `1` 高 / `2` 紧急置顶插队） | `id`, `priority` |
+| `stream_task` | 获取任务的实时边下边播 HTTP Range 流地址（可选 `play: true` 直接拉起 Unflick 边下边播） | `id` |
 | `remove_task` | 彻底删除（可选 `delete_file`） | `id` |
 | `trash_task` | 移入垃圾箱（可恢复，不删文件） | `id` |
 | `restore_task` | 从垃圾箱恢复 | `id` |
 | `empty_trash` | 清空垃圾箱（删任务+文件） | — |
 | `restore_all_trashed` | 恢复所有垃圾箱任务 | — |
 | `get_config` | 读配置 | — |
-| `set_config` | 改配置（下载目录/并发/线程/代理/限速/完成动作…） | — |
+| `set_config` | 改配置（下载目录/智能归档/BT木马过滤/并发/线程/代理/限速/完成动作…） | — |
 | `play_in_unflick` | 用 Unflick 播放本地文件 | `path` |
 
 `add_task` 完整参数：`url`(必填)、`save_dir`、`filename`、`threads`、`quality`(`best`/`1080p`/`720p`/`480p`/`audio`)、`proxy`、`cookies`、`play_after`、`tags[]`、`start_at`(RFC3339 定时)、`expected_sha256`、`expected_md5`、`mirrors[]`、`depends_on[]`、`template`、`selected_files[]`、`custom_trackers[]`。

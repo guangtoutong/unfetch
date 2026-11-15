@@ -192,6 +192,18 @@ export const SettingsPanel: React.FC = () => {
                     {t('addTask.browse')}
                   </button>
                 </div>
+                <div style={{ marginTop: 10 }}>
+                  <ToggleRow
+                    label={i18n.language.startsWith('zh') ? '智能分类归档' : 'Smart Folder Categorization'}
+                    description={
+                      i18n.language.startsWith('zh')
+                        ? '按扩展名自动分入 Videos / Music / Archives / Programs / Documents 子目录'
+                        : 'Automatically route downloads into Videos / Music / Archives / Programs / Documents subfolders'
+                    }
+                    checked={!!config.auto_categorize}
+                    onChange={(v) => updateConfig({ auto_categorize: v })}
+                  />
+                </div>
               </Section>
 
               <Divider />
@@ -467,6 +479,16 @@ export const SettingsPanel: React.FC = () => {
                       description={t('settings.autoUtpFallbackHint')}
                       checked={!!config.bt_auto_utp_fallback}
                       onChange={(v) => updateConfig({ bt_auto_utp_fallback: v })}
+                    />
+                    <ToggleRow
+                      label={i18n.language.startsWith('zh') ? '拦截可疑木马文件' : 'Block Suspicious Files'}
+                      description={
+                        i18n.language.startsWith('zh')
+                          ? '自动识别并跳过种子中伪装的 .scr / .bat / .vbs / .exe 等高危文件'
+                          : 'Automatically skip disguised .scr / .bat / .vbs / .exe files in media torrents'
+                      }
+                      checked={config.bt_block_suspicious_files !== false}
+                      onChange={(v) => updateConfig({ bt_block_suspicious_files: v })}
                     />
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, paddingTop: 6 }}>
                       <div>

@@ -15,6 +15,7 @@ package downloader
 import (
 	"context"
 	"errors"
+	"net/http"
 
 	"unfetch/core/types"
 )
@@ -32,6 +33,10 @@ func (d *BTDownloader) UpdateConfig(_ *types.Config) {}
 
 func (d *BTDownloader) Download(_ context.Context, _ *types.Task, _ func()) error {
 	return ErrNotInAppStoreEdition
+}
+
+func (d *BTDownloader) StreamTask(_ http.ResponseWriter, _ *http.Request, _ *types.Task) bool {
+	return false
 }
 
 // PreviewTorrent 桩：MAS 版不解析种子。

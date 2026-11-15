@@ -55,30 +55,40 @@ func (d *HLSDownloader) Download(ctx context.Context, task *types.Task, onProgre
 	httpDL := NewHTTPDownloader(cfg)
 	client := httpDL.buildHTTPClient(effectiveProxy)
 
-	// 1. 拉取入口 m3u8
+	// 1. 拉取入口 m3u8 或 DASH .mpd
 	playlistURL := task.URL
 	body, err := d.fetchBytes(ctx, client, task, playlistURL, false, 0, 0)
 	if err != nil {
-		return fmt.Errorf("fetch m3u8 playlist: %w", err)
+		return fmt.Errorf("fetch stream playlist: %w", err)
 	}
 
-	variants, media, err := ParseHLSMasterOrMedia(playlistURL, string(body))
-	if err != nil {
-		return fmt.Errorf("parse m3u8: %w", err)
-	}
-
-	// 如果是 Master Playlist，挑选对应画质的子播放列表再拉一次
-	if len(variants) > 0 {
-		chosen := SelectHLSVariant(variants, task.Quality)
-		slog.Info("hls: selected variant", "id", task.ID, "uri", chosen.URI, "res", chosen.Resolution, "bw", chosen.Bandwidth)
-		playlistURL = chosen.URI
-		body, err = d.fetchBytes(ctx, client, task, playlistURL, false, 0, 0)
+	var media *HLSMediaPlaylist
+	if IsDASHManifest(playlistURL, string(body)) {
+		media, err = ParseDASHManifest(playlistURL, string(body), task.Quality)
 		if err != nil {
-			return fmt.Errorf("fetch variant playlist: %w", err)
+			return fmt.Errorf("parse dash mpd: %w", err)
 		}
-		_, media, err = ParseHLSMasterOrMedia(playlistURL, string(body))
+		slog.Info("dash: parsed mpd manifest", "id", task.ID, "segments", len(media.Segments), "duration", media.TotalDuration)
+	} else {
+		var variants []HLSVariant
+		variants, media, err = ParseHLSMasterOrMedia(playlistURL, string(body))
 		if err != nil {
-			return fmt.Errorf("parse media playlist: %w", err)
+			return fmt.Errorf("parse m3u8: %w", err)
+		}
+
+		// 如果是 Master Playlist，挑选对应画质的子播放列表再拉一次
+		if len(variants) > 0 {
+			chosen := SelectHLSVariant(variants, task.Quality)
+			slog.Info("hls: selected variant", "id", task.ID, "uri", chosen.URI, "res", chosen.Resolution, "bw", chosen.Bandwidth)
+			playlistURL = chosen.URI
+			body, err = d.fetchBytes(ctx, client, task, playlistURL, false, 0, 0)
+			if err != nil {
+				return fmt.Errorf("fetch variant playlist: %w", err)
+			}
+			_, media, err = ParseHLSMasterOrMedia(playlistURL, string(body))
+			if err != nil {
+				return fmt.Errorf("parse media playlist: %w", err)
+			}
 		}
 	}
 

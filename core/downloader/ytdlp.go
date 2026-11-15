@@ -101,14 +101,14 @@ func (d *YtdlpDownloader) getConfig() *types.Config {
 	return d.config
 }
 
-// findYtdlp 在 daemon 同目录和 PATH 中查找 yt-dlp
+// findYtdlp 在 daemon 同目录、~/.local/share/unfetch/bin、~/.local/bin 和 PATH 中查找 yt-dlp
 func findYtdlp() (string, error) {
 	binaryName := "yt-dlp"
 	if runtime.GOOS == "windows" {
 		binaryName = "yt-dlp.exe"
 	}
 
-	// 先查找与 daemon 同目录
+	// 1. 先查找与 daemon 同目录
 	if exe, err := os.Executable(); err == nil {
 		candidate := filepath.Join(filepath.Dir(exe), binaryName)
 		if _, err := os.Stat(candidate); err == nil {
@@ -116,10 +116,33 @@ func findYtdlp() (string, error) {
 		}
 	}
 
-	// 再从 PATH 查找
+	// 2. 查找 ~/.local/share/unfetch/bin 与 ~/.local/bin
+	if home, err := os.UserHomeDir(); err == nil {
+		for _, dir := range []string{
+			filepath.Join(home, ".local", "share", "unfetch", "bin"),
+			filepath.Join(home, ".local", "bin"),
+		} {
+			candidate := filepath.Join(dir, binaryName)
+			if _, err := os.Stat(candidate); err == nil {
+				return candidate, nil
+			}
+		}
+	}
+
+	// 3. 再从 PATH 查找
 	path, err := exec.LookPath(binaryName)
 	if err == nil {
 		return path, nil
+	}
+
+	// 4. macOS/Linux 常见包管理器路径兜底（GUI 启动时 PATH 可能较精简）
+	if runtime.GOOS != "windows" {
+		for _, dir := range []string{"/opt/homebrew/bin", "/usr/local/bin"} {
+			candidate := filepath.Join(dir, binaryName)
+			if _, err := os.Stat(candidate); err == nil {
+				return candidate, nil
+			}
+		}
 	}
 
 	// Windows 还可能叫 yt-dlp（无.exe）

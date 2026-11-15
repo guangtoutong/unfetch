@@ -75,12 +75,16 @@ var publicTrackers = []string{
 
 // BTDownloader BT 下载器，基于 anacrolix/torrent
 type BTDownloader struct {
-	mu     sync.RWMutex
-	config *types.Config
+	mu             sync.RWMutex
+	config         *types.Config
+	activeTorrents map[string]*torrent.Torrent
 }
 
 func NewBTDownloader(config *types.Config) *BTDownloader {
-	return &BTDownloader{config: config}
+	return &BTDownloader{
+		config:         config,
+		activeTorrents: make(map[string]*torrent.Torrent),
+	}
 }
 
 func (d *BTDownloader) UpdateConfig(cfg *types.Config) {
@@ -251,6 +255,15 @@ func (d *BTDownloader) downloadOnce(ctx context.Context, task *types.Task, onPro
 		return fmt.Errorf("failed to get torrent info")
 	}
 
+	d.mu.Lock()
+	d.activeTorrents[task.ID] = t
+	d.mu.Unlock()
+	defer func() {
+		d.mu.Lock()
+		delete(d.activeTorrents, task.ID)
+		d.mu.Unlock()
+	}()
+
 	// 更新任务元数据
 	task.Filename = info.BestName()
 	task.TotalBytes = t.Length()
@@ -268,9 +281,45 @@ func (d *BTDownloader) downloadOnce(ctx context.Context, task *types.Task, onPro
 
 	onProgress()
 
-	// 按 SelectedFiles 选择性下载；空切片或 nil 代表下载全部
+	// 按 SelectedFiles 选择性下载；空切片或 nil 代表下载全部（若开启了可疑文件拦截则自动剔除高危脚本/木马）
 	if len(task.SelectedFiles) == 0 {
-		t.DownloadAll()
+		files := t.Files()
+		blockSuspicious := cfg == nil || cfg.BTBlockSuspiciousFiles
+		var hasSuspicious bool
+		var hasMedia bool
+		if blockSuspicious && len(files) > 0 {
+			paths := make([]string, len(files))
+			for i, f := range files {
+				paths[i] = f.DisplayPath()
+			}
+			hasMedia = types.HasMediaFilesInPaths(paths)
+			for _, f := range files {
+				if types.IsSuspiciousTorrentFile(f.DisplayPath(), f.Length(), hasMedia) {
+					hasSuspicious = true
+					break
+				}
+			}
+		}
+		if !hasSuspicious {
+			t.DownloadAll()
+		} else {
+			var realTotal int64
+			var blockedCount int
+			for _, f := range files {
+				if types.IsSuspiciousTorrentFile(f.DisplayPath(), f.Length(), hasMedia) {
+					f.SetPriority(torrent.PiecePriorityNone)
+					blockedCount++
+					slog.Warn("bt: blocked suspicious file in torrent", "id", task.ID, "file", f.DisplayPath())
+				} else {
+					f.SetPriority(torrent.PiecePriorityNormal)
+					realTotal += f.Length()
+				}
+			}
+			if realTotal > 0 {
+				task.TotalBytes = realTotal
+			}
+			slog.Info("bt: auto-filtered suspicious files", "id", task.ID, "blocked", blockedCount, "total_files", len(files))
+		}
 	} else {
 		selected := make(map[int]bool, len(task.SelectedFiles))
 		for _, idx := range task.SelectedFiles {
@@ -473,6 +522,13 @@ func PreviewTorrent(ctx context.Context, rawURL string, cfg *types.Config) (*typ
 
 	info := t.Info()
 	files := t.Files()
+	paths := make([]string, len(files))
+	for i, f := range files {
+		paths[i] = f.DisplayPath()
+	}
+	hasMedia := types.HasMediaFilesInPaths(paths)
+	blockSuspicious := cfg == nil || cfg.BTBlockSuspiciousFiles
+
 	preview := &types.TorrentPreview{
 		Name:       info.BestName(),
 		InfoHash:   t.InfoHash().String(),
@@ -480,11 +536,13 @@ func PreviewTorrent(ctx context.Context, rawURL string, cfg *types.Config) (*typ
 		Files:      make([]types.TorrentFile, len(files)),
 	}
 	for i, f := range files {
+		susp := types.IsSuspiciousTorrentFile(f.DisplayPath(), f.Length(), hasMedia)
 		preview.Files[i] = types.TorrentFile{
-			Index:    i,
-			Path:     f.DisplayPath(),
-			Length:   f.Length(),
-			Selected: true,
+			Index:      i,
+			Path:       f.DisplayPath(),
+			Length:     f.Length(),
+			Selected:   !(susp && blockSuspicious),
+			Suspicious: susp,
 		}
 	}
 	return preview, nil
@@ -589,4 +647,67 @@ func downloadTorrentFile(ctx context.Context, url, saveDir string) (string, erro
 	}
 
 	return tmpFile.Name(), nil
+}
+
+// StreamTask 为正在下载的 BT 任务提供顺序分片（Sequential Piece Priority）边下边播流
+func (d *BTDownloader) StreamTask(w http.ResponseWriter, r *http.Request, task *types.Task) bool {
+	if task == nil {
+		return false
+	}
+	d.mu.RLock()
+	t, ok := d.activeTorrents[task.ID]
+	d.mu.RUnlock()
+	if !ok || t == nil || t.Info() == nil {
+		return false
+	}
+
+	files := t.Files()
+	if len(files) == 0 {
+		return false
+	}
+
+	// 优先选择最大尺寸的音视频文件（或最大的已选文件）
+	selectedSet := make(map[int]bool, len(task.SelectedFiles))
+	for _, idx := range task.SelectedFiles {
+		selectedSet[idx] = true
+	}
+
+	var target *torrent.File
+	var bestMediaSize int64
+	var bestAnySize int64
+	for i, f := range files {
+		if len(selectedSet) > 0 && !selectedSet[i] {
+			continue
+		}
+		if types.HasMediaFilesInPaths([]string{f.DisplayPath()}) {
+			if f.Length() > bestMediaSize {
+				bestMediaSize = f.Length()
+				target = f
+			}
+		} else if target == nil && f.Length() > bestAnySize {
+			bestAnySize = f.Length()
+			target = f
+		}
+	}
+	if target == nil {
+		target = files[0]
+	}
+
+	// 提高文件首尾分片优先级（MP4 moov / MKV EBML 索引）
+	firstPiece := target.BeginPieceIndex()
+	lastPiece := target.EndPieceIndex() - 1
+	if firstPiece >= 0 && firstPiece < t.NumPieces() {
+		t.Piece(firstPiece).SetPriority(torrent.PiecePriorityNow)
+	}
+	if lastPiece >= firstPiece && lastPiece < t.NumPieces() {
+		t.Piece(lastPiece).SetPriority(torrent.PiecePriorityNow)
+	}
+
+	reader := target.NewReader()
+	reader.SetResponsive()
+	reader.SetReadahead(8 * 1024 * 1024) // 8 MB 顺序预读
+	defer reader.Close()
+
+	http.ServeContent(w, r, filepath.Base(target.DisplayPath()), time.Now(), reader)
+	return true
 }

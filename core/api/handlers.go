@@ -7,7 +7,9 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -42,8 +44,8 @@ func detectURLType(url string) types.TaskType {
 		return types.TaskTypeBT
 	}
 
-	// HLS (.m3u8) 原生流媒体判断
-	if strings.HasSuffix(pathOnly, ".m3u8") || strings.HasSuffix(pathOnly, ".m3u") {
+	// HLS (.m3u8) 与 MPEG-DASH (.mpd) 原生流媒体判断
+	if strings.HasSuffix(pathOnly, ".m3u8") || strings.HasSuffix(pathOnly, ".m3u") || strings.HasSuffix(pathOnly, ".mpd") {
 		return types.TaskTypeHLS
 	}
 
@@ -221,11 +223,17 @@ func (h *Handlers) AddTask(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// 用户未显式指定 save_dir 时，若开启了智能分类归档，按规则自动路由子目录
+	if req.SaveDir == "" {
+		saveDir = types.ResolveCategoryDir(saveDir, filename, req.URL, taskType, quality, cfg)
+	}
+
 	task, err := h.mgr.AddTask(types.AddTaskRequest{
 		URL:            req.URL,
 		SaveDir:        saveDir,
 		Filename:       filename,
 		Threads:        threads,
+		Priority:       req.Priority,
 		Proxy:          req.Proxy,
 		Quality:        quality,
 		Cookies:        req.Cookies,
@@ -279,6 +287,14 @@ func (h *Handlers) GetTask(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, task)
 }
 
+// StreamTask GET /tasks/{id}/stream — 边下边播 HTTP Range 流媒体网关
+func (h *Handlers) StreamTask(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if err := h.mgr.StreamTask(w, r, id); err != nil {
+		writeError(w, http.StatusNotFound, fmt.Sprintf("stream failed: %v", err))
+	}
+}
+
 // PauseTask PATCH /tasks/{id}/pause
 func (h *Handlers) PauseTask(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
@@ -295,6 +311,24 @@ func (h *Handlers) ResumeTask(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if err := h.mgr.ResumeTask(id); err != nil {
 		writeError(w, http.StatusBadRequest, fmt.Sprintf("resume failed: %v", err))
+		return
+	}
+	task, _ := h.mgr.GetTask(id)
+	writeJSON(w, http.StatusOK, task)
+}
+
+// SetTaskPriority PATCH /tasks/{id}/priority
+func (h *Handlers) SetTaskPriority(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	var req struct {
+		Priority int `json:"priority"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, fmt.Sprintf("invalid body: %v", err))
+		return
+	}
+	if err := h.mgr.SetTaskPriority(id, req.Priority); err != nil {
+		writeError(w, http.StatusBadRequest, fmt.Sprintf("set priority failed: %v", err))
 		return
 	}
 	task, _ := h.mgr.GetTask(id)
@@ -547,6 +581,89 @@ func (h *Handlers) GetSystemProxy(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{
 		"proxy":   proxy,
 		"enabled": proxy != "",
+	})
+}
+
+// GetDepsStatus GET /deps/status
+// 检查外部可选依赖（yt-dlp / ffmpeg）的安装状态与路径（MAS 版本仅返回受限提示）
+func (h *Handlers) GetDepsStatus(w http.ResponseWriter, r *http.Request) {
+	if types.AppStoreEdition {
+		writeJSON(w, http.StatusOK, map[string]any{
+			"app_store_edition": true,
+			"deps":              map[string]any{},
+		})
+		return
+	}
+
+	probeBin := func(name string, versionFlag string) map[string]any {
+		binName := name
+		if runtime.GOOS == "windows" && !strings.HasSuffix(binName, ".exe") {
+			binName += ".exe"
+		}
+		var resolved string
+		if exe, err := os.Executable(); err == nil {
+			cand := filepath.Join(filepath.Dir(exe), binName)
+			if _, err := os.Stat(cand); err == nil {
+				resolved = cand
+			}
+		}
+		if resolved == "" {
+			if home, err := os.UserHomeDir(); err == nil {
+				for _, d := range []string{
+					filepath.Join(home, ".local", "share", "unfetch", "bin"),
+					filepath.Join(home, ".local", "bin"),
+				} {
+					cand := filepath.Join(d, binName)
+					if _, err := os.Stat(cand); err == nil {
+						resolved = cand
+						break
+					}
+				}
+			}
+		}
+		if resolved == "" {
+			if p, err := exec.LookPath(binName); err == nil {
+				resolved = p
+			} else if runtime.GOOS != "windows" {
+				for _, d := range []string{"/opt/homebrew/bin", "/usr/local/bin"} {
+					cand := filepath.Join(d, binName)
+					if _, err := os.Stat(cand); err == nil {
+						resolved = cand
+						break
+					}
+				}
+			}
+		}
+		if resolved == "" {
+			return map[string]any{
+				"installed": false,
+				"path":      "",
+				"version":   "",
+			}
+		}
+		ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+		defer cancel()
+		out, err := exec.CommandContext(ctx, resolved, versionFlag).Output()
+		ver := ""
+		if err == nil {
+			lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+			if len(lines) > 0 {
+				ver = strings.TrimSpace(lines[0])
+			}
+		}
+		return map[string]any{
+			"installed": true,
+			"path":      resolved,
+			"version":   ver,
+		}
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"app_store_edition": false,
+		"deps": map[string]any{
+			"yt_dlp": probeBin("yt-dlp", "--version"),
+			"ffmpeg": probeBin("ffmpeg", "-version"),
+		},
 	})
 }
 

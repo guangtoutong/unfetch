@@ -81,8 +81,11 @@ func NewRouter(mgr *queue.Manager, cfg *types.Config, saveCfg func(*types.Config
 	r.Patch("/tasks/trash/restore-all", h.RestoreAllTrashed)
 
 	r.Get("/tasks/{id}", h.GetTask)
+	r.Get("/tasks/{id}/stream", h.StreamTask)
+	r.Head("/tasks/{id}/stream", h.StreamTask)
 	r.Patch("/tasks/{id}/pause", h.PauseTask)
 	r.Patch("/tasks/{id}/resume", h.ResumeTask)
+	r.Patch("/tasks/{id}/priority", h.SetTaskPriority)
 	r.Patch("/tasks/{id}/trash", h.TrashTask)
 	r.Patch("/tasks/{id}/restore", h.RestoreTask)
 	r.Delete("/tasks/{id}", h.DeleteTask)
@@ -91,6 +94,7 @@ func NewRouter(mgr *queue.Manager, cfg *types.Config, saveCfg func(*types.Config
 	r.Patch("/config", h.UpdateConfig)
 
 	r.Get("/system-proxy", h.GetSystemProxy)
+	r.Get("/deps/status", h.GetDepsStatus)
 	r.Post("/torrent/preview", h.PreviewTorrent)
 
 	// 内嵌的 Web UI，挂载到 / 之外的所有未匹配路径

@@ -116,12 +116,16 @@ type downloadState struct {
 
 // HTTPDownloader 多线程 HTTP 下载器
 type HTTPDownloader struct {
-	mu     sync.RWMutex
-	config *types.Config
+	mu           sync.RWMutex
+	config       *types.Config
+	activeStates map[string]*downloadState
 }
 
 func NewHTTPDownloader(config *types.Config) *HTTPDownloader {
-	return &HTTPDownloader{config: config}
+	return &HTTPDownloader{
+		config:       config,
+		activeStates: make(map[string]*downloadState),
+	}
 }
 
 func (d *HTTPDownloader) UpdateConfig(cfg *types.Config) {
@@ -262,29 +266,68 @@ func applyTaskHeaders(req *http.Request, task *types.Task) {
 	}
 }
 
-// Download 执行下载，支持断点续传 + 多线程 + 多镜像源
+// Download 执行下载，支持断点续传 + 多线程 + 多镜像源 + Metalink (.meta4/.metalink) 清单自动展开
 func (d *HTTPDownloader) Download(ctx context.Context, task *types.Task, onProgress func()) error {
 	cfg := d.getConfig()
 	client := d.buildHTTPClient(task.Proxy)
 
+	primaryURL := task.URL
+	if IsMetalinkURL(primaryURL) {
+		mResp, mErr := doRequestWithRetry(ctx, client, func() (*http.Request, error) {
+			req, err := http.NewRequestWithContext(ctx, http.MethodGet, primaryURL, nil)
+			if err != nil {
+				return nil, err
+			}
+			applyTaskHeaders(req, task)
+			return req, nil
+		}, "GET metalink "+primaryURL)
+		if mErr != nil {
+			return fmt.Errorf("fetch metalink: %w", mErr)
+		}
+		xmlBytes, rErr := io.ReadAll(io.LimitReader(mResp.Body, 8*1024*1024))
+		mResp.Body.Close()
+		if rErr != nil {
+			return fmt.Errorf("read metalink: %w", rErr)
+		}
+		meta, pErr := ParseMetalink(xmlBytes)
+		if pErr != nil {
+			return pErr
+		}
+		primaryURL = meta.URLs[0]
+		if len(meta.URLs) > 1 {
+			task.Mirrors = append(task.Mirrors, meta.URLs[1:]...)
+		}
+		if meta.Filename != "" && (task.Filename == "" || task.Filename == "unknown" || task.Filename == "download" || IsMetalinkURL(task.Filename)) {
+			task.Filename = filepath.Base(meta.Filename)
+		}
+		if task.ExpectedSHA256 == "" && meta.SHA256 != "" {
+			task.ExpectedSHA256 = meta.SHA256
+		}
+		if task.ExpectedMD5 == "" && meta.MD5 != "" {
+			task.ExpectedMD5 = meta.MD5
+		}
+		onProgress()
+		slog.Info("metalink resolved", "file", task.Filename, "mirrors", len(meta.URLs), "sha256", task.ExpectedSHA256)
+	}
+
 	// 镜像源列表：主 URL + task.Mirrors
-	allURLs := []string{task.URL}
+	allURLs := []string{primaryURL}
 	for _, m := range task.Mirrors {
 		m = strings.TrimSpace(m)
-		if m != "" && m != task.URL {
+		if m != "" && m != primaryURL {
 			allURLs = append(allURLs, m)
 		}
 	}
 
 	// HEAD 请求主 URL 获取文件信息（带重试，处理 GitHub 偶发的 reset/timeout）
 	resp, err := doRequestWithRetry(ctx, client, func() (*http.Request, error) {
-		req, err := http.NewRequestWithContext(ctx, http.MethodHead, task.URL, nil)
+		req, err := http.NewRequestWithContext(ctx, http.MethodHead, primaryURL, nil)
 		if err != nil {
 			return nil, err
 		}
 		applyTaskHeaders(req, task)
 		return req, nil
-	}, "HEAD "+task.URL)
+	}, "HEAD "+primaryURL)
 	if err != nil {
 		return err
 	}
@@ -296,14 +339,14 @@ func (d *HTTPDownloader) Download(ctx context.Context, task *types.Task, onProgr
 	// 部分 CDN（GitHub release 重定向后的 Azure Blob）HEAD 不返回 Content-Length
 	// 但返回 Accept-Ranges: bytes。这种情况下用 Range 探测真实大小。
 	if totalSize <= 0 && acceptRanges {
-		if size, ok := probeSizeViaRange(ctx, client, task.URL, task); ok {
+		if size, ok := probeSizeViaRange(ctx, client, primaryURL, task); ok {
 			totalSize = size
-			slog.Info("size probed via Range", "url", task.URL, "size", size)
+			slog.Info("size probed via Range", "url", primaryURL, "size", size)
 		}
 	}
 
 	// 探活：剩余镜像必须 size 一致且支持 Range，否则剔除
-	validURLs := []string{task.URL}
+	validURLs := []string{primaryURL}
 	if len(allURLs) > 1 && totalSize > 0 && acceptRanges {
 		for _, u := range allURLs[1:] {
 			mResp, mErr := doRequestWithRetry(ctx, client, func() (*http.Request, error) {
@@ -336,9 +379,20 @@ func (d *HTTPDownloader) Download(ctx context.Context, task *types.Task, onProgr
 
 	// 确定文件名
 	filename := task.Filename
-	if filename == "" || filename == "unknown" {
-		filename = guessFilename(task.URL, resp)
-		task.Filename = filename
+	if filename == "" || filename == "unknown" || filename == "download" {
+		guessed := guessFilename(primaryURL, resp)
+		if guessed != "" {
+			filename = guessed
+			task.Filename = filename
+		}
+	}
+	if cfg != nil && cfg.AutoCategorize && task.SavePath == cfg.DownloadDir {
+		newDir := types.ResolveCategoryDir(cfg.DownloadDir, filename, primaryURL, task.Type, task.Quality, cfg)
+		if newDir != task.SavePath {
+			if err := os.MkdirAll(newDir, 0755); err == nil {
+				task.SavePath = newDir
+			}
+		}
 	}
 
 	atomic.StoreInt64(&task.TotalBytes, totalSize)
@@ -347,7 +401,7 @@ func (d *HTTPDownloader) Download(ctx context.Context, task *types.Task, onProgr
 	statePath := savePath + ".unfetch_state"
 
 	slog.Info("http download start",
-		"url", task.URL,
+		"url", primaryURL,
 		"file", savePath,
 		"size", totalSize,
 		"accept_ranges", acceptRanges,
@@ -362,7 +416,7 @@ func (d *HTTPDownloader) Download(ctx context.Context, task *types.Task, onProgr
 		if cfg.SpeedLimit > 0 {
 			tb = newTokenBucket(cfg.SpeedLimit)
 		}
-		if err := d.downloadStreaming(ctx, client, task.URL, savePath, task, &task.DoneBytes, tb, onProgress); err != nil {
+		if err := d.downloadStreaming(ctx, client, primaryURL, savePath, task, &task.DoneBytes, tb, onProgress); err != nil {
 			return err
 		}
 		slog.Info("http streaming download complete", "file", savePath)
@@ -388,10 +442,19 @@ func (d *HTTPDownloader) Download(ctx context.Context, task *types.Task, onProgr
 	}
 
 	// 加载或创建断点续传状态
-	state, err := d.loadOrCreateState(statePath, task.URL, totalSize, threads)
+	state, err := d.loadOrCreateState(statePath, primaryURL, totalSize, threads)
 	if err != nil {
 		return fmt.Errorf("prepare state: %w", err)
 	}
+
+	d.mu.Lock()
+	d.activeStates[task.ID] = state
+	d.mu.Unlock()
+	defer func() {
+		d.mu.Lock()
+		delete(d.activeStates, task.ID)
+		d.mu.Unlock()
+	}()
 
 	// 打开（或创建）输出文件
 	file, err := os.OpenFile(savePath, os.O_RDWR|os.O_CREATE, 0644)
@@ -903,4 +966,122 @@ func (tb *tokenBucket) consume(ctx context.Context, n int64) {
 		case <-time.After(waitDur):
 		}
 	}
+}
+
+// StreamTask 为正在进行中的 HTTP 下载任务提供边下边播（HTTP Range 流式读取）
+func (d *HTTPDownloader) StreamTask(w http.ResponseWriter, r *http.Request, task *types.Task) bool {
+	if task == nil || task.SavePath == "" || task.Filename == "" {
+		return false
+	}
+	d.mu.RLock()
+	state, ok := d.activeStates[task.ID]
+	d.mu.RUnlock()
+	if !ok || state == nil || state.Total <= 0 {
+		return false
+	}
+
+	savePath := filepath.Join(task.SavePath, task.Filename)
+	f, err := os.Open(savePath)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	reader := &progressiveFileReader{
+		ctx:    r.Context(),
+		file:   f,
+		state:  state,
+		dl:     d,
+		taskID: task.ID,
+	}
+	http.ServeContent(w, r, task.Filename, time.Now(), reader)
+	return true
+}
+
+// progressiveFileReader 实现 io.ReadSeeker，允许播放器在分片未写完时阻塞等待对应区间落盘
+type progressiveFileReader struct {
+	ctx    context.Context
+	file   *os.File
+	state  *downloadState
+	dl     *HTTPDownloader
+	taskID string
+	offset int64
+}
+
+func (p *progressiveFileReader) Seek(offset int64, whence int) (int64, error) {
+	var next int64
+	switch whence {
+	case io.SeekStart:
+		next = offset
+	case io.SeekCurrent:
+		next = p.offset + offset
+	case io.SeekEnd:
+		next = p.state.Total + offset
+	default:
+		return p.offset, fmt.Errorf("invalid whence %d", whence)
+	}
+	if next < 0 {
+		return p.offset, fmt.Errorf("negative seek position")
+	}
+	p.offset = next
+	return p.offset, nil
+}
+
+func (p *progressiveFileReader) Read(buf []byte) (int, error) {
+	if p.offset >= p.state.Total {
+		return 0, io.EOF
+	}
+	if len(buf) == 0 {
+		return 0, nil
+	}
+
+	// 找到包含当前 offset 的分片
+	var targetChunk *chunkState
+	for i := range p.state.Chunks {
+		c := &p.state.Chunks[i]
+		if p.offset >= c.Start && p.offset <= c.End {
+			targetChunk = c
+			break
+		}
+	}
+
+	for {
+		if p.ctx.Err() != nil {
+			return 0, p.ctx.Err()
+		}
+		if targetChunk == nil {
+			break
+		}
+		availEnd := targetChunk.Start + atomic.LoadInt64(&targetChunk.Downloaded)
+		if availEnd > p.offset {
+			maxRead := int64(len(buf))
+			if avail := availEnd - p.offset; avail < maxRead {
+				maxRead = avail
+			}
+			n, err := p.file.ReadAt(buf[:maxRead], p.offset)
+			p.offset += int64(n)
+			if err == io.EOF && p.offset < p.state.Total {
+				err = nil
+			}
+			return n, err
+		}
+
+		// 若下载已结束（离开 activeStates），直接按磁盘已有数据读取
+		p.dl.mu.RLock()
+		_, stillActive := p.dl.activeStates[p.taskID]
+		p.dl.mu.RUnlock()
+		if !stillActive {
+			break
+		}
+
+		select {
+		case <-p.ctx.Done():
+			return 0, p.ctx.Err()
+		case <-time.After(80 * time.Millisecond):
+		}
+	}
+
+	n, err := p.file.ReadAt(buf, p.offset)
+	p.offset += int64(n)
+	return n, err
 }

@@ -14,19 +14,35 @@
 
 ---
 
-unfetch 是把浏览器没下完的活接走的下载引擎。多镜像 HTTP 高速并发、原生 BT/磁力、yt-dlp 集成的 1000+ 视频网站、RSS 自动订阅、完成钩子、token 鉴权的远程 Web UI —— GUI、CLI、AI(MCP)都能驱动。约 8 MB 安装包,MIT 风格许可,默认零遥测。
+unfetch 是把浏览器没下完的活接走的下载引擎。多镜像 HTTP + Metalink 高速并发、原生 BT/磁力（支持**边下边播**与**木马文件自动拦截**）、原生 HLS (`.m3u8`) 与 MPEG-DASH (`.mpd`) 流媒体合并、yt-dlp 集成的 1000+ 视频网站、RSS 自动订阅、完成钩子、token 鉴权的远程 Web UI —— GUI、CLI、AI (MCP) 都能驱动。约 8 MB 安装包，MIT 许可，默认零遥测。
+
+## 为什么选择 unfetch？
+
+| 能力对比 | **unfetch** | Motrix | IDM | Downie | qBittorrent |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **多线程 / 多镜像 HTTP 与 Metalink (`.meta4`)** | ✅ (最高 32 线程) | ✅ | ✅ (仅 Windows) | ❌ | ❌ |
+| **BT / 磁力链接 + 做种分享率控制** | ✅ | ⚠️ (仅基础 aria2) | ❌ | ❌ | ✅ |
+| **BT 伪装木马（`.mp4.exe`/`.scr`）自动拦截** | ✅ | ❌ | ❌ | ❌ | 需手动配置 |
+| **边下边播 (`206 Range` 实时流网关)** | ✅ (`unfetch stream`) | ❌ | ❌ | ❌ | 仅顺序下载 |
+| **原生 HLS (`.m3u8` 解密) & MPEG-DASH (`.mpd`)** | ✅ 原生内置 | ❌ | ⚠️ | ✅ (仅 macOS) | ❌ |
+| **1000+ 视频网站 (`yt-dlp`)** | ✅ | ❌ | ❌ | ✅ | ❌ |
+| **FTP / FTPS / SFTP 与 ed2k** | ✅ | ⚠️ 仅 FTP | ⚠️ 仅 FTP | ❌ | ❌ |
+| **AI Agent 原生 (MCP Server + Claude Skills)** | ✅ (19 个工具) | ❌ | ❌ | ❌ | ❌ |
+| **活跃维护与安装包体积** | ✅ (~8 MB, Tauri 2 + Go) | ❌ (已停更, Electron) | 付费 | 付费 | ✅ (~40 MB Qt) |
 
 ## 核心功能
 
-- **多镜像 HTTP、原生 HLS (.m3u8) 与 FTP/SFTP** — 最多 32 线程 × 多镜像 URL 并发,原生 HLS (`.m3u8`) 多线程分片拉取与 AES-128 解密合并,失败自动 fallback,断点续传,SHA256/MD5 校验,原生支持 FTP/FTPS/SFTP 与 ed2k。
-- **BT / 磁力与做种管理** — 35 个公共 tracker、IPv6 + WebTorrent、下载前选文件、显示 peer 和做种数、可配置目标分享率与做种时长自动停止、ISP 屏蔽时自动切 uTP。
-- **1000+ 视频网站** — 通过内置 yt-dlp 支持 YouTube、B 站、抖音、X 等。
-- **AI 原生(MCP)** — `add_task` / `list_tasks` / `wait_for_task` / 进度通知 —— 任意 MCP 宿主(Claude Desktop、Cursor、Codex …)都能调用,无锁定。
-- **远程 Web UI** — `0.0.0.0` + token 鉴权 —— 手机或远程机器都能管下载,可生成访问链接二维码。
-- **RSS 自动订阅** — 订阅源加正则过滤,新条目自动入队,GUID 去重。
-- **完成钩子** — Webhook POST 或 Shell exec —— 任务完成接 Home Assistant / n8n / 任何自动化流程。
-- **任务模板和依赖链** — 按站点预设 Cookie / UA,任务依赖链等待前置完成,定时启动,按小时带宽计划。
-- **6 套主题** — 乳白(新用户默认)、深堡野、亮色纸、护眼绿、赛博朋克、极简灰白 —— 一键切换无需重启。
+- **多镜像 HTTP、Metalink (`.meta4`)、原生 HLS (`.m3u8`)、MPEG-DASH (`.mpd`) 与 FTP/SFTP** — 最多 32 线程 × 多镜像 URL 并发，RFC 5854 Metalink 自动提取镜像与哈希校验，原生 HLS (`.m3u8` AES-128 解密) 与 MPEG-DASH (`.mpd`) 多线程分片拉取合并，断点续传，SHA256/MD5 校验，原生支持 FTP/FTPS/SFTP 与 ed2k。
+- **Sequential 边下边播网关 (`unfetch stream`)** — 下载过程中即可通过本地 HTTP `206 Partial Content` 流网关（`GET /tasks/:id/stream`）实时观看 BT/磁力与 HTTP 视频，自动提权视频首尾 2% 分片（秒读 MP4 `moov` 索引头），一键调用 **Unflick** 或 mpv/IINA/VLC 边下边播并支持拖动进度条。
+- **BT / 磁力、做种控制与木马文件自动拦截** — 35 个公共 tracker、IPv6 + WebTorrent、下载前文件预览选择、自动识别并取消勾选高危伪装木马文件（`.scr/.pif/.vbs/.bat/.cmd/.hta/.lnk/.ps1`、`.mp4.exe` 双后缀伪装及影视种子夹带的 `.exe/.msi`）、可配置目标分享率与做种时长自动停止、ISP 干扰时自动切 uTP。
+- **动态队列优先级与安全智能归档** — 支持 `-1`（低）到 `2`（紧急置顶插队）四级动态优先级调度；支持按扩展名自动分流至 `Videos`、`Music`、`Archives`、`Programs`、`Documents`、`Images`、`ISO` 子目录，**绝不自动解包压缩文件**，杜绝解压炸弹与木马释放风险。
+- **1000+ 视频网站** — 通过内置 yt-dlp 集成支持 YouTube、B 站、抖音、X 等，并提供 `/deps/status` 依赖自检。
+- **AI 原生 (MCP)** — 内置 19 个工具（`add_task`、`stream_task`、`set_task_priority`、`list_tasks`、`wait_for_task`、实时进度通知），任意 MCP 宿主（Claude Desktop、Claude Code、Cursor、Codex、Unterm）开箱即用。
+- **远程 Web UI** — `0.0.0.0` + token 鉴权 —— 手机或远程 NAS/服务器都能管下载，支持扫码访问。
+- **RSS 自动订阅** — 订阅源加正则过滤，新条目自动入队，GUID 去重。
+- **完成钩子** — Webhook POST 或 Shell exec —— 任务完成接 Home Assistant / n8n / 任意自动化流程。
+- **任务模板和依赖链** — 按站点预设 Cookie / UA，任务依赖链等待前置完成，定时启动，按小时带宽计划。
+- **6 套主题与 14 种语言** — 乳白（新用户默认）、深邃靛蓝、亮色纸张、森林暗夜、赛博朋克、极简灰白 —— 一键切换无需重启。
 - **隐私至上** — 无广告、无遥测、无登录、不上传 infohash。
 
 ## 安装
@@ -36,6 +52,11 @@ unfetch 是把浏览器没下完的活接走的下载引擎。多镜像 HTTP 高
 | macOS(Apple Silicon + Intel,已 Apple 公证) | [`unfetch_*_universal.dmg`](https://github.com/guangtoutong/unfetch/releases/latest) |
 | Windows 10/11(NSIS 安装器) | [`unfetch_*_x64-setup.exe`](https://github.com/guangtoutong/unfetch/releases/latest) |
 | Linux x64(AppImage / deb / rpm) | [Release 页面](https://github.com/guangtoutong/unfetch/releases/latest) |
+
+**Homebrew 一键安装（macOS）** —— Cask 配方见 [`packaging/homebrew/unfetch.rb`](packaging/homebrew/unfetch.rb)：
+```bash
+brew install --cask guangtoutong/tap/unfetch
+```
 
 或访问 <https://unfetch.org/#download> 一键下载。
 
@@ -83,7 +104,7 @@ unfetch 用 Go daemon + Tauri 外壳实现。**三个前端共享一个 daemon,�
 
 然后你的 AI 就可以 `add_task` / `list_tasks` / `wait_for_task` 等。完整工具列表见 [mcp/README.md](mcp/README.md) 或 <https://unfetch.org/mcp>。
 
-**17 个 MCP 工具**(完整 Schema、Resources 与各市场发布材料见 [`mcp/`](mcp/)): `add_task`、`detect_url`、`preview_torrent`、`wait_for_task`、`wait_for_all`、`list_tasks`、`get_task`、`pause_task`、`resume_task`、`remove_task`、`trash_task`、`restore_task`、`empty_trash`、`restore_all_trashed`、`get_config`、`set_config`、`play_in_unflick`。
+**19 个 MCP 工具**(完整 Schema、Resources 与各市场发布材料见 [`mcp/`](mcp/)): `add_task`、`detect_url`、`preview_torrent`、`wait_for_task`、`wait_for_all`、`list_tasks`、`get_task`、`pause_task`、`resume_task`、`set_task_priority`、`stream_task`、`remove_task`、`trash_task`、`restore_task`、`empty_trash`、`restore_all_trashed`、`get_config`、`set_config`、`play_in_unflick`。
 
 ### Skills 与一键安装
 

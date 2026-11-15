@@ -85,6 +85,7 @@ func NewStore() (*Store, error) {
 		`ALTER TABLE tasks ADD COLUMN custom_trackers TEXT NOT NULL DEFAULT ''`,
 		`ALTER TABLE tasks ADD COLUMN mirrors TEXT NOT NULL DEFAULT ''`,
 		`ALTER TABLE tasks ADD COLUMN depends_on TEXT NOT NULL DEFAULT ''`,
+		`ALTER TABLE tasks ADD COLUMN priority INTEGER NOT NULL DEFAULT 0`,
 	}
 	for _, m := range migrations {
 		if _, err := db.Exec(m); err != nil {
@@ -138,12 +139,12 @@ func (s *Store) SaveTask(task *types.Task) error {
 
 	_, err = s.db.Exec(`
 		INSERT INTO tasks
-			(id, url, filename, save_path, type, status, total_bytes, done_bytes, threads,
+			(id, url, filename, save_path, type, status, total_bytes, done_bytes, threads, priority,
 			 proxy, quality, cookies, user_agent, headers, play_after, trashed, retry_count, start_at, tags,
 			 expected_sha256, expected_md5, actual_sha256, selected_files,
 			 custom_trackers, mirrors, depends_on,
 			 created_at, finished_at, error, metadata)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(id) DO UPDATE SET
 			filename    = excluded.filename,
 			save_path   = excluded.save_path,
@@ -151,6 +152,7 @@ func (s *Store) SaveTask(task *types.Task) error {
 			total_bytes = excluded.total_bytes,
 			done_bytes  = excluded.done_bytes,
 			threads     = excluded.threads,
+			priority    = excluded.priority,
 			proxy       = excluded.proxy,
 			quality     = excluded.quality,
 			cookies     = excluded.cookies,
@@ -175,7 +177,7 @@ func (s *Store) SaveTask(task *types.Task) error {
 		task.ID, task.URL, task.Filename, task.SavePath,
 		string(task.Type), string(task.Status),
 		task.TotalBytes, task.DoneBytes,
-		task.Threads, task.Proxy, task.Quality, task.Cookies,
+		task.Threads, task.Priority, task.Proxy, task.Quality, task.Cookies,
 		task.UserAgent, string(headersJSON),
 		playAfter, trashed, task.RetryCount, startAt, string(tagsJSON),
 		task.ExpectedSHA256, task.ExpectedMD5, task.ActualSHA256, string(selectedJSON),
@@ -204,14 +206,14 @@ func (s *Store) DeleteTask(id string) error {
 func (s *Store) LoadActiveTasks() ([]*types.Task, error) {
 	rows, err := s.db.Query(`
 		SELECT id, url, filename, save_path, type, status,
-		       total_bytes, done_bytes, threads, proxy, quality, cookies,
+		       total_bytes, done_bytes, threads, priority, proxy, quality, cookies,
 		       user_agent, headers, play_after, trashed, retry_count, start_at, tags,
 		       expected_sha256, expected_md5, actual_sha256, selected_files,
 		       custom_trackers, mirrors, depends_on,
 		       created_at, finished_at, error, metadata
 		FROM tasks
 		WHERE status NOT IN ('done') OR trashed = 1
-		ORDER BY created_at ASC
+		ORDER BY priority DESC, created_at ASC
 	`)
 	if err != nil {
 		return nil, fmt.Errorf("query tasks: %w", err)
@@ -260,7 +262,7 @@ func scanTask(rows *sql.Rows) (*types.Task, error) {
 		&t.ID, &t.URL, &t.Filename, &t.SavePath,
 		&taskType, &status,
 		&t.TotalBytes, &t.DoneBytes,
-		&t.Threads, &t.Proxy, &t.Quality, &t.Cookies,
+		&t.Threads, &t.Priority, &t.Proxy, &t.Quality, &t.Cookies,
 		&t.UserAgent, &headersJSON,
 		&playAfter, &trashed, &t.RetryCount, &startAt, &tagsJSON,
 		&t.ExpectedSHA256, &t.ExpectedMD5, &t.ActualSHA256, &selectedJSON,

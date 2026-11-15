@@ -10,11 +10,15 @@ interface Props {
 }
 
 export const TorrentFilePicker: React.FC<Props> = ({ preview, onConfirm, onCancel, submitting }) => {
-  // 默认全选
+  // 默认勾选非可疑且后端标记为 selected 的文件
   const [selected, setSelected] = useState<Set<number>>(
-    () => new Set(preview.files.map((f) => f.index)),
+    () => new Set(preview.files.filter((f) => f.selected !== false && !f.suspicious).map((f) => f.index)),
   )
   const [filter, setFilter] = useState('')
+  const suspiciousCount = useMemo(
+    () => preview.files.filter((f) => f.suspicious).length,
+    [preview.files],
+  )
 
   const filtered = useMemo(() => {
     const q = filter.trim().toLowerCase()
@@ -34,7 +38,7 @@ export const TorrentFilePicker: React.FC<Props> = ({ preview, onConfirm, onCance
     })
   }
 
-  const selectAll = () => setSelected(new Set(preview.files.map((f) => f.index)))
+  const selectAll = () => setSelected(new Set(preview.files.filter((f) => !f.suspicious).map((f) => f.index)))
   const selectNone = () => setSelected(new Set())
   const selectVisible = () => {
     setSelected((prev) => {
@@ -71,6 +75,11 @@ export const TorrentFilePicker: React.FC<Props> = ({ preview, onConfirm, onCance
         <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
           {preview.files.length} 文件 · 共 {formatBytes(preview.total_bytes)} · {selected.size} 已选 ({formatBytes(totalSelectedSize)})
         </div>
+        {suspiciousCount > 0 && (
+          <div style={{ marginTop: 6, fontSize: 11, color: '#f59e0b', fontWeight: 600 }}>
+            🛡️ 已自动识别并取消勾选 {suspiciousCount} 个可疑脚本/可执行文件
+          </div>
+        )}
       </div>
 
       {/* 搜索 + 批量操作 */}
@@ -163,12 +172,27 @@ export const TorrentFilePicker: React.FC<Props> = ({ preview, onConfirm, onCance
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
-                    color: isSel ? 'var(--text-primary)' : 'var(--text-secondary)',
+                    color: f.suspicious ? '#f59e0b' : isSel ? 'var(--text-primary)' : 'var(--text-secondary)',
                   }}
                   title={f.path}
                 >
                   {f.path}
                 </span>
+                {f.suspicious && (
+                  <span
+                    style={{
+                      flexShrink: 0,
+                      fontSize: 10,
+                      fontWeight: 600,
+                      color: '#ef4444',
+                      background: 'rgba(239,68,68,0.14)',
+                      borderRadius: 4,
+                      padding: '1px 6px',
+                    }}
+                  >
+                    ⚠️ 可疑
+                  </span>
+                )}
                 <span style={{ flexShrink: 0, fontSize: 11, color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>
                   {formatBytes(f.length)}
                 </span>

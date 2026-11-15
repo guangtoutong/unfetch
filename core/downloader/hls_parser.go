@@ -390,6 +390,13 @@ func normalizeHLSFilename(filename, rawURL string) string {
 		name = "stream"
 	}
 	lower := strings.ToLower(name)
+	if strings.HasSuffix(lower, ".mpd") {
+		stem := name[:len(name)-4]
+		if stem == "" {
+			stem = "stream"
+		}
+		return stem + ".mp4"
+	}
 	if strings.HasSuffix(lower, ".m3u8") || strings.HasSuffix(lower, ".m3u") {
 		extLen := 5
 		if strings.HasSuffix(lower, ".m3u") {

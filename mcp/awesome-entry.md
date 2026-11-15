@@ -11,7 +11,7 @@ the target's format.
 > File: `README.md` in https://github.com/punkpeye/awesome-mcp-servers (or any fork you submit to).
 
 ```markdown
-- [guangtoutong/unfetch](https://github.com/guangtoutong/unfetch) 🦀 🖥️ - AI-native download manager: HTTP multi-threaded, BT/magnet, and 1000+ video sites via yt-dlp. Add tasks, wait for completion with live progress, and manage the queue over MCP.
+- [guangtoutong/unfetch](https://github.com/guangtoutong/unfetch) 🦀 🖥️ - AI-native multi-protocol download engine: multi-mirror HTTP/Metalink, BT/magnet (with live sequential streaming & malware file guard), native HLS/DASH, and 1000+ video sites via yt-dlp. 19 MCP tools + live progress notifications.
 ```
 
 Legend used by that list: 🦀 = Rust, 🖥️ = local/desktop service.

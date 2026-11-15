@@ -22,6 +22,7 @@ export interface Task {
   speed: number
   eta: number
   threads: number
+  priority?: number
   proxy?: string
   quality?: string
   created_at: string
@@ -72,6 +73,13 @@ export interface TaskTemplate {
   headers?: Record<string, string>
 }
 
+export interface CategoryRule {
+  name: string
+  extensions?: string[]
+  domain_regex?: string
+  sub_dir: string
+}
+
 export interface Config {
   download_dir: string
   max_concurrent: number
@@ -88,6 +96,9 @@ export interface Config {
   bt_auto_utp_fallback?: boolean
   bt_seed_ratio?: number
   bt_seed_time_min?: number
+  bt_block_suspicious_files?: boolean
+  auto_categorize?: boolean
+  category_rules?: CategoryRule[]
   // v0.1.1+ 远程 Web UI
   remote_enabled?: boolean
   remote_token?: string
@@ -105,6 +116,7 @@ export interface AddTaskRequest {
   save_dir?: string
   filename?: string
   threads?: number
+  priority?: number
   proxy?: string
   quality?: string
   cookies?: string
@@ -125,6 +137,7 @@ export interface TorrentFile {
   path: string
   length: number
   selected: boolean
+  suspicious?: boolean
 }
 
 export interface TorrentPreview {

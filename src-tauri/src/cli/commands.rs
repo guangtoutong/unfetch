@@ -74,6 +74,9 @@ pub enum Commands {
         /// BT 任务：额外 Tracker URL（逗号分隔）
         #[arg(long, value_delimiter = ',')]
         trackers: Vec<String>,
+        /// 任务优先级（-1 低 / 0 普通 / 1 高 / 2 置顶优先）
+        #[arg(long, short = 'p', default_value_t = 0, allow_hyphen_values = true)]
+        priority: i32,
     },
 
     /// 列出所有下载任务
@@ -94,6 +97,21 @@ pub enum Commands {
 
     /// 恢复任务
     Resume { id: String },
+
+    /// 修改任务优先级（-1 低 / 0 普通 / 1 高 / 2 置顶优先）
+    Priority {
+        id: String,
+        #[arg(allow_hyphen_values = true)]
+        priority: i32,
+    },
+
+    /// 获取任务的边下边播流媒体地址（可选直接拉起 Unflick 播放）
+    Stream {
+        id: String,
+        /// 立即调用 Unflick 边下边播
+        #[arg(long)]
+        play: bool,
+    },
 
     /// 阻塞等待任务完成或失败，期间打印进度
     Wait {
@@ -198,6 +216,7 @@ fn _run(cli: Cli) -> Result<i32> {
             user_agent,
             selected_files,
             trackers,
+            priority,
         } => {
             ensure_daemon()?;
             let body = serde_json::json!({
@@ -205,6 +224,7 @@ fn _run(cli: Cli) -> Result<i32> {
                 "save_dir":        output,
                 "filename":        filename,
                 "threads":         threads,
+                "priority":        priority,
                 "quality":         quality,
                 "proxy":           proxy,
                 "cookies":         cookies,
@@ -251,6 +271,36 @@ fn _run(cli: Cli) -> Result<i32> {
             ensure_daemon()?;
             let resp = patch(&format!("/tasks/{id}/resume"))?;
             print_json(&resp);
+        }
+
+        Commands::Priority { id, priority } => {
+            ensure_daemon()?;
+            let body = serde_json::json!({ "priority": priority });
+            let resp = patch_json(&format!("/tasks/{id}/priority"), &body)?;
+            print_json(&resp);
+        }
+
+        Commands::Stream { id, play } => {
+            ensure_daemon()?;
+            let task = get(&format!("/tasks/{id}"))?;
+            if let Some(err) = task.get("error").and_then(|v| v.as_str()) {
+                if !err.is_empty() && task.get("id").is_none() {
+                    bail!("{err}");
+                }
+            }
+            let stream_url = format!("{}/tasks/{id}/stream", daemon::DAEMON_URL);
+            let mut playing = false;
+            if play {
+                crate::gui::commands::play_in_unflick(stream_url.clone())
+                    .map_err(|e| anyhow::anyhow!(e))?;
+                playing = true;
+            }
+            let out = serde_json::json!({
+                "id": id,
+                "stream_url": stream_url,
+                "playing": playing,
+            });
+            print_json(&out);
         }
 
         Commands::Wait { id, timeout } => {

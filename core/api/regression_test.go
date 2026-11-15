@@ -133,15 +133,45 @@ func TestFullAPIRegression(t *testing.T) {
 		t.Errorf("template Header not applied: got %q", receivedCustomHeader)
 	}
 
-	// 7. 验证落盘文件内容
+	// 7. 验证落盘文件内容与 GET /tasks/{id}/stream Range 流媒体网关
 	savedBytes, err := os.ReadFile(filepath.Join(tmpDir, "reg_sample.bin"))
 	if err != nil || !bytes.Equal(savedBytes, content) {
 		t.Fatalf("saved file mismatch: err=%v len=%d", err, len(savedBytes))
 	}
 
-	// 8. 测试 Trash -> Restore -> Delete 完整生命周期
-	req, _ := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/tasks/%s/trash", apiSrv.URL, created.ID), nil)
+	streamReq, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/tasks/%s/stream", apiSrv.URL, created.ID), nil)
+	streamReq.Header.Set("Range", "bytes=0-31")
+	streamResp, err := http.DefaultClient.Do(streamReq)
+	if err != nil || streamResp.StatusCode != http.StatusPartialContent {
+		t.Fatalf("GET /tasks/{id}/stream Range failed: status=%v err=%v", streamResp, err)
+	}
+	var rangeBuf [32]byte
+	if _, err := streamResp.Body.Read(rangeBuf[:]); err != nil && err.Error() != "EOF" {
+		t.Fatalf("read stream range failed: %v", err)
+	}
+	streamResp.Body.Close()
+	if !bytes.Equal(rangeBuf[:], content[:32]) {
+		t.Errorf("stream range content mismatch: got %q, want %q", rangeBuf[:], content[:32])
+	}
+
+	// 8. 测试 PATCH /tasks/{id}/priority
+	prioBody := []byte(`{"priority": 2}`)
+	req, _ := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/tasks/%s/priority", apiSrv.URL, created.ID), bytes.NewReader(prioBody))
+	req.Header.Set("Content-Type", "application/json")
 	r, err := http.DefaultClient.Do(req)
+	if err != nil || r.StatusCode != http.StatusOK {
+		t.Fatalf("set priority failed: %v", err)
+	}
+	var prioTask types.Task
+	_ = json.NewDecoder(r.Body).Decode(&prioTask)
+	r.Body.Close()
+	if prioTask.Priority != 2 {
+		t.Errorf("Priority = %d, want 2", prioTask.Priority)
+	}
+
+	// 9. 测试 Trash -> Restore -> Delete 完整生命周期
+	req, _ = http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/tasks/%s/trash", apiSrv.URL, created.ID), nil)
+	r, err = http.DefaultClient.Do(req)
 	if err != nil || r.StatusCode != http.StatusOK {
 		t.Fatalf("trash failed: %v", err)
 	}
@@ -160,4 +190,44 @@ func TestFullAPIRegression(t *testing.T) {
 		t.Fatalf("delete failed: %v", err)
 	}
 	r.Body.Close()
+}
+
+func TestSmartCategoryAndSuspiciousFilter(t *testing.T) {
+	baseDir := "/tmp/unfetch-dl"
+	cfg := &types.Config{
+		DownloadDir:    baseDir,
+		AutoCategorize: true,
+	}
+
+	if got := types.ResolveCategoryDir(baseDir, "movie.mkv", "https://example.com/movie.mkv", types.TaskTypeHTTP, "", cfg); got != filepath.Join(baseDir, "Videos") {
+		t.Errorf("video category got %q, want Videos", got)
+	}
+	if got := types.ResolveCategoryDir(baseDir, "archive.tar.gz", "https://example.com/archive.tar.gz", types.TaskTypeHTTP, "", cfg); got != filepath.Join(baseDir, "Archives") {
+		t.Errorf("archive category got %q, want Archives", got)
+	}
+	if got := types.ResolveCategoryDir(baseDir, "installer.dmg", "https://example.com/installer.dmg", types.TaskTypeHTTP, "", cfg); got != filepath.Join(baseDir, "Programs") {
+		t.Errorf("program category got %q, want Programs", got)
+	}
+	if got := types.ResolveCategoryDir(baseDir, "unknown", "https://www.youtube.com/watch?v=abc", types.TaskTypeYtdlp, "audio", cfg); got != filepath.Join(baseDir, "Music") {
+		t.Errorf("ytdlp audio category got %q, want Music", got)
+	}
+
+	// 测试 BT 可疑文件识别
+	paths := []string{"Movie.2026.1080p.mp4", "Subtitles.srt", "专用播放器.exe", "bonus.scr"}
+	hasMedia := types.HasMediaFilesInPaths(paths)
+	if !hasMedia {
+		t.Fatal("expected HasMediaFilesInPaths to be true")
+	}
+	if types.IsSuspiciousTorrentFile("Movie.2026.1080p.mp4", 1024*1024*500, hasMedia) {
+		t.Error("legitimate .mp4 should not be suspicious")
+	}
+	if !types.IsSuspiciousTorrentFile("专用播放器.exe", 1024*500, hasMedia) {
+		t.Error(".exe bundled in media torrent should be suspicious")
+	}
+	if !types.IsSuspiciousTorrentFile("bonus.scr", 1024*100, false) {
+		t.Error(".scr screensaver trojan should always be suspicious")
+	}
+	if !types.IsSuspiciousTorrentFile("movie.mp4.exe", 1024*100, false) {
+		t.Error("double extension .mp4.exe should always be suspicious")
+	}
 }

@@ -109,13 +109,14 @@ func loadConfig() (*types.Config, error) {
 			sharedDir = filepath.Join(home, "Downloads")
 		}
 		cfg := &types.Config{
-			DownloadDir:   sharedDir,
-			Proxy:         sharedProxy,
-			MaxConcurrent: 5,
-			HTTPThreads:   16,
-			SpeedLimit:    0,
-			AutoRetry:     true,
-			MaxRetries:    5,
+			DownloadDir:            sharedDir,
+			Proxy:                  sharedProxy,
+			MaxConcurrent:          5,
+			HTTPThreads:            16,
+			SpeedLimit:             0,
+			AutoRetry:              true,
+			MaxRetries:             5,
+			BTBlockSuspiciousFiles: true,
 		}
 		if err := saveConfig(cfg); err != nil {
 			slog.Warn("failed to save default config", "err", err)
@@ -163,6 +164,15 @@ func loadConfig() (*types.Config, error) {
 			_ = saveConfig(&cfg)
 			_ = os.WriteFile(marker, []byte("1"), 0644)
 			slog.Info("auto_retry defaulted to true for existing config")
+		}
+	}
+	if !cfg.BTBlockSuspiciousFiles {
+		marker := filepath.Join(dir, ".bt-safe-default-upgraded")
+		if _, err := os.Stat(marker); os.IsNotExist(err) {
+			cfg.BTBlockSuspiciousFiles = true
+			_ = saveConfig(&cfg)
+			_ = os.WriteFile(marker, []byte("1"), 0644)
+			slog.Info("bt_block_suspicious_files defaulted to true for existing config")
 		}
 	}
 	return &cfg, nil

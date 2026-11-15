@@ -327,8 +327,9 @@ async function playInUnflick(path: string) {
 }
 
 export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskItem({ task, filter }, ref) {
-  const { pauseTask, resumeTask, trashTask, restoreTask, removeTask } = useTaskStore()
-  const { t } = useTranslation()
+  const { pauseTask, resumeTask, setTaskPriority, trashTask, restoreTask, removeTask } = useTaskStore()
+  const { t, i18n } = useTranslation()
+  const isZh = i18n.language?.startsWith('zh')
   const [hovered, setHovered] = useState(false)
   const [confirmHardDelete, setConfirmHardDelete] = useState(false)
   const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(null)
@@ -347,6 +348,13 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
   }
 
   const filePath = task.save_path && task.filename ? `${task.save_path}/${task.filename}` : ''
+  const streamURL = `http://127.0.0.1:19543/tasks/${task.id}/stream`
+  const isMediaExt = /\.(mp4|mkv|avi|mov|webm|flv|m4v|ts|mp3|flac|wav|m4a|ogg|opus)$/i.test(task.filename || '')
+  const canStreamWhileDownloading =
+    !__APP_STORE_BUILD__ &&
+    task.status === 'downloading' &&
+    task.done_bytes > 0 &&
+    (task.type === 'bt' || (task.type === 'http' && isMediaExt))
 
   const menuItems = useMemo<MenuItem[]>(() => {
     const copyURL = () => {
@@ -397,11 +405,21 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
         icon: (
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
             <rect x="6" y="4" width="4" height="16" rx="1" />
-            <rect x="14" y="4" width="4" height="16" rx="1" />
           </svg>
         ),
         onClick: () => pauseTask(task.id).catch(console.error),
       })
+      if (canStreamWhileDownloading) {
+        items.push({
+          label: isZh ? '▶ 边下边播 (Unflick)' : '▶ Stream in Unflick',
+          icon: (
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+          ),
+          onClick: () => playInUnflick(streamURL),
+        })
+      }
     } else if (task.status === 'paused') {
       items.push({
         label: t('task.resume'),
@@ -446,6 +464,21 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
           onClick: () => playInUnflick(filePath),
         })
       }
+    }
+
+    if (task.status !== 'done') {
+      const isHigh = (task.priority ?? 0) > 0
+      items.push({
+        label: isHigh
+          ? (isZh ? '恢复普通优先级' : 'Normal Priority')
+          : (isZh ? '⚡ 置顶优先下载' : '⚡ High Priority'),
+        icon: (
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+          </svg>
+        ),
+        onClick: () => setTaskPriority(task.id, isHigh ? 0 : 2).catch(console.error),
+      })
     }
 
     if (items.length > 0) items.push({ divider: true, label: '' })
@@ -553,6 +586,16 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
             </span>
             <SourceBadge url={task.url} type={task.type} />
             <StatusBadge status={task.status} />
+            {(task.priority ?? 0) > 0 && (
+              <span style={{
+                fontSize: 10, fontWeight: 600,
+                color: '#10b981',
+                background: 'rgba(16,185,129,0.12)',
+                borderRadius: 4, padding: '2px 6px',
+              }}>
+                ⚡ {isZh ? '优先' : 'Priority'}
+              </span>
+            )}
             {(task.retry_count ?? 0) > 0 && (
               <span style={{
                 fontSize: 10, fontWeight: 600,
@@ -718,6 +761,18 @@ export const TaskItem = forwardRef<HTMLDivElement, TaskItemProps>(function TaskI
           transition={{ duration: 0.15 }}
           style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}
         >
+          {canStreamWhileDownloading && (
+            <ActionButton
+              onClick={() => playInUnflick(streamURL)}
+              title={isZh ? '用 Unflick 边下边播' : 'Stream in Unflick'}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+              {isZh ? '边下边播' : 'Stream'}
+            </ActionButton>
+          )}
+
           {task.status === 'downloading' && (
             <ActionButton onClick={() => pauseTask(task.id)} title={t('task.pause')}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

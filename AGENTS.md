@@ -299,9 +299,11 @@ type Task struct {
 | 协议 | 实现方式 | 状态 |
 |------|---------|------|
 | HTTP/HTTPS 多线程 | 自研（Go `net/http` + goroutine 分片） | Phase 1 |
+| Metalink (`.meta4`/`.metalink`) | 自研 RFC 5854 / v3 解析（多镜像 + SHA-256/MD5 自动校验） | Phase 4 |
 | HLS 流媒体 (`.m3u8`) | 自研（Master/Media 解析 + 多线程分片 + AES-128 解密合并） | Phase 3 |
-| BT 种子文件 | `anacrolix/torrent`（支持分享率/做种时长自动停止） | Phase 1 |
-| 磁力链接 | `anacrolix/torrent`（DHT） | Phase 1 |
+| MPEG-DASH (`.mpd`) | 自研（MPD 清单解析 + Init/Fragment 并发下载合并） | Phase 4 |
+| BT 种子文件 | `anacrolix/torrent`（支持分享率/做种时长自动停止 + 恶意文件拦截） | Phase 1 / 4 |
+| 磁力链接 | `anacrolix/torrent`（DHT + Sequential 边下边播流网关） | Phase 1 / 4 |
 | 视频网站（1000+） | `go-ytdlp`（包装 yt-dlp 二进制） | Phase 1 |
 | ed2k | `go-ed2k` 或 aMule CLI 包装 | Phase 3 |
 | FTP/SFTP | Go 标准库 | Phase 2 |
@@ -370,6 +372,14 @@ unfetch add "<stream_url>" --filename "video_title.mp4" --play-after
 - [x] CLI 补全（`unfetch completions <bash|zsh|fish|powershell|elvish>`）
 - [x] RSS 自动订阅（正则过滤 + GUID 去重）与远程 Web UI（`0.0.0.0` + Token 鉴权）
 - [x] 6 套主题皮肤 + 14 种语言国际化 + 多语言官网（`website/`）+ Mac App Store 合规版（`-tags masbuild`）
+
+### Phase 4：边下边播、智能归档与协议全覆盖（v0.4.0，已完成）
+- [x] Sequential 边下边播网关（`GET /tasks/:id/stream` HTTP 206 Range 流，BT 首尾分片提权 + HTTP 渐进式流 + `unfetch stream` + Unflick 联动）
+- [x] 任务队列动态优先级调度（`priority` `-1/0/1/2` + 紧急置顶插队）
+- [x] 安全智能归档（`auto_categorize` 按扩展名分流至 Videos/Music/Archives/Programs/Documents/Images/ISO，绝不自动解压）
+- [x] BT 可疑/木马文件安全拦截（`bt_block_suspicious_files` 自动跳过 `.scr/.vbs/.bat/.lnk/.ps1`、双后缀伪装及影视种子夹带 `.exe`）
+- [x] MPEG-DASH (`.mpd`) 流媒体与 Metalink (`.meta4`/`.metalink`) 多镜像 + 自动校验支持
+- [x] 外部依赖状态探针（`GET /deps/status` 检测 `yt-dlp` / `ffmpeg`）
 
 ---
 

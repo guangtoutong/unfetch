@@ -36,6 +36,12 @@ export const api = {
   resumeTask: (id: string): Promise<Task> =>
     request(`/tasks/${id}/resume`, { method: 'PATCH' }),
 
+  setTaskPriority: (id: string, priority: number): Promise<Task> =>
+    request(`/tasks/${id}/priority`, {
+      method: 'PATCH',
+      body: JSON.stringify({ priority }),
+    }),
+
   trashTask: (id: string): Promise<Task> =>
     request(`/tasks/${id}/trash`, { method: 'PATCH' }),
 

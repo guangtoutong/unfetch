@@ -383,6 +383,7 @@ fn handle_tool(name: &str, args: &Value) -> Value {
                 "save_dir":  args.get("save_dir"),
                 "filename":  args.get("filename"),
                 "threads":   args.get("threads"),
+                "priority":  args.get("priority"),
                 "quality":   args.get("quality"),
                 "proxy":     args.get("proxy"),
                 "cookies":   args.get("cookies"),
@@ -428,7 +429,7 @@ fn handle_tool(name: &str, args: &Value) -> Value {
                     "ftp"
                 } else if lower.starts_with("magnet:") || path_only.ends_with(".torrent") {
                     "bt"
-                } else if path_only.ends_with(".m3u8") || path_only.ends_with(".m3u") {
+                } else if path_only.ends_with(".m3u8") || path_only.ends_with(".m3u") || path_only.ends_with(".mpd") {
                     "hls"
                 } else if ytdlp_sites.iter().any(|s| lower.contains(s)) {
                     "ytdlp"
@@ -469,6 +470,14 @@ fn handle_tool(name: &str, args: &Value) -> Value {
         "resume_task" => {
             let id = args["id"].as_str().unwrap_or("");
             client.patch(format!("{base}/tasks/{id}/resume")).send()
+                .and_then(|r| r.json::<Value>())
+                .unwrap_or_else(|e| json!({"error": e.to_string()}))
+        }
+        "set_task_priority" => {
+            let id = args["id"].as_str().unwrap_or("");
+            let priority = args.get("priority").and_then(|v| v.as_i64()).unwrap_or(0);
+            let body = json!({ "priority": priority });
+            client.patch(format!("{base}/tasks/{id}/priority")).json(&body).send()
                 .and_then(|r| r.json::<Value>())
                 .unwrap_or_else(|e| json!({"error": e.to_string()}))
         }
@@ -520,6 +529,19 @@ fn handle_tool(name: &str, args: &Value) -> Value {
                 Err(e) => json!({"error": e}),
             }
         }
+        "stream_task" => {
+            let id = args["id"].as_str().unwrap_or("");
+            let play = args.get("play_in_unflick").and_then(|v| v.as_bool()).unwrap_or(true);
+            let stream_url = format!("{base}/tasks/{id}/stream");
+            if play {
+                match crate::gui::commands::play_in_unflick(stream_url.clone()) {
+                    Ok(_) => json!({"ok": true, "id": id, "stream_url": stream_url, "playing": true}),
+                    Err(e) => json!({"ok": false, "id": id, "stream_url": stream_url, "playing": false, "error": e}),
+                }
+            } else {
+                json!({"ok": true, "id": id, "stream_url": stream_url, "playing": false})
+            }
+        }
         _ => json!({"error": format!("unknown tool: {name}")}),
     }
 }
@@ -551,6 +573,7 @@ fn tool_definitions() -> Value {
                     "save_dir":  { "type": "string", "description": "保存目录" },
                     "filename":  { "type": "string", "description": "文件名" },
                     "threads":   { "type": "integer", "description": "HTTP 分片并发线程数" },
+                    "priority":  { "type": "integer", "description": "任务优先级（-1 低 / 0 普通 / 1 高 / 2 置顶优先）" },
                     "quality":   { "type": "string", "enum": ["best","1080p","720p","480p","audio"] },
                     "proxy":     { "type": "string" },
                     "cookies":   { "type": "string", "description": "Cookie 头或 Netscape cookie 内容" },
@@ -630,6 +653,11 @@ fn tool_definitions() -> Value {
           "inputSchema": { "type": "object", "properties": { "id": { "type": "string" } }, "required": ["id"] } },
         { "name": "resume_task", "description": "恢复暂停的下载任务",
           "inputSchema": { "type": "object", "properties": { "id": { "type": "string" } }, "required": ["id"] } },
+        { "name": "set_task_priority", "description": "调整任务队列优先级（-1 低 / 0 普通 / 1 高 / 2 置顶优先）",
+          "inputSchema": { "type": "object", "properties": {
+              "id": { "type": "string" },
+              "priority": { "type": "integer", "description": "-1 低 / 0 普通 / 1 高 / 2 置顶优先" }
+          }, "required": ["id", "priority"] } },
         { "name": "remove_task", "description": "彻底删除下载任务",
           "inputSchema": { "type": "object", "properties": {
               "id": { "type": "string" },
@@ -654,13 +682,20 @@ fn tool_definitions() -> Value {
               "speed_limit":      { "type": "integer" },
               "auto_play_unflick":{ "type": "boolean" },
               "auto_retry":       { "type": "boolean" },
+              "auto_categorize":  { "type": "boolean", "description": "按扩展名/规则自动分目录归档" },
               "bt_force_utp":     { "type": "boolean" },
               "bt_auto_utp_fallback": { "type": "boolean" },
+              "bt_block_suspicious_files": { "type": "boolean", "description": "自动拦截 BT 种子内的可疑木马/脚本文件" },
               "bt_seed_ratio":    { "type": "number", "description": "BT 目标分享率（如 1.0），0 表示下载完即停" },
               "bt_seed_time_min": { "type": "integer", "description": "BT 最长做种分钟数（如 60），0 表示下载完即停" },
               "on_all_done":      { "type": "string", "enum": ["", "notify", "open_dir", "shutdown", "sleep"] }
           } } },
         { "name": "play_in_unflick", "description": "用 Unflick 播放本地文件",
-          "inputSchema": { "type": "object", "properties": { "path": { "type": "string" } }, "required": ["path"] } }
+          "inputSchema": { "type": "object", "properties": { "path": { "type": "string" } }, "required": ["path"] } },
+        { "name": "stream_task", "description": "获取下载中或已完成任务的 HTTP Range 边下边播流媒体地址，并可选直接拉起 Unflick 边下边播",
+          "inputSchema": { "type": "object", "properties": {
+              "id": { "type": "string", "description": "任务 ID" },
+              "play_in_unflick": { "type": "boolean", "description": "是否立即用 Unflick 打开流式播放（默认 true）" }
+          }, "required": ["id"] } }
     ])
 }

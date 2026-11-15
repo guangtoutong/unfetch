@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"math/rand"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -31,7 +32,10 @@ type Manager struct {
 	eventCh     chan *types.Task  // 任务更新广播
 	subscribers []chan *types.Task
 	subMu       sync.Mutex
-	semaphore   chan struct{}      // 并发控制
+	slotMu      sync.Mutex
+	slotCond    *sync.Cond
+	activeSlots int
+	waiting     map[string]struct{}
 	saveCfg     func(*types.Config) error
 
 	// 下载器
@@ -56,7 +60,7 @@ func NewManager(cfg *types.Config, saveCfg func(*types.Config) error) (*Manager,
 		cfg:       cfg,
 		store:     store,
 		eventCh:   make(chan *types.Task, 256),
-		semaphore: make(chan struct{}, max(1, cfg.MaxConcurrent)),
+		waiting:   make(map[string]struct{}),
 		saveCfg:   saveCfg,
 		httpDL:    downloader.NewHTTPDownloader(cfg),
 		btDL:      downloader.NewBTDownloader(cfg),
@@ -65,6 +69,7 @@ func NewManager(cfg *types.Config, saveCfg func(*types.Config) error) (*Manager,
 		ed2kDL:    downloader.NewEd2kDownloader(cfg),
 		hlsDL:     downloader.NewHLSDownloader(cfg),
 	}
+	m.slotCond = sync.NewCond(&m.slotMu)
 
 	// 从数据库恢复任务
 	saved, err := store.LoadActiveTasks()
@@ -169,6 +174,7 @@ func (m *Manager) AddTask(req types.AddTaskRequest, taskType types.TaskType) (*t
 		Status:    types.StatusQueued,
 		ETA:       -1,
 		Threads:   threads,
+		Priority:  req.Priority,
 		Proxy:     req.Proxy,
 		Quality:   req.Quality,
 		Cookies:   req.Cookies,
@@ -202,9 +208,83 @@ func (m *Manager) AddTask(req types.AddTaskRequest, taskType types.TaskType) (*t
 	return task, nil
 }
 
+// acquireSlot 按任务优先级（Priority 降序，CreatedAt 升序）申请并发槽位
+func (m *Manager) acquireSlot(taskID string) bool {
+	m.slotMu.Lock()
+	defer m.slotMu.Unlock()
+
+	m.waiting[taskID] = struct{}{}
+	defer func() {
+		delete(m.waiting, taskID)
+		m.slotCond.Broadcast()
+	}()
+
+	for {
+		m.mu.RLock()
+		cur, ok := m.tasks[taskID]
+		invalid := !ok || cur.Trashed || cur.Status == types.StatusPaused
+		m.mu.RUnlock()
+		if invalid {
+			return false
+		}
+
+		m.cfgMu.RLock()
+		maxConc := max(1, m.cfg.MaxConcurrent)
+		m.cfgMu.RUnlock()
+
+		if m.activeSlots < maxConc && m.isHighestPriorityWaiter(taskID) {
+			m.activeSlots++
+			return true
+		}
+		m.slotCond.Wait()
+	}
+}
+
+func (m *Manager) releaseSlot() {
+	m.slotMu.Lock()
+	if m.activeSlots > 0 {
+		m.activeSlots--
+	}
+	m.slotCond.Broadcast()
+	m.slotMu.Unlock()
+}
+
+// isHighestPriorityWaiter 调用时需持有 m.slotMu
+func (m *Manager) isHighestPriorityWaiter(taskID string) bool {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	me, ok := m.tasks[taskID]
+	if !ok {
+		return false
+	}
+
+	for otherID := range m.waiting {
+		if otherID == taskID {
+			continue
+		}
+		other, exists := m.tasks[otherID]
+		if !exists || other.Trashed || other.Status == types.StatusPaused {
+			continue
+		}
+		if other.Priority > me.Priority {
+			return false
+		}
+		if other.Priority == me.Priority {
+			if other.CreatedAt.Before(me.CreatedAt) {
+				return false
+			}
+			if other.CreatedAt.Equal(me.CreatedAt) && other.ID < me.ID {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // startDownload 在信号量控制下启动下载
 func (m *Manager) startDownload(task *types.Task) {
-	// 依赖等待：必须先于 semaphore，避免互相依赖时 semaphore 死锁
+	// 依赖等待：必须先于并发槽位，避免互相依赖时死锁
 	if len(task.DependsOn) > 0 {
 		for {
 			m.mu.RLock()
@@ -250,11 +330,7 @@ func (m *Manager) startDownload(task *types.Task) {
 		}
 	}
 
-	// 等待信号量（控制并发数）
-	m.semaphore <- struct{}{}
-	defer func() { <-m.semaphore }()
-
-	// 定时下载：未到 StartAt 之前一直等
+	// 定时下载：未到 StartAt 之前一直等（不占用并发槽位）
 	if task.StartAt != nil {
 		for {
 			delay := time.Until(*task.StartAt)
@@ -275,6 +351,12 @@ func (m *Manager) startDownload(task *types.Task) {
 			}
 		}
 	}
+
+	// 等待并发槽位（按 Priority 降序、CreatedAt 升序调度）
+	if !m.acquireSlot(task.ID) {
+		return
+	}
+	defer m.releaseSlot()
 
 	// 检查任务是否仍然有效且处于可下载状态
 	m.mu.Lock()
@@ -520,6 +602,37 @@ func (m *Manager) PauseTask(id string) error {
 		slog.Warn("save paused task", "id", id, "err", err)
 	}
 	m.notify(task)
+	m.slotMu.Lock()
+	m.slotCond.Broadcast()
+	m.slotMu.Unlock()
+	return nil
+}
+
+// SetTaskPriority 修改任务优先级（-1 低 / 0 普通 / 1 高 / 2 置顶优先）并立即重调度队列
+func (m *Manager) SetTaskPriority(id string, priority int) error {
+	if priority < -10 {
+		priority = -10
+	} else if priority > 10 {
+		priority = 10
+	}
+
+	m.mu.Lock()
+	task, ok := m.tasks[id]
+	if !ok {
+		m.mu.Unlock()
+		return fmt.Errorf("task %s not found", id)
+	}
+	task.Priority = priority
+	m.mu.Unlock()
+
+	if err := m.store.SaveTask(task); err != nil {
+		slog.Warn("save task priority", "id", id, "err", err)
+	}
+	m.notify(task)
+
+	m.slotMu.Lock()
+	m.slotCond.Broadcast()
+	m.slotMu.Unlock()
 	return nil
 }
 
@@ -566,6 +679,10 @@ func (m *Manager) RemoveTask(id string) error {
 	delete(m.tasks, id)
 	m.mu.Unlock()
 
+	m.slotMu.Lock()
+	m.slotCond.Broadcast()
+	m.slotMu.Unlock()
+
 	_ = task // 保留引用避免 GC
 
 	if err := m.store.DeleteTask(id); err != nil {
@@ -601,6 +718,9 @@ func (m *Manager) TrashTask(id string) error {
 		slog.Warn("save trashed task", "id", id, "err", err)
 	}
 	m.notify(task)
+	m.slotMu.Lock()
+	m.slotCond.Broadcast()
+	m.slotMu.Unlock()
 	return nil
 }
 
@@ -652,6 +772,73 @@ func (m *Manager) GetTask(id string) (*types.Task, error) {
 	return &cp, nil
 }
 
+// StreamTask 为任务提供 HTTP Range 边下边播流（支持进行中的 BT/HTTP 任务与已落盘文件）
+func (m *Manager) StreamTask(w http.ResponseWriter, r *http.Request, id string) error {
+	task, err := m.GetTask(id)
+	if err != nil {
+		return err
+	}
+
+	// 1. 进行中的 BT 任务：走 anacrolix/torrent 顺序分片 Reader
+	if task.Type == types.TaskTypeBT && m.btDL.StreamTask(w, r, task) {
+		return nil
+	}
+
+	// 2. 进行中的 HTTP 任务：走 progressiveFileReader
+	if task.Type == types.TaskTypeHTTP && m.httpDL.StreamTask(w, r, task) {
+		return nil
+	}
+
+	// 3. 回退到本地磁盘文件（已完成任务或单文件落盘）
+	if task.SavePath == "" || task.Filename == "" {
+		return fmt.Errorf("task file not ready yet")
+	}
+	targetPath := filepath.Join(task.SavePath, task.Filename)
+	info, err := os.Stat(targetPath)
+	if err != nil {
+		return fmt.Errorf("task file not available: %w", err)
+	}
+
+	// 若是多文件 BT 种子下载完的目录，选取其中最大的音视频文件
+	if info.IsDir() {
+		var bestFile string
+		var bestMediaSize int64
+		var bestAnySize int64
+		_ = filepath.Walk(targetPath, func(p string, fi os.FileInfo, walkErr error) error {
+			if walkErr != nil || fi == nil || fi.IsDir() {
+				return nil
+			}
+			if types.HasMediaFilesInPaths([]string{p}) {
+				if fi.Size() > bestMediaSize {
+					bestMediaSize = fi.Size()
+					bestFile = p
+				}
+			} else if bestMediaSize == 0 && fi.Size() > bestAnySize {
+				bestAnySize = fi.Size()
+				bestFile = p
+			}
+			return nil
+		})
+		if bestFile == "" {
+			return fmt.Errorf("no streamable file found in directory")
+		}
+		targetPath = bestFile
+		info, err = os.Stat(targetPath)
+		if err != nil {
+			return err
+		}
+	}
+
+	f, err := os.Open(targetPath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	http.ServeContent(w, r, filepath.Base(targetPath), info.ModTime(), f)
+	return nil
+}
+
 // ListTasks 返回所有任务（按创建时间升序）
 func (m *Manager) ListTasks() []*types.Task {
 	m.mu.RLock()
@@ -684,14 +871,10 @@ func (m *Manager) UpdateConfig(cfg *types.Config) {
 	m.hlsDL.UpdateConfig(cfg)
 	m.cfgMu.Unlock()
 
-	// 重建信号量（调整并发数）
-	newCap := max(1, cfg.MaxConcurrent)
-	newSem := make(chan struct{}, newCap)
-	// 尽量迁移现有占用（简单处理：新 semaphore 会自然生效）
-	_ = newSem
-	// 注：运行中的 goroutine 仍持有旧 semaphore 的 slot，
-	// 新请求会使用新 semaphore。此处采用简单替换，不做精确迁移。
-	m.semaphore = newSem
+	// 唤醒等待中的任务，立即应用新的 MaxConcurrent 并发上限
+	m.slotMu.Lock()
+	m.slotCond.Broadcast()
+	m.slotMu.Unlock()
 }
 
 // speedTicker 每秒更新一次运行中任务的速度和 ETA
