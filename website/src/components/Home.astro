@@ -1,5 +1,6 @@
 ---
 import { getStrings } from '../i18n/strings'
+import { fetchGithubDownloads } from '../lib/download-channels'
 import Download from './Download.astro'
 import Sponsor from './Sponsor.astro'
 interface Props { lang: string }
@@ -10,16 +11,76 @@ const mcpHref = lang === 'en' ? '/mcp' : `/${lang}/mcp`
 
 const VERSION = '0.4.0'
 const REPO = 'guangtoutong/unfetch'
+const GITHUB_URL = `https://github.com/${REPO}`
 const baseUrl = `https://github.com/${REPO}/releases/download/v${VERSION}`
 const dlMac = `${baseUrl}/unfetch_${VERSION}_universal.dmg`
 const dlWin = `${baseUrl}/unfetch_${VERSION}_x64-setup.exe`
 const dlLinux = `${baseUrl}/unfetch_${VERSION}_amd64.AppImage`
 
+// Build-time SSR fetch of GitHub stars + total downloads (like SoloMD),
+// hydrated live every 5 min via Cloudflare Pages Function /api/stats.
+let initialStars = 0
+let initialDownloads = 0
+const GH_TOKEN = (typeof process !== 'undefined' && process.env && process.env.GITHUB_TOKEN) || ''
+const GH_HEADERS: Record<string, string> = {
+  'User-Agent': 'unfetch-build-stats',
+  Accept: 'application/vnd.github+json',
+}
+if (GH_TOKEN) GH_HEADERS.Authorization = `Bearer ${GH_TOKEN}`
+
+try {
+  const live = await fetch('https://unfetch.org/api/stats', { headers: { 'User-Agent': 'unfetch-build-stats' } })
+  if (live.ok) {
+    const j = (await live.json()) as { stars?: number | null; downloads?: number | null }
+    if (typeof j.stars === 'number') initialStars = j.stars
+    if (typeof j.downloads === 'number') initialDownloads = j.downloads
+  }
+} catch {
+  /* fall through to GitHub */
+}
+if (!initialDownloads || !initialStars) {
+  try {
+    const gh = await fetchGithubDownloads(REPO, GH_HEADERS)
+    if (gh) {
+      if (!initialStars && gh.stars != null) initialStars = gh.stars
+      if (!initialDownloads) initialDownloads = gh.installers
+    }
+  } catch {
+    // Client-side /api/stats will populate on load
+  }
+}
+
+const DL_WORD: Record<string, string> = {
+  en: 'downloads', zh: '次下载', ja: 'ダウンロード', ko: '다운로드', de: 'Downloads', fr: 'téléchargements',
+  es: 'descargas', pt: 'downloads', it: 'download', pl: 'pobrań', nl: 'downloads', tr: 'indirme',
+  sv: 'nedladdningar', uk: 'завантажень',
+}
+const dlWord = DL_WORD[lang] ?? 'downloads'
+const dlWan = lang === 'zh' || lang === 'ja' ? '万' : lang === 'ko' ? '만' : ''
+
+function fmtStars(n: number): string {
+  return n >= 1000 ? `⭐ ${(n / 1000).toFixed(1)}k` : `⭐ ${n}`
+}
+function fmtDownloads(n: number): string {
+  if (dlWan && n >= 10000) return `⬇ ${(n / 10000).toFixed(1)}${dlWan}${dlWan === '만' ? ' ' : ''}${dlWord}`
+  return n >= 1000 ? `⬇ ${(n / 1000).toFixed(1)}k ${dlWord}` : `⬇ ${n} ${dlWord}`
+}
+const initialStarsText = fmtStars(initialStars)
+const initialDownloadsText = fmtDownloads(initialDownloads)
+
+const starCtaLabel = lang === 'zh' ? '在 GitHub 点 Star' : lang === 'ja' ? 'GitHub で Star' : lang === 'ko' ? 'GitHub 스타' : 'Star on GitHub'
+const starNudgeTitle = lang === 'zh' ? '开始下载了 — 如果觉得好用，能帮我们点个 Star 吗？' : 'Downloading unfetch — mind leaving a GitHub Star?'
+const starNudgeBody = lang === 'zh'
+  ? 'unfetch 完全免费、开源且无广告。GitHub Star 是让更多开发者发现它的唯一方式。'
+  : 'unfetch is free, open-source, and ad-free. GitHub stars are how other developers discover it.'
+const starNudgeCta = lang === 'zh' ? '去 GitHub 点 Star' : 'Star on GitHub'
+const starNudgeLater = lang === 'zh' ? '以后再说' : 'Maybe later'
+
 const featureBadges = [
   '32 Threads · Multi-Mirror',
   '35 Trackers · Auto uTP',
   'yt-dlp · 4K / Audio',
-  '17 Tools · JSON-RPC',
+  '19 Tools · JSON-RPC',
   '0.0.0.0 · QR Token',
   'Regex · GUID Dedup',
   'Webhook · Shell Exec',
@@ -31,13 +92,14 @@ const featureBadges = [
 <section class="hero-section">
   <div class="hero-aura" aria-hidden="true"></div>
   <div class="container hero-container">
-    <a href={`https://github.com/${REPO}/releases/latest`} target="_blank" rel="noreferrer" class="hero-pill">
+    <div class="hero-pill">
       <span class="hero-pill__dot"></span>
-      <span>{s.hero.tag}</span>
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
-        <polyline points="9 18 15 12 9 6" />
-      </svg>
-    </a>
+      <a href={`https://github.com/${REPO}/releases/latest`} target="_blank" rel="noreferrer" class="hero-pill__link">{s.hero.tag}</a>
+      <span id="hero-stars-sep" class="hero-pill__sep">·</span>
+      <a href={`${GITHUB_URL}/stargazers`} target="_blank" rel="noreferrer" id="hero-stars" class="hero-pill__stat">{initialStarsText}</a>
+      <span id="hero-dl-sep" class="hero-pill__sep">·</span>
+      <a href={`${GITHUB_URL}/releases`} target="_blank" rel="noreferrer" id="hero-dl-count" data-word={dlWord} data-wan={dlWan} class="hero-pill__stat">{initialDownloadsText}</a>
+    </div>
 
     <h1 class="hero-title">{s.hero.title}</h1>
 
@@ -61,6 +123,17 @@ const featureBadges = [
         </svg>
         <span id="download-cta-label">{s.hero.download}</span>
       </a>
+      <a href={GITHUB_URL}
+         target="_blank"
+         rel="noopener"
+         data-star-cta="hero"
+         class="btn-hero-secondary btn-hero-star">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        <span>{starCtaLabel}</span>
+        <span class="hero__star-count" data-stars>{initialStarsText}</span>
+      </a>
       <a href={mcpHref} class="btn-hero-secondary">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="3" width="18" height="18" rx="4" />
@@ -80,14 +153,17 @@ const featureBadges = [
     </div>
 
     <div class="stats-row">
-      <a href="https://github.com/guangtoutong/unfetch/stargazers" target="_blank" rel="noreferrer">
-        <img src="https://img.shields.io/github/stars/guangtoutong/unfetch?label=stars&color=7c3aed&labelColor=ede9fe&style=for-the-badge" alt="GitHub stars" height="26" />
+      <a href={`${GITHUB_URL}/stargazers`} target="_blank" rel="noreferrer" class="stat-pill" data-star-cta="pill">
+        <span class="stat-pill__label">★ STARS</span>
+        <span class="stat-pill__val" id="stat-pill-stars">{initialStars >= 1000 ? `${(initialStars / 1000).toFixed(1)}k` : initialStars}</span>
       </a>
-      <a href="https://github.com/guangtoutong/unfetch/releases" target="_blank" rel="noreferrer">
-        <img src="https://img.shields.io/github/downloads/guangtoutong/unfetch/total?label=downloads&color=8b5cf6&labelColor=ede9fe&style=for-the-badge" alt="GitHub downloads" height="26" />
+      <a href={`${GITHUB_URL}/releases`} target="_blank" rel="noreferrer" class="stat-pill">
+        <span class="stat-pill__label">⬇ DOWNLOADS</span>
+        <span class="stat-pill__val" id="stat-pill-downloads">{initialDownloads >= 1000 ? `${(initialDownloads / 1000).toFixed(1)}k` : initialDownloads}</span>
       </a>
-      <a href="https://github.com/guangtoutong/unfetch/releases/latest" target="_blank" rel="noreferrer">
-        <img src="https://img.shields.io/github/v/release/guangtoutong/unfetch?label=latest&color=a78bfa&labelColor=ede9fe&style=for-the-badge" alt="latest release" height="26" />
+      <a href={`${GITHUB_URL}/releases/latest`} target="_blank" rel="noreferrer" class="stat-pill">
+        <span class="stat-pill__label">RELEASE</span>
+        <span class="stat-pill__val">v{VERSION}</span>
       </a>
     </div>
 
@@ -377,6 +453,19 @@ const featureBadges = [
   </div>
 </section>
 
+<aside class="star-nudge" id="star-nudge" hidden aria-live="polite">
+  <button class="star-nudge__close" type="button" aria-label={starNudgeLater} data-star-later>×</button>
+  <p class="star-nudge__title">{starNudgeTitle}</p>
+  <p class="star-nudge__body">{starNudgeBody}</p>
+  <div class="star-nudge__actions">
+    <a class="star-nudge__cta" href={GITHUB_URL} target="_blank" rel="noopener" data-star-go>
+      <span>{starNudgeCta}</span>
+      <span class="star-nudge__count" data-stars>{initialStarsText}</span>
+    </a>
+    <button class="star-nudge__later" type="button" data-star-later>{starNudgeLater}</button>
+  </div>
+</aside>
+
 <script is:inline>
   // Interactive Showcase Tabs & Live Theme Switcher
   ;(function () {
@@ -404,6 +493,43 @@ const featureBadges = [
       })
     })
   })()
+
+  // Post-download Star Nudge (learned from SoloMD)
+  ;(function () {
+    var KEY = 'unfetch.starNudge'
+    var LATER_MS = 30 * 24 * 3600 * 1000
+    var card = document.getElementById('star-nudge')
+    if (!card) return
+    function read() { try { return JSON.parse(localStorage.getItem(KEY) || 'null') } catch (e) { return null } }
+    function write(v) { try { localStorage.setItem(KEY, JSON.stringify(v)) } catch (e) {} }
+    function suppressed() {
+      var v = read()
+      if (!v) return false
+      if (v.state === 'starred') return true
+      return v.state === 'later' && Date.now() - v.at < LATER_MS
+    }
+    var shown = false
+    function show() {
+      if (shown || suppressed()) return
+      shown = true
+      setTimeout(function () { card.hidden = false; card.classList.add('star-nudge--in') }, 700)
+    }
+    function hide(state) {
+      write({ state: state, at: Date.now() })
+      card.classList.remove('star-nudge--in')
+      card.hidden = true
+    }
+    var DOWNLOAD = /\/releases\/download\//
+    document.addEventListener('click', function (e) {
+      var t = e.target
+      if (!t || !t.closest) return
+      if (t.closest('[data-star-go]')) { hide('starred'); return }
+      if (t.closest('[data-star-later]')) { hide('later'); return }
+      if (t.closest('[data-star-cta]')) { write({ state: 'starred', at: Date.now() }); return }
+      var a = t.closest('a[href]')
+      if (a && DOWNLOAD.test(a.href)) show()
+    }, true)
+  })()
 </script>
 
 <style>
@@ -411,6 +537,122 @@ const featureBadges = [
     position: relative;
     padding: 76px 0 64px;
     overflow: hidden;
+  }
+  .hero-pill__link, .hero-pill__stat {
+    color: var(--primary-strong);
+    font-weight: 600;
+  }
+  .hero-pill__link:hover, .hero-pill__stat:hover {
+    text-decoration: underline;
+  }
+  .hero-pill__sep {
+    opacity: 0.45;
+  }
+  .hero__star-count {
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--primary-bg);
+    color: var(--primary-strong);
+    border: 1px solid var(--primary-border);
+  }
+  .hero__star-count:empty { display: none; }
+  .stat-pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--primary-border);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-pill__label {
+    background: #ede9fe;
+    color: #5b21b6;
+    padding: 5px 10px;
+  }
+  .stat-pill__val {
+    background: #7c3aed;
+    color: #ffffff;
+    padding: 5px 11px;
+    font-family: ui-monospace, monospace;
+  }
+  .star-nudge {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 90;
+    width: min(360px, calc(100vw - 32px));
+    background: #ffffff;
+    border: 1px solid var(--primary-border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: 0 20px 48px -12px rgba(9, 9, 11, 0.22), 0 0 0 1px rgba(124, 58, 237, 0.12);
+    transform: translateY(12px);
+    opacity: 0;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  .star-nudge--in {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .star-nudge__close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .star-nudge__title {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--fg);
+    margin-bottom: 6px;
+    padding-right: 18px;
+  }
+  .star-nudge__body {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    line-height: 1.55;
+  }
+  .star-nudge__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .star-nudge__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--primary);
+    color: #ffffff !important;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .star-nudge__cta:hover {
+    background: var(--primary-strong);
+  }
+  .star-nudge__later {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 6px 8px;
+  }
+  .star-nudge__later:hover {
+    color: var(--fg);
   }
   .hero-aura {
     position: absolute;

@@ -170,6 +170,19 @@ const VERSION = '0.4.0'
       background: var(--bg-3);
       color: var(--fg);
     }
+    .header__stars {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: var(--primary-bg);
+      color: var(--primary-strong);
+      border: 1px solid var(--primary-border);
+      line-height: 1.4;
+    }
+    .header__stars:empty {
+      display: none;
+    }
 
     .lang-btn {
       display: inline-flex;
@@ -296,11 +309,12 @@ const VERSION = '0.4.0'
         <a href={(lang === 'en' ? '/' : `/${lang}/`) + '#sponsor'} class="nav-sponsor">
           <span style="color: #e11d48;">♥</span>{s.nav.sponsor}
         </a>
-        <a href="https://github.com/guangtoutong/unfetch" class="nav-gh" target="_blank" rel="noreferrer">
+        <a href="https://github.com/guangtoutong/unfetch" class="nav-gh" target="_blank" rel="noreferrer" data-star-cta="header">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
           </svg>
           <span>{s.nav.github}</span>
+          <span class="header__stars" data-stars></span>
         </a>
 
         <div id="lang-wrap" style="position: relative; margin-left: 2px;">
@@ -416,6 +430,85 @@ const VERSION = '0.4.0'
       if (card) {
         card.classList.add('dl-card--recommended')
       }
+    })()
+
+    // Live GitHub stars & total downloads (via Cloudflare Pages Function /api/stats with 5-min edge cache,
+    // falling back to api.github.com when running locally)
+    ;(function () {
+      function applyStats(stats) {
+        if (!stats) return
+        if (typeof stats.stars === 'number' && stats.stars >= 0) {
+          var starTxt = '⭐ ' + (stats.stars >= 1000 ? (stats.stars / 1000).toFixed(1) + 'k' : stats.stars)
+          document.querySelectorAll('[data-stars]').forEach(function (el) {
+            el.textContent = starTxt
+          })
+          var heroStars = document.getElementById('hero-stars')
+          if (heroStars) {
+            heroStars.textContent = starTxt
+            heroStars.hidden = false
+          }
+          var heroStarsSep = document.getElementById('hero-stars-sep')
+          if (heroStarsSep) heroStarsSep.hidden = false
+          var pillStars = document.getElementById('stat-pill-stars')
+          if (pillStars) pillStars.textContent = stats.stars >= 1000 ? (stats.stars / 1000).toFixed(1) + 'k' : String(stats.stars)
+        }
+        if (typeof stats.downloads === 'number' && stats.downloads >= 0) {
+          var dlEl = document.getElementById('hero-dl-count')
+          if (dlEl) {
+            var word = dlEl.getAttribute('data-word') || 'downloads'
+            var wan = dlEl.getAttribute('data-wan') || ''
+            var n = stats.downloads
+            dlEl.textContent = '⬇ ' + (wan && n >= 10000
+              ? (n / 10000).toFixed(1) + wan + (wan === '만' ? ' ' : '') + word
+              : n >= 1000 ? (n / 1000).toFixed(1) + 'k ' + word : n + ' ' + word)
+            dlEl.hidden = false
+          }
+          var heroDlSep = document.getElementById('hero-dl-sep')
+          if (heroDlSep) heroDlSep.hidden = false
+          var pillDl = document.getElementById('stat-pill-downloads')
+          if (pillDl) {
+            pillDl.textContent = stats.downloads >= 1000
+              ? (stats.downloads / 1000).toFixed(1) + 'k'
+              : String(stats.downloads)
+          }
+          var dlSec = document.getElementById('dl-section-count')
+          if (dlSec && stats.downloads > 0) {
+            dlSec.textContent = '⬇ ' + stats.downloads.toLocaleString() + '+'
+            dlSec.hidden = false
+          }
+        }
+      }
+
+      fetch('/api/stats')
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('no /api/stats')) })
+        .then(applyStats)
+        .catch(function () {
+          // Fallback to GitHub API directly (e.g. local dev server)
+          Promise.all([
+            fetch('https://api.github.com/repos/guangtoutong/unfetch').then(function (r) { return r.ok ? r.json() : null }),
+            fetch('https://api.github.com/repos/guangtoutong/unfetch/releases?per_page=100').then(function (r) { return r.ok ? r.json() : null })
+          ]).then(function (res) {
+            var repo = res[0]
+            var releases = res[1]
+            var stars = repo && typeof repo.stargazers_count === 'number' ? repo.stargazers_count : null
+            var downloads = null
+            if (Array.isArray(releases)) {
+              var sum = 0
+              releases.forEach(function (rel) {
+                if (rel && !rel.draft && Array.isArray(rel.assets)) {
+                  rel.assets.forEach(function (a) {
+                    var n = (a.name || '').toLowerCase()
+                    if (n.endsWith('.dmg') || n.endsWith('.exe') || n.endsWith('.msi') || n.endsWith('.appimage') || n.endsWith('.deb') || n.endsWith('.rpm')) {
+                      sum += (a.download_count || 0)
+                    }
+                  })
+                }
+              })
+              downloads = sum
+            }
+            applyStats({ stars: stars, downloads: downloads })
+          }).catch(function () {})
+        })
     })()
   </script>
 </body>
