@@ -1,6 +1,6 @@
 cask "unfetch" do
   version "0.4.0"
-  sha256 :no_check # 发版后可替换为实际 DMG 的 sha256
+  sha256 "43fd327b1470465313867b212fdc4920f8aee33bcc4295998cf973bab04848b5"
 
   url "https://github.com/guangtoutong/unfetch/releases/download/v#{version}/unfetch_#{version}_universal.dmg"
   name "unfetch"
